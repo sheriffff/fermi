@@ -11,4 +11,7 @@ en el Máster de Educación Secundaria.
 
 ---
 
-<img width=400 src="https://humanprogress.org/wp-content/uploads/2020/01/PNG_enrico_fermi.png">
+<figure style="text-align:center;">
+  <img width="400" src="https://humanprogress.org/wp-content/uploads/2020/01/PNG_enrico_fermi.png" alt="Fermi">
+  <figcaption style="font-style:italic; margin-top:0.5rem;">Cuántos puntos hay en la imagen punteada de Fermi?</figcaption>
+</figure>
