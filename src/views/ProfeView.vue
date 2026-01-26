@@ -72,14 +72,14 @@ async function handleDownload(pdfId) {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center p-8">
-    <div class="max-w-xl w-full">
+  <div class="min-h-screen p-8">
+    <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
+      ← Volver al inicio
+    </RouterLink>
 
-      <!-- Header -->
+    <div class="max-w-xl mx-auto">
+
       <div class="text-center mb-8">
-        <RouterLink to="/" class="inline-block mb-4 text-primary-500 hover:text-primary-600 transition-colors">
-          ← Volver al inicio
-        </RouterLink>
         <h1 class="text-3xl font-bold text-neutral-800">
           Sección Profesores
         </h1>
@@ -195,12 +195,6 @@ async function handleDownload(pdfId) {
               <li>Cada pregunta tiene un tiempo máximo de 3 minutos</li>
               <li>No hay respuestas correctas ni incorrectas</li>
             </ol>
-          </div>
-
-          <div class="text-center">
-            <RouterLink to="/" class="text-neutral-500 hover:text-neutral-700 text-sm">
-              ← Volver al inicio
-            </RouterLink>
           </div>
         </div>
       </Transition>

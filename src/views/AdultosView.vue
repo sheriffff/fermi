@@ -266,20 +266,17 @@ async function finishTest() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center p-8">
-    <div class="max-w-2xl w-full">
+  <div class="min-h-screen p-8">
+    <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
+      ← Volver al inicio
+    </RouterLink>
 
-      <!-- ============================================ -->
-      <!-- PANTALLA 1: METADATA -->
-      <!-- ============================================ -->
+    <div class="max-w-2xl mx-auto">
+
       <Transition name="fade" mode="out-in">
         <div v-if="currentStep === 'metadata'" key="metadata">
 
-          <!-- Header -->
           <div class="text-center mb-8">
-            <RouterLink to="/" class="inline-block mb-4 text-primary-500 hover:text-primary-600 transition-colors">
-              ← Volver al inicio
-            </RouterLink>
             <h1 class="text-3xl font-bold text-neutral-800">
               ¡Juguemos a Estimar! 🎯
             </h1>

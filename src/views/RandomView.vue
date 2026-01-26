@@ -43,13 +43,13 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center p-8">
-    <div class="max-w-2xl w-full">
+  <div class="min-h-screen p-8">
+    <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
+      ← Volver al inicio
+    </RouterLink>
 
+    <div class="max-w-2xl mx-auto">
       <div class="text-center mb-8">
-        <RouterLink to="/" class="inline-block mb-4 text-primary-500 hover:text-primary-600 transition-colors">
-          ← Volver al inicio
-        </RouterLink>
         <h1 class="text-3xl font-bold text-neutral-800">
           Estima:
         </h1>

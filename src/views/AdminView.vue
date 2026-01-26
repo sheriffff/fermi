@@ -214,11 +214,11 @@ async function onAuthenticated() {
 
 <template>
   <div class="min-h-screen p-8">
+    <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
+      ← Volver al inicio
+    </RouterLink>
 
-    <!-- ============================================ -->
-    <!-- LOGIN -->
-    <!-- ============================================ -->
-    <div v-if="!isAuthenticated" class="max-w-md mx-auto mt-20">
+    <div v-if="!isAuthenticated" class="max-w-md mx-auto mt-12">
       <div class="card text-center">
         <div class="text-4xl mb-4">🔐</div>
         <h1 class="text-2xl font-bold text-neutral-800 mb-6">
@@ -242,16 +242,9 @@ async function onAuthenticated() {
             Entrar
           </button>
         </form>
-
-        <RouterLink to="/" class="inline-block mt-6 text-sm text-neutral-500 hover:text-neutral-700">
-          ← Volver al inicio
-        </RouterLink>
       </div>
     </div>
 
-    <!-- ============================================ -->
-    <!-- PANEL PRINCIPAL -->
-    <!-- ============================================ -->
     <div v-else class="max-w-7xl mx-auto">
 
       <!-- Header -->
