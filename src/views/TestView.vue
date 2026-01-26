@@ -591,14 +591,6 @@ async function finishTest() {
               Tus respuestas han sido guardadas correctamente.
               Tu contribución es muy valiosa para esta investigación.
             </p>
-
-            <div class="bg-neutral-50 rounded-2xl p-6 mb-8 max-w-sm mx-auto">
-              <p class="text-sm text-neutral-500 mb-2">Modelo completado</p>
-              <p class="font-mono text-2xl font-bold text-primary-500">
-                {{ modeloAsignado }}
-              </p>
-            </div>
-
             <RouterLink to="/" class="btn-primary btn-large">
               Volver al inicio
             </RouterLink>
