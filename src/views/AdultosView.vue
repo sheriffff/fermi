@@ -5,6 +5,7 @@ import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
 import { guardarRespuestasOnline } from '@/lib/supabase'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
+import FermiInput from '@/components/common/FermiInput.vue'
 
 // ============================================
 // ESTADO DEL FLUJO
@@ -93,7 +94,6 @@ const currentQuestionIndex = ref(0)
 const respuestas = ref({})
 const tiempos = ref({})
 const modeloAsignado = ref('')
-const inputRef = ref(null)
 
 // Pregunta actual
 const currentQuestion = computed(() => {
@@ -114,6 +114,10 @@ const progressPercent = computed(() => {
 
 // Respuesta actual del input
 const currentAnswer = ref('')
+
+const isAnswerComplete = computed(() => {
+  return cleanInput(currentAnswer.value) !== ''
+})
 
 // ============================================
 // TIMER
@@ -136,10 +140,9 @@ const {
 // ============================================
 const { formatNumber, cleanInput } = useNumberFormat()
 
-// Número formateado para mostrar debajo del input
 const formattedAnswer = computed(() => {
   const cleaned = cleanInput(currentAnswer.value)
-  if (!cleaned) return ''
+  if (!cleaned) return '—'
   return formatNumber(parseInt(cleaned, 10))
 })
 
@@ -191,11 +194,10 @@ async function startTest() {
     tiempos.value = {}
     currentAnswer.value = ''
 
-    // Iniciar timer y enfocar input
+    // Iniciar timer
     await nextTick()
     resetTimer(QUESTION_TIME)
     startTimer()
-    focusInput()
 
   } catch (e) {
     console.error('Error iniciando test:', e)
@@ -218,12 +220,10 @@ function handleSubmitAnswer() {
 
 function saveCurrentAnswer() {
   const questionKey = `p${currentQuestionIndex.value + 1}`
-  const cleanedAnswer = cleanInput(currentAnswer.value)
+  const cleaned = cleanInput(currentAnswer.value)
 
-  // Guardar respuesta (número entero o null)
-  respuestas.value[questionKey] = cleanedAnswer ? parseInt(cleanedAnswer, 10) : null
+  respuestas.value[questionKey] = cleaned ? parseInt(cleaned, 10) : null
 
-  // Guardar tiempo usado (segundos)
   tiempos.value[questionKey] = getElapsedTime()
 }
 
@@ -231,16 +231,13 @@ async function goToNextQuestion() {
   stopTimer()
 
   if (currentQuestionIndex.value < preguntas.value.length - 1) {
-    // Siguiente pregunta
     currentQuestionIndex.value++
     currentAnswer.value = ''
 
     await nextTick()
     resetTimer(QUESTION_TIME)
     startTimer()
-    focusInput()
   } else {
-    // Fin del test
     await finishTest()
   }
 }
@@ -264,27 +261,6 @@ async function finishTest() {
   } finally {
     isLoading.value = false
     currentStep.value = 'finished'
-  }
-}
-
-function focusInput() {
-  nextTick(() => {
-    if (inputRef.value) {
-      inputRef.value.focus()
-    }
-  })
-}
-
-// Manejar input: solo números
-function handleInput(event) {
-  const value = event.target.value
-  currentAnswer.value = value.replace(/\D/g, '')
-}
-
-// Manejar Enter para enviar
-function handleKeydown(event) {
-  if (event.key === 'Enter' && currentAnswer.value) {
-    handleSubmitAnswer()
   }
 }
 </script>
@@ -523,7 +499,6 @@ function handleKeydown(event) {
           <Transition name="slide" mode="out-in">
             <div :key="currentQuestionIndex" class="card-elevated">
 
-              <!-- Texto de la pregunta -->
               <div class="mb-8">
                 <h2 class="text-xl font-medium text-neutral-800 leading-relaxed">
                   {{ currentQuestion?.texto }}
@@ -533,36 +508,13 @@ function handleKeydown(event) {
                 </p>
               </div>
 
-              <!-- Input numérico -->
-              <div class="space-y-4">
-                <input
-                  ref="inputRef"
-                  :value="currentAnswer"
-                  @input="handleInput"
-                  @keydown="handleKeydown"
-                  type="text"
-                  inputmode="numeric"
-                  class="input-large"
-                  placeholder="Escribe tu estimación"
-                  autocomplete="off"
-                />
+              <FermiInput v-model="currentAnswer" />
 
-                <!-- Feedback del número formateado -->
-                <Transition name="fade">
-                  <div v-if="formattedAnswer" class="text-center">
-                    <span class="number-display">
-                      {{ formattedAnswer }}
-                    </span>
-                  </div>
-                </Transition>
-              </div>
-
-              <!-- Botón siguiente -->
               <div class="mt-8">
                 <button
                   @click="handleSubmitAnswer"
                   class="btn-primary btn-large w-full"
-                  :disabled="!currentAnswer"
+                  :disabled="!isAnswerComplete"
                 >
                   <span v-if="questionNumber === totalQuestions">
                     Finalizar Test
@@ -571,10 +523,6 @@ function handleKeydown(event) {
                     Siguiente Pregunta →
                   </span>
                 </button>
-
-                <p class="text-xs text-center text-neutral-400 mt-3">
-                  Pulsa Enter para continuar
-                </p>
               </div>
             </div>
           </Transition>

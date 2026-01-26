@@ -3,24 +3,26 @@ import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useNumberFormat } from '@/composables/useNumberFormat'
 import { getRandomQuestion as fetchRandomQuestion } from '@/lib/questions'
+import FermiInput from '@/components/common/FermiInput.vue'
 
-// Estado
 const currentQuestion = ref(null)
 const currentAnswer = ref('')
 const showResult = ref(false)
 const isLoading = ref(true)
+const fermiInputRef = ref(null)
 
-// Formateador de números
 const { formatNumber, cleanInput } = useNumberFormat()
 
-// Número formateado para mostrar
 const formattedAnswer = computed(() => {
   const cleaned = cleanInput(currentAnswer.value)
   if (!cleaned) return '—'
   return formatNumber(parseInt(cleaned, 10))
 })
 
-// Obtener pregunta aleatoria
+const isAnswerComplete = computed(() => {
+  return cleanInput(currentAnswer.value) !== ''
+})
+
 async function getNewQuestion() {
   isLoading.value = true
   currentQuestion.value = await fetchRandomQuestion()
@@ -29,28 +31,13 @@ async function getNewQuestion() {
   isLoading.value = false
 }
 
-// Inicializar con una pregunta
 onMounted(() => {
   getNewQuestion()
 })
 
-// Manejar input: solo números
-function handleInput(event) {
-  const value = event.target.value
-  currentAnswer.value = value.replace(/\D/g, '')
-}
-
-// Enviar respuesta
 function handleSubmit() {
-  if (currentAnswer.value) {
+  if (isAnswerComplete.value) {
     showResult.value = true
-  }
-}
-
-// Manejar Enter para enviar
-function handleKeydown(event) {
-  if (event.key === 'Enter' && currentAnswer.value && !showResult.value) {
-    handleSubmit()
   }
 }
 </script>
@@ -59,7 +46,6 @@ function handleKeydown(event) {
   <div class="min-h-screen flex items-center justify-center p-8">
     <div class="max-w-2xl w-full">
 
-      <!-- Header -->
       <div class="text-center mb-8">
         <RouterLink to="/" class="inline-block mb-4 text-primary-500 hover:text-primary-600 transition-colors">
           ← Volver al inicio
@@ -69,55 +55,35 @@ function handleKeydown(event) {
         </h1>
       </div>
 
-      <!-- Card de pregunta -->
       <div class="card-elevated">
 
-        <!-- Loading -->
         <div v-if="isLoading" class="text-center py-8">
           <p class="text-neutral-500">Cargando pregunta...</p>
         </div>
 
         <template v-else>
-        <!-- Texto de la pregunta -->
         <div class="mb-8">
           <h2 class="text-xl font-medium text-neutral-800 leading-relaxed">
             {{ currentQuestion?.texto }}
           </h2>
         </div>
 
-        <!-- Input numérico (solo si no se ha mostrado resultado) -->
-        <div v-if="!showResult" class="space-y-4">
-          <input
-            :value="currentAnswer"
-            @input="handleInput"
-            @keydown="handleKeydown"
-            type="text"
-            inputmode="numeric"
-            class="input-large"
-            placeholder="Escribe tu estimación"
-            autocomplete="off"
+        <div v-if="!showResult" class="space-y-6">
+          <FermiInput
+            ref="fermiInputRef"
+            v-model="currentAnswer"
           />
 
-          <!-- Feedback del número formateado -->
-          <div class="text-center">
-            <span class="number-display">
-              {{ formattedAnswer }}
-            </span>
-          </div>
-
-          <!-- Botón enviar -->
           <button
             @click="handleSubmit"
             class="btn-primary btn-large w-full"
-            :disabled="!currentAnswer"
+            :disabled="!isAnswerComplete"
           >
             Ver resultado
           </button>
         </div>
 
-        <!-- Resultado -->
         <div v-else class="space-y-6">
-          <!-- Tu respuesta -->
           <div class="bg-neutral-50 rounded-2xl p-6 text-center">
             <p class="text-sm text-neutral-500 mb-2">Tu estimación</p>
             <p class="text-3xl font-bold text-neutral-800">
@@ -129,7 +95,6 @@ function handleKeydown(event) {
             Respuesta registrada. ¿Quieres probar otra?
           </p>
 
-          <!-- Botón nueva pregunta -->
           <button
             @click="getNewQuestion"
             class="btn-primary btn-large w-full"
@@ -140,7 +105,6 @@ function handleKeydown(event) {
         </template>
       </div>
 
-      <!-- Info -->
       <div class="text-center mt-6 text-sm text-neutral-400">
         <p>Esta modalidad no guarda datos. Es solo para practicar.</p>
       </div>
