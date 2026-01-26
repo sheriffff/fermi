@@ -6,12 +6,13 @@ import { useNumberFormat } from '@/composables/useNumberFormat'
 import { guardarRespuestasOnline } from '@/lib/supabase'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import FermiInput from '@/components/common/FermiInput.vue'
+import InstructionsCard from '@/components/common/InstructionsCard.vue'
 
 // ============================================
 // CONFIGURACIÓN DE TIEMPOS
 // ============================================
-const QUESTION_TIME = 10 // Segundos por pregunta (3 minutos)
-const WARNING_TIME = 5   // Segundos antes del final para avisar
+const QUESTION_TIME = 120 // Segundos por pregunta (3 minutos)
+const WARNING_TIME = 20  // Segundos antes del final para avisar
 
 // ============================================
 // ESTADO DEL FLUJO
@@ -507,65 +508,11 @@ async function finishTest() {
         </div>
 
         <div v-else-if="currentStep === 'instructions'" key="instructions">
-          <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-neutral-800">
-              Antes de empezar... 📋
-            </h1>
-          </div>
-
-          <div class="card-elevated space-y-6">
-            <div class="space-y-4">
-              <div class="flex gap-4 items-start">
-                <span class="text-2xl">⏱️</span>
-                <div>
-                  <p class="font-semibold text-neutral-800">Tienes 3 minutos por pregunta</p>
-                  <p class="text-sm text-neutral-500">
-                    Puedes pulsar el <span class="text-lg">⏱️</span> de arriba para ver/ocultar el tiempo.
-                    Te avisaré con un sonido cuando queden 30 segundos.
-                    Si no contestas a tiempo, pasarás automáticamente a la siguiente pregunta.
-                  </p>
-                </div>
-              </div>
-
-              <div class="flex gap-4 items-start">
-                <span class="text-2xl">🔢</span>
-                <div>
-                  <p class="font-semibold text-neutral-800">Escribe números grandes fácilmente</p>
-                  <p class="text-sm text-neutral-500">
-                    Usa el botón <span class="font-mono bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded">×1000</span> para multiplicar rápidamente.
-                    Hay otro botón <span class="font-mono bg-secondary-100 text-secondary-600 px-1.5 py-0.5 rounded">÷1000</span> para dividir rápidamente.
-                  </p>
-                </div>
-              </div>
-
-              <div class="flex gap-4 items-start">
-                <span class="text-2xl">📝</span>
-                <div>
-                  <p class="font-semibold text-neutral-800">Usa papel y boli</p>
-                  <p class="text-sm text-neutral-500">
-                    Tenlos a mano antes de empezar. Te harán falta para hacer algunas operaciones.
-                  </p>
-                </div>
-              </div>
-
-              <div class="flex gap-4 items-start">
-                <span class="text-2xl">🎯</span>
-                <div>
-                  <p class="font-semibold text-neutral-800">Esto no es un exámen.</p>
-                  <p class="text-sm text-neutral-500">
-                    Disfruta!
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <button
-              @click="startQuestions"
-              class="btn-primary btn-large w-full"
-            >
-              ¡Entendido, empezamos! 🚀
-            </button>
-          </div>
+          <InstructionsCard
+            :question-time="QUESTION_TIME"
+            :warning-time="WARNING_TIME"
+            @start="startQuestions"
+          />
         </div>
 
         <div v-else-if="currentStep === 'test'" key="test" class="space-y-6">
@@ -574,23 +521,18 @@ async function finishTest() {
             <span class="text-sm text-neutral-500 font-medium">
               Pregunta {{ questionNumber }} de {{ totalQuestions }}
             </span>
-            <div class="flex items-center gap-3">
-              <button
-                @click="toggleTimer"
-                class="timer-toggle"
-                :class="{ 'timer-shaking': timerShaking }"
-              >
-                <span class="timer-icon">⏱️</span>
-                <Transition name="fade">
-                  <span v-if="showTimer || showTimeWarning" class="timer-value">
-                    {{ formattedTime }}
-                  </span>
-                </Transition>
-              </button>
-              <span class="font-mono text-sm text-neutral-400">
-                Modelo {{ modeloAsignado }}
-              </span>
-            </div>
+            <button
+              @click="toggleTimer"
+              class="timer-toggle"
+              :class="{ 'timer-shaking': timerShaking }"
+            >
+              <span class="timer-icon">⏱️</span>
+              <Transition name="fade">
+                <span v-if="showTimer || showTimeWarning" class="timer-value">
+                  {{ formattedTime }}
+                </span>
+              </Transition>
+            </button>
           </div>
 
           <div class="progress-bar">
