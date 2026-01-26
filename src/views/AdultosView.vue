@@ -1,10 +1,10 @@
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
-import { obtenerPreguntas, guardarRespuestasOnline } from '@/lib/supabase'
-import { getPreguntas } from '@/data/preguntas'
+import { guardarRespuestasOnline } from '@/lib/supabase'
+import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 
 // ============================================
 // ESTADO DEL FLUJO
@@ -40,15 +40,22 @@ const piVsEOptions = [
   { value: 'no_se', label: 'No lo sé' }
 ]
 
-const modeloOptions = ['A', 'B', 'C', 'D']
+const modeloOptions = ref(['A', 'B', 'C', 'D'])
+const primerasPreguntasPorModelo = ref({})
 
-// Primeras preguntas de cada modelo para reconocimiento
-const primerasPreguntasPorModelo = {
-  A: '¿Cuántos granos de arena hay en una playa de 100 metros de largo?',
-  B: '¿Cuántos coches hay actualmente en Madrid?',
-  C: '¿Cuántas estrellas puede ver una persona a simple vista en una noche clara?',
-  D: '¿Cuántos litros de petróleo consume el mundo en un día?'
-}
+// Cargar las primeras preguntas de cada modelo al montar
+onMounted(async () => {
+  const tests = await getAvailableTests()
+  modeloOptions.value = tests
+
+  // Cargar primera pregunta de cada test para reconocimiento
+  for (const testNum of tests) {
+    const questions = await getTestQuestions(testNum)
+    if (questions.length > 0) {
+      primerasPreguntasPorModelo.value[testNum] = questions[0].texto
+    }
+  }
+})
 
 // Toggle para marcar/desmarcar modelos ya hechos
 function toggleModeloYaHecho(modelo) {
@@ -147,11 +154,13 @@ async function startTest() {
   error.value = null
 
   try {
-    // Determinar modelo
+    // Determinar modelo (ahora son números 1, 2, 3, 4)
     let modelo
+    const availableTests = modeloOptions.value
+
     if (metadata.value.segundaVez && metadata.value.modelosYaHechos.length > 0) {
       // Excluir los modelos ya hechos
-      const modelosDisponibles = ['A', 'B', 'C', 'D'].filter(
+      const modelosDisponibles = availableTests.filter(
         m => !metadata.value.modelosYaHechos.includes(m)
       )
       // Si quedan modelos disponibles, elegir uno aleatorio
@@ -159,25 +168,20 @@ async function startTest() {
         modelo = modelosDisponibles[Math.floor(Math.random() * modelosDisponibles.length)]
       } else {
         // Si hizo todos, dar uno aleatorio de todos modos
-        const modelos = ['A', 'B', 'C', 'D']
-        modelo = modelos[Math.floor(Math.random() * modelos.length)]
+        modelo = availableTests[Math.floor(Math.random() * availableTests.length)]
       }
     } else {
       // Asignar modelo aleatorio
-      const modelos = ['A', 'B', 'C', 'D']
-      modelo = modelos[Math.floor(Math.random() * modelos.length)]
+      modelo = availableTests[Math.floor(Math.random() * availableTests.length)]
     }
 
     modeloAsignado.value = modelo
 
-    // Obtener preguntas del modelo
-    const preguntasData = await obtenerPreguntas(modelo)
+    // Obtener preguntas del modelo desde el Excel
+    preguntas.value = await getTestQuestions(modelo)
 
-    if (!preguntasData || preguntasData.length === 0) {
-      // Si no hay preguntas en la BD, usar preguntas locales
-      preguntas.value = getPreguntas(modelo)
-    } else {
-      preguntas.value = preguntasData
+    if (!preguntas.value || preguntas.value.length === 0) {
+      throw new Error('No se encontraron preguntas para este test')
     }
 
     // Iniciar test

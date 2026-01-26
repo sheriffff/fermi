@@ -47,20 +47,6 @@ export async function registrarDescarga(idProfe, archivo) {
 }
 
 /**
- * Obtiene las preguntas de un modelo específico
- */
-export async function obtenerPreguntas(modelo) {
-  const { data, error } = await supabase
-    .from('preguntas')
-    .select('*')
-    .eq('modelo', modelo)
-    .order('numero')
-
-  if (error) throw error
-  return data
-}
-
-/**
  * Guarda las respuestas del test online
  */
 export async function guardarRespuestasOnline({

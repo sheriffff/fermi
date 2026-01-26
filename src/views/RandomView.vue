@@ -1,16 +1,14 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useNumberFormat } from '@/composables/useNumberFormat'
-import { preguntasPorModelo } from '@/data/preguntas'
-
-// Obtener todas las preguntas de todos los modelos
-const allPreguntas = Object.values(preguntasPorModelo).flat()
+import { getRandomQuestion as fetchRandomQuestion } from '@/lib/questions'
 
 // Estado
 const currentQuestion = ref(null)
 const currentAnswer = ref('')
 const showResult = ref(false)
+const isLoading = ref(true)
 
 // Formateador de números
 const { formatNumber, cleanInput } = useNumberFormat()
@@ -22,22 +20,19 @@ const formattedAnswer = computed(() => {
   return formatNumber(parseInt(cleaned, 10))
 })
 
-// Valor de referencia formateado
-const formattedReference = computed(() => {
-  if (!currentQuestion.value?.valorReferencia) return ''
-  return formatNumber(currentQuestion.value.valorReferencia)
-})
-
 // Obtener pregunta aleatoria
-function getRandomQuestion() {
-  const randomIndex = Math.floor(Math.random() * allPreguntas.length)
-  currentQuestion.value = allPreguntas[randomIndex]
+async function getNewQuestion() {
+  isLoading.value = true
+  currentQuestion.value = await fetchRandomQuestion()
   currentAnswer.value = ''
   showResult.value = false
+  isLoading.value = false
 }
 
 // Inicializar con una pregunta
-getRandomQuestion()
+onMounted(() => {
+  getNewQuestion()
+})
 
 // Manejar input: solo números
 function handleInput(event) {
@@ -80,14 +75,18 @@ function handleKeydown(event) {
       <!-- Card de pregunta -->
       <div class="card-elevated">
 
+        <!-- Loading -->
+        <div v-if="isLoading" class="text-center py-8">
+          <p class="text-neutral-500">Cargando pregunta...</p>
+        </div>
+
+        <template v-else>
         <!-- Texto de la pregunta -->
         <div class="mb-8">
+          <p class="text-xs text-neutral-400 mb-2">{{ currentQuestion?.category }}</p>
           <h2 class="text-xl font-medium text-neutral-800 leading-relaxed">
             {{ currentQuestion?.texto }}
           </h2>
-          <p v-if="currentQuestion?.unidad" class="text-sm text-neutral-400 mt-2">
-            Responde en: {{ currentQuestion.unidad }}
-          </p>
         </div>
 
         <!-- Input numérico (solo si no se ha mostrado resultado) -->
@@ -124,36 +123,27 @@ function handleKeydown(event) {
 
         <!-- Resultado -->
         <div v-else class="space-y-6">
-          <div class="grid grid-cols-2 gap-4">
-            <!-- Tu respuesta -->
-            <div class="bg-neutral-50 rounded-2xl p-4 text-center">
-              <p class="text-sm text-neutral-500 mb-2">Tu estimación</p>
-              <p class="text-2xl font-bold text-neutral-800">
-                {{ formattedAnswer }}
-              </p>
-            </div>
-
-            <!-- Valor de referencia -->
-            <div class="bg-primary-50 rounded-2xl p-4 text-center">
-              <p class="text-sm text-primary-600 mb-2">Valor de referencia</p>
-              <p class="text-2xl font-bold text-primary-700">
-                {{ formattedReference }}
-              </p>
-            </div>
+          <!-- Tu respuesta -->
+          <div class="bg-neutral-50 rounded-2xl p-6 text-center">
+            <p class="text-sm text-neutral-500 mb-2">Tu estimación</p>
+            <p class="text-3xl font-bold text-neutral-800">
+              {{ formattedAnswer }}
+            </p>
           </div>
 
-          <p class="text-xs text-neutral-400 text-center italic">
-            Los valores de referencia son aproximados y pueden variar según la fuente.
+          <p class="text-sm text-neutral-500 text-center">
+            Respuesta registrada. ¿Quieres probar otra?
           </p>
 
           <!-- Botón nueva pregunta -->
           <button
-            @click="getRandomQuestion"
+            @click="getNewQuestion"
             class="btn-primary btn-large w-full"
           >
             Otra pregunta
           </button>
         </div>
+        </template>
       </div>
 
       <!-- Info -->
