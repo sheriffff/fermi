@@ -31,7 +31,7 @@ import { RouterLink } from 'vue-router'
       </div>
 
       <!-- Botones principales -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Botón Profesor -->
         <RouterLink
           to="/profe"
@@ -61,6 +61,22 @@ import { RouterLink } from 'vue-router'
           </h3>
           <p class="text-neutral-500 text-sm">
             Realiza el test online (solo adultos mayores de 18 años)
+          </p>
+        </RouterLink>
+
+        <!-- Botón Pregunta Aleatoria -->
+        <RouterLink
+          to="/random"
+          class="card-elevated group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
+        >
+          <div class="mb-4">
+            <span class="text-5xl group-hover:scale-110 transition-transform duration-300 inline-block">🎲</span>
+          </div>
+          <h3 class="text-xl font-semibold text-neutral-800 mb-2">
+            Pregunta Aleatoria
+          </h3>
+          <p class="text-neutral-500 text-sm">
+            Prueba una pregunta al azar sin registrar datos
           </p>
         </RouterLink>
       </div>
