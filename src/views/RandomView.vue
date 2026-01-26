@@ -16,7 +16,7 @@ const { formatNumber, cleanInput } = useNumberFormat()
 // Número formateado para mostrar
 const formattedAnswer = computed(() => {
   const cleaned = cleanInput(currentAnswer.value)
-  if (!cleaned) return ''
+  if (!cleaned) return '—'
   return formatNumber(parseInt(cleaned, 10))
 })
 
@@ -65,11 +65,8 @@ function handleKeydown(event) {
           ← Volver al inicio
         </RouterLink>
         <h1 class="text-3xl font-bold text-neutral-800">
-          Pregunta Aleatoria
+          Estima:
         </h1>
-        <p class="text-neutral-600 mt-2">
-          Practica tu capacidad de estimación sin presión
-        </p>
       </div>
 
       <!-- Card de pregunta -->
@@ -83,7 +80,6 @@ function handleKeydown(event) {
         <template v-else>
         <!-- Texto de la pregunta -->
         <div class="mb-8">
-          <p class="text-xs text-neutral-400 mb-2">{{ currentQuestion?.category }}</p>
           <h2 class="text-xl font-medium text-neutral-800 leading-relaxed">
             {{ currentQuestion?.texto }}
           </h2>
@@ -103,13 +99,11 @@ function handleKeydown(event) {
           />
 
           <!-- Feedback del número formateado -->
-          <Transition name="fade">
-            <div v-if="formattedAnswer" class="text-center">
-              <span class="number-display">
-                {{ formattedAnswer }}
-              </span>
-            </div>
-          </Transition>
+          <div class="text-center">
+            <span class="number-display">
+              {{ formattedAnswer }}
+            </span>
+          </div>
 
           <!-- Botón enviar -->
           <button
