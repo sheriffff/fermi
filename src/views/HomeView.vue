@@ -33,7 +33,7 @@ import { RouterLink } from 'vue-router'
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Botón Adultos -->
         <RouterLink
-          to="/adultos"
+          to="/test"
           class="card-elevated group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
         >
           <div class="mb-4">

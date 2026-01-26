@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick, onMounted } from 'vue'
+import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
@@ -8,11 +8,23 @@ import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import FermiInput from '@/components/common/FermiInput.vue'
 
 // ============================================
+// CONFIGURACIÓN DE TIEMPOS
+// ============================================
+const QUESTION_TIME = 10 // Segundos por pregunta (3 minutos)
+const WARNING_TIME = 5   // Segundos antes del final para avisar
+
+// ============================================
 // ESTADO DEL FLUJO
 // ============================================
-const currentStep = ref('metadata') // 'metadata' | 'test' | 'finished'
+const currentStep = ref('metadata') // 'metadata' | 'instructions' | 'test' | 'finished'
 const isLoading = ref(false)
 const error = ref(null)
+
+// Aviso de 30 segundos
+const showTimeWarning = ref(false)
+const warningPlayed = ref(false)
+const showTimer = ref(false)
+const timerShaking = ref(false)
 
 // ============================================
 // METADATA DEL PARTICIPANTE
@@ -122,18 +134,55 @@ const isAnswerComplete = computed(() => {
 // ============================================
 // TIMER
 // ============================================
-const QUESTION_TIME = 180 // 3 minutos
-
 const {
   formattedTime,
   timerClass,
   timerState,
   percentageRemaining,
+  seconds: timeRemaining,
   start: startTimer,
   stop: stopTimer,
   reset: resetTimer,
   getElapsedTime
 } = useTimer(QUESTION_TIME, handleTimeUp)
+
+watch(timeRemaining, (remaining) => {
+  if (remaining <= WARNING_TIME && remaining > 0 && !warningPlayed.value) {
+    showTimeWarning.value = true
+    warningPlayed.value = true
+    timerShaking.value = true
+    playWarningSound()
+    setTimeout(() => {
+      timerShaking.value = false
+    }, 1000)
+  }
+})
+
+function playWarningSound() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    const oscillator = audioContext.createOscillator()
+    const gainNode = audioContext.createGain()
+
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext.destination)
+
+    oscillator.frequency.value = 440
+    oscillator.type = 'sine'
+
+    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+
+    oscillator.start(audioContext.currentTime)
+    oscillator.stop(audioContext.currentTime + 0.5)
+  } catch (e) {
+    console.log('No se pudo reproducir sonido:', e)
+  }
+}
+
+function toggleTimer() {
+  showTimer.value = !showTimer.value
+}
 
 // ============================================
 // FORMATEADOR DE NÚMEROS
@@ -157,47 +206,37 @@ async function startTest() {
   error.value = null
 
   try {
-    // Determinar modelo (ahora son números 1, 2, 3, 4)
     let modelo
     const availableTests = modeloOptions.value
 
     if (metadata.value.segundaVez && metadata.value.modelosYaHechos.length > 0) {
-      // Excluir los modelos ya hechos
       const modelosDisponibles = availableTests.filter(
         m => !metadata.value.modelosYaHechos.includes(m)
       )
-      // Si quedan modelos disponibles, elegir uno aleatorio
       if (modelosDisponibles.length > 0) {
         modelo = modelosDisponibles[Math.floor(Math.random() * modelosDisponibles.length)]
       } else {
-        // Si hizo todos, dar uno aleatorio de todos modos
         modelo = availableTests[Math.floor(Math.random() * availableTests.length)]
       }
     } else {
-      // Asignar modelo aleatorio
       modelo = availableTests[Math.floor(Math.random() * availableTests.length)]
     }
 
     modeloAsignado.value = modelo
 
-    // Obtener preguntas del modelo desde el Excel
     preguntas.value = await getTestQuestions(modelo)
 
     if (!preguntas.value || preguntas.value.length === 0) {
       throw new Error('No se encontraron preguntas para este test')
     }
 
-    // Iniciar test
-    currentStep.value = 'test'
     currentQuestionIndex.value = 0
     respuestas.value = {}
     tiempos.value = {}
     currentAnswer.value = ''
 
-    // Iniciar timer
-    await nextTick()
-    resetTimer(QUESTION_TIME)
-    startTimer()
+    // Ir a instrucciones primero
+    currentStep.value = 'instructions'
 
   } catch (e) {
     console.error('Error iniciando test:', e)
@@ -205,6 +244,16 @@ async function startTest() {
   } finally {
     isLoading.value = false
   }
+}
+
+function startQuestions() {
+  currentStep.value = 'test'
+  showTimeWarning.value = false
+  warningPlayed.value = false
+  timerShaking.value = false
+  showTimer.value = false
+  resetTimer(QUESTION_TIME)
+  startTimer()
 }
 
 function handleTimeUp() {
@@ -233,6 +282,9 @@ async function goToNextQuestion() {
   if (currentQuestionIndex.value < preguntas.value.length - 1) {
     currentQuestionIndex.value++
     currentAnswer.value = ''
+    showTimeWarning.value = false
+    warningPlayed.value = false
+    timerShaking.value = false
 
     await nextTick()
     resetTimer(QUESTION_TIME)
@@ -438,12 +490,10 @@ async function finishTest() {
                 </Transition>
               </div>
 
-              <!-- Error -->
               <div v-if="error" class="p-4 bg-red-50 text-red-700 rounded-xl text-sm">
                 {{ error }}
               </div>
 
-              <!-- Submit -->
               <button
                 type="submit"
                 class="btn-primary btn-large w-full"
@@ -456,22 +506,93 @@ async function finishTest() {
           </div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- PANTALLA 2: TEST (Preguntas) -->
-        <!-- ============================================ -->
+        <div v-else-if="currentStep === 'instructions'" key="instructions">
+          <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-neutral-800">
+              Antes de empezar... 📋
+            </h1>
+          </div>
+
+          <div class="card-elevated space-y-6">
+            <div class="space-y-4">
+              <div class="flex gap-4 items-start">
+                <span class="text-2xl">⏱️</span>
+                <div>
+                  <p class="font-semibold text-neutral-800">Tienes 3 minutos por pregunta</p>
+                  <p class="text-sm text-neutral-500">
+                    Puedes pulsar el <span class="text-lg">⏱️</span> de arriba para ver/ocultar el tiempo.
+                    Te avisaré con un sonido cuando queden 30 segundos.
+                    Si no contestas a tiempo, pasarás automáticamente a la siguiente pregunta.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <span class="text-2xl">🔢</span>
+                <div>
+                  <p class="font-semibold text-neutral-800">Escribe números grandes fácilmente</p>
+                  <p class="text-sm text-neutral-500">
+                    Usa el botón <span class="font-mono bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded">×1000</span> para multiplicar rápidamente.
+                    Hay otro botón <span class="font-mono bg-secondary-100 text-secondary-600 px-1.5 py-0.5 rounded">÷1000</span> para dividir rápidamente.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <span class="text-2xl">📝</span>
+                <div>
+                  <p class="font-semibold text-neutral-800">Usa papel y boli</p>
+                  <p class="text-sm text-neutral-500">
+                    Tenlos a mano antes de empezar. Te harán falta para hacer algunas operaciones.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <span class="text-2xl">🎯</span>
+                <div>
+                  <p class="font-semibold text-neutral-800">Esto no es un exámen.</p>
+                  <p class="text-sm text-neutral-500">
+                    Disfruta!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              @click="startQuestions"
+              class="btn-primary btn-large w-full"
+            >
+              ¡Entendido, empezamos! 🚀
+            </button>
+          </div>
+        </div>
+
         <div v-else-if="currentStep === 'test'" key="test" class="space-y-6">
 
-          <!-- Header con progreso -->
           <div class="flex items-center justify-between mb-4">
             <span class="text-sm text-neutral-500 font-medium">
               Pregunta {{ questionNumber }} de {{ totalQuestions }}
             </span>
-            <span class="font-mono text-sm text-neutral-400">
-              Modelo {{ modeloAsignado }}
-            </span>
+            <div class="flex items-center gap-3">
+              <button
+                @click="toggleTimer"
+                class="timer-toggle"
+                :class="{ 'timer-shaking': timerShaking }"
+              >
+                <span class="timer-icon">⏱️</span>
+                <Transition name="fade">
+                  <span v-if="showTimer || showTimeWarning" class="timer-value">
+                    {{ formattedTime }}
+                  </span>
+                </Transition>
+              </button>
+              <span class="font-mono text-sm text-neutral-400">
+                Modelo {{ modeloAsignado }}
+              </span>
+            </div>
           </div>
 
-          <!-- Barra de progreso -->
           <div class="progress-bar">
             <div
               class="progress-bar-fill"
@@ -479,20 +600,7 @@ async function finishTest() {
             ></div>
           </div>
 
-          <!-- Timer prominente -->
-          <div class="text-center py-4">
-            <div
-              :class="timerClass"
-              class="transition-colors duration-300"
-            >
-              {{ formattedTime }}
-            </div>
-            <p class="text-xs text-neutral-400 mt-1">
-              Tiempo restante para esta pregunta
-            </p>
-          </div>
 
-          <!-- Card de pregunta -->
           <Transition name="slide" mode="out-in">
             <div :key="currentQuestionIndex" class="card-elevated">
 
@@ -558,3 +666,36 @@ async function finishTest() {
     </div>
   </div>
 </template>
+
+<style scoped>
+@reference "../assets/main.css";
+
+.timer-toggle {
+  @apply flex items-center gap-1 px-2 py-1 rounded-lg cursor-pointer;
+  @apply bg-neutral-100 hover:bg-neutral-200 transition-all duration-200;
+}
+
+.timer-icon {
+  @apply text-lg transition-transform duration-200;
+}
+
+.timer-value {
+  @apply font-mono text-sm text-neutral-600;
+}
+
+.timer-shaking {
+  @apply scale-125;
+  animation: shake 0.5s ease-in-out;
+}
+
+.timer-shaking .timer-icon {
+  @apply scale-110;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0) scale(1.25); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px) scale(1.25); }
+  20%, 40%, 60%, 80% { transform: translateX(2px) scale(1.25); }
+}
+</style>
+
