@@ -69,7 +69,7 @@ def generate_pdf(test_id):
 
     def draw_header(y_pos):
         c.setFont("Helvetica-Bold", 16)
-        c.drawString(margin_left, y_pos, f"¿Cuánto conocemos el mundo? - Modelo {test_id}")
+        c.drawString(margin_left, y_pos, f"Gymkana de la aproximación 🎯 - Modelo {test_id}")
         c.setFont("Helvetica", 10)
         y_pos -= PDF.TITLE_SPACING * 2
         return y_pos
