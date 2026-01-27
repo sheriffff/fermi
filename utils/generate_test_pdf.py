@@ -212,16 +212,24 @@ def generate_pdf(test_id):
                 break
         return y_pos
 
+    def draw_footer(page_num):
+        """Draw footer with model and page number (e.g., A1, A2)"""
+        c.setFont("Helvetica", 10)
+        footer_text = f"{test_id}{page_num}"
+        c.drawRightString(width - 1 * cm, 1 * cm, footer_text)
+
     y = height - PDF.MARGIN_TOP
     y = draw_header(y)
     y = draw_form_fields(y)
     y = draw_separator_lines(y)
     y -= PDF.SECTION_SPACING
     y = render_questions_page(y, 0, 4, page=1)  # 4 questions on page 1 (compact)
+    draw_footer(1)
 
     c.showPage()
     y = height - PDF.MARGIN_TOP
     y = render_questions_page(y, 4, 8, page=2)  # 4 questions on page 2 (spacious)
+    draw_footer(2)
 
     c.save()
     print(f"PDF generado: {filename}")
