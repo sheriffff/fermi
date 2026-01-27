@@ -27,4 +27,4 @@ class PDFParams:
     ANSWER_BOX_LINE_GAP = 0.8 * cm
 
     ANSWER_TOTAL_SPACE_PAGE1 = 3 * cm
-    ANSWER_TOTAL_SPACE_PAGE2 = 5.4 * cm
+    ANSWER_TOTAL_SPACE_PAGE2 = 5.2 * cm

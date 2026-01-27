@@ -53,7 +53,7 @@ def generate_pdf(test_id):
         print(f"Error: Se esperaban 8 preguntas para el test {test_id}, se encontraron {len(questions)}")
         return
 
-    filename = f"examen_modelo_{test_id}.pdf"
+    filename = f"utils/data/examen_modelo_{test_id}.pdf"
     c = canvas.Canvas(filename, pagesize=A4)
     width, height = A4
 
@@ -68,10 +68,33 @@ def generate_pdf(test_id):
         c.rect(x, y, width, height)
 
     def draw_header(y_pos):
+        title_text = "Gymkana de la aproximación"
         c.setFont("Helvetica-Bold", 16)
-        c.drawString(margin_left, y_pos, f"Gymkana de la aproximación 🎯 - Modelo {test_id}")
+        title_width = c.stringWidth(title_text, "Helvetica-Bold", 16)
+
+        emoji_size = 0.8 * cm
+        spacing = 0.25 * cm
+
+        total_width = emoji_size + spacing + title_width + spacing + emoji_size
+        start_x = (width - total_width) / 2
+
+        emoji_y = y_pos - 0.2 * cm
+
+        emoji_path = "utils/emoji_dart.png"
+        c.drawImage(emoji_path, start_x, emoji_y, width=emoji_size, height=emoji_size, preserveAspectRatio=True, anchor='sw', mask='auto')
+        title_x = start_x + emoji_size + spacing
+        c.drawString(title_x, y_pos, title_text)
+        emoji_right_x = title_x + title_width + spacing
+        c.drawImage(emoji_path, emoji_right_x, emoji_y, width=emoji_size, height=emoji_size, preserveAspectRatio=True, anchor='sw', mask='auto')
+
+        y_pos -= 0.5 * cm
+        c.setFont("Helvetica", 9)
+        modelo_text = f"Modelo {test_id}"
+        modelo_width = c.stringWidth(modelo_text, "Helvetica", 9)
+        c.drawString((width - modelo_width) / 2, y_pos, modelo_text)
+
+        y_pos -= 1.6 * cm
         c.setFont("Helvetica", 10)
-        y_pos -= PDF.TITLE_SPACING * 2
         return y_pos
 
     def draw_form_fields(y_pos):
