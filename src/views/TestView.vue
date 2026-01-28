@@ -43,9 +43,9 @@ const metadata = ref({
 const edadOptions = Array.from({ length: 96 }, (_, i) => i + 4)
 
 const sexoOptions = [
-  { value: 'chico', label: 'Chico' },
-  { value: 'chica', label: 'Chica' },
-  { value: 'otro', label: 'Otro' }
+  { value: 'Masculino', label: 'Masculino' },
+  { value: 'Femenino', label: 'Femenino' },
+  { value: 'Otro', label: 'Otro' }
 ]
 
 const piVsEOptions = [

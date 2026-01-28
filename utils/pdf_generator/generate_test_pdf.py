@@ -117,13 +117,13 @@ def generate_pdf(test_id):
         y_pos -= PDF.FORM_ROW_SPACING - 0.3 * cm
 
         c.drawString(col1_x, y_pos, "Sexo:")
-        chico_x = col2_x
-        draw_checkbox(c, chico_x, y_pos - PDF.FORM_CHECKBOX_OFFSET_Y)
-        c.drawString(chico_x + PDF.FORM_CHECKBOX_LABEL_SPACING, y_pos, "Chico")
-        chica_x = chico_x + PDF.FORM_CHECKBOX_ITEM_SPACING
-        draw_checkbox(c, chica_x, y_pos - PDF.FORM_CHECKBOX_OFFSET_Y)
-        c.drawString(chica_x + PDF.FORM_CHECKBOX_LABEL_SPACING, y_pos, "Chica")
-        otro_x = chica_x + PDF.FORM_CHECKBOX_ITEM_SPACING
+        masculino_x = col2_x
+        draw_checkbox(c, masculino_x, y_pos - PDF.FORM_CHECKBOX_OFFSET_Y)
+        c.drawString(masculino_x + PDF.FORM_CHECKBOX_LABEL_SPACING, y_pos, "Masculino")
+        femenino_x = masculino_x + PDF.FORM_CHECKBOX_ITEM_SPACING
+        draw_checkbox(c, femenino_x, y_pos - PDF.FORM_CHECKBOX_OFFSET_Y)
+        c.drawString(femenino_x + PDF.FORM_CHECKBOX_LABEL_SPACING, y_pos, "Femenino")
+        otro_x = femenino_x + PDF.FORM_CHECKBOX_ITEM_SPACING
         draw_checkbox(c, otro_x, y_pos - PDF.FORM_CHECKBOX_OFFSET_Y)
         c.drawString(otro_x + PDF.FORM_CHECKBOX_LABEL_SPACING, y_pos, "Otro")
         y_pos -= PDF.FORM_CHECKBOX_ROW_SPACING + 0.6 * cm
