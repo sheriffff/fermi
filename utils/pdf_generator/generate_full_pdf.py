@@ -41,18 +41,18 @@ def get_page_size(pdf_path):
     height = float(first_page.mediabox.height)
     return (width, height)
 
+
 def generate_full_pdf():
     """Merge all PDFs into one final document"""
     utils_dir = Path(__file__).parent
     data_dir = utils_dir / "data"
+    public_dir = utils_dir.parent.parent / "public"
 
-    # Generate all test PDFs first
     generate_all_tests()
 
-    # Paths to source files
     instructions_pdf = utils_dir / "hoja_instrucciones_profes.pdf"
     test_pdfs = [data_dir / f"examen_modelo_{t}.pdf" for t in ['A', 'B', 'C', 'D']]
-    output_pdf = data_dir / "profe_imprimir.pdf"
+    output_pdf = public_dir / "profe_instrucciones_y_tests.pdf"
 
     # Check instructions file exists
     if not instructions_pdf.exists():
@@ -104,7 +104,7 @@ def generate_full_pdf():
     reader = PdfReader(str(output_pdf))
     total_pages = len(reader.pages)
 
-    print(f"\n✅ PDF completo generado: {output_pdf}")
+    print(f"\n✅ PDF completo generado: public/profe_instrucciones_y_tests.pdf")
     print(f"📄 Total de páginas: {total_pages}")
 
 if __name__ == "__main__":
