@@ -107,11 +107,34 @@ def generate_pdf(test_id):
         c.setFont("Helvetica", 10)
         return y_pos
 
+    def draw_double_border_box(c, x, y, w, h, gap=0.1*cm):
+        c.rect(x, y, w, h)
+        c.rect(x + gap, y + gap, w - 2*gap, h - 2*gap)
+
+    def draw_profe_boxes():
+        right_col_x = width - 1 * cm - 3 * cm
+        right_box_width = 3 * cm
+        right_box_height = 1 * cm
+        top_y = height - 1 * cm
+
+        c.setFont("Helvetica", 9)
+        c.drawString(right_col_x, top_y, "ID Profesor")
+        c.setFont("Helvetica", 5)
+        c.drawString(right_col_x, top_y - 0.3 * cm, "Rellena el profesor. Opcional.")
+        draw_double_border_box(c, right_col_x, top_y - 0.45 * cm - right_box_height, right_box_width, right_box_height)
+
+        c.setFont("Helvetica", 9)
+        c.drawString(right_col_x, top_y - 1.8 * cm, "ID Aula")
+        c.setFont("Helvetica", 5)
+        c.drawString(right_col_x, top_y - 2.1 * cm, "Opcional.")
+        draw_double_border_box(c, right_col_x, top_y - 2.25 * cm - right_box_height, right_box_width, right_box_height)
+
     def draw_form_fields(y_pos):
         col1_x = margin_left
         col2_x = margin_left + PDF.FORM_COL_SPACING
         box_width = PDF.FORM_BOX_WIDTH
 
+        c.setFont("Helvetica", 10)
         c.drawString(col1_x, y_pos, "Edad:")
         draw_text_box(c, col2_x, y_pos - PDF.FORM_BOX_OFFSET_Y, box_width)
         y_pos -= PDF.FORM_ROW_SPACING - 0.3 * cm
@@ -229,6 +252,7 @@ def generate_pdf(test_id):
         c.drawRightString(width - 1 * cm, 1 * cm, footer_text)
 
     y = height - PDF.MARGIN_TOP
+    draw_profe_boxes()
     y = draw_header(y)
     y = draw_form_fields(y)
     y = draw_separator_lines(y)
