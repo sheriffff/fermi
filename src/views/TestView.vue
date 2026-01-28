@@ -83,10 +83,6 @@ function toggleModeloYaHecho(modelo) {
   }
 }
 
-// Mostrar sexo solo si edad < 19
-const mostrarSexo = computed(() => {
-  return metadata.value.edad && parseInt(metadata.value.edad) < 19
-})
 
 const isMetadataValid = computed(() => {
   const m = metadata.value
@@ -375,26 +371,19 @@ async function finishTest() {
                   </select>
                 </div>
 
-                <!-- Columna 2: Sexo (solo si edad < 19) -->
+                <!-- Columna 2: Sexo -->
                 <div>
-                  <Transition name="fade">
-                    <div v-if="mostrarSexo">
-                      <label class="label">Sexo (opcional)</label>
-                      <select v-model="metadata.sexo" class="select">
-                        <option value="">Selecciona</option>
-                        <option
-                          v-for="option in sexoOptions"
-                          :key="option.value"
-                          :value="option.value"
-                        >
-                          {{ option.label }}
-                        </option>
-                      </select>
-                      <p class="text-xs text-neutral-500 mt-1 italic">
-                        ¿Se notará que chicos y chicas adolescentes maduráis de media en diferentes momentos?
-                      </p>
-                    </div>
-                  </Transition>
+                  <label class="label">Sexo (opcional)</label>
+                  <select v-model="metadata.sexo" class="select">
+                    <option value="">Selecciona</option>
+                    <option
+                      v-for="option in sexoOptions"
+                      :key="option.value"
+                      :value="option.value"
+                    >
+                      {{ option.label }}
+                    </option>
+                  </select>
                 </div>
               </div>
 
