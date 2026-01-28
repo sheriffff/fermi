@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx'
+import readXlsxFile from 'read-excel-file'
 
 let questionsCache = null
 
@@ -6,36 +6,31 @@ async function loadExcel() {
   if (questionsCache) return questionsCache
 
   const response = await fetch('/questions.xlsx')
-  const arrayBuffer = await response.arrayBuffer()
-  const workbook = XLSX.read(arrayBuffer, { type: 'array' })
+  const blob = await response.blob()
 
-  const questionsSheet = workbook.Sheets['questions']
-  const questionsRaw = XLSX.utils.sheet_to_json(questionsSheet, { header: ['category', 'level', 'text'] })
-
+  const questionsRaw = await readXlsxFile(blob, { sheet: 'questions' })
   const questions = questionsRaw
     .slice(1)
-    .filter(q => q.text && q.text !== 'Prueba')
-    .map((q, index) => ({
+    .filter(row => row[2] && row[2] !== 'Prueba')
+    .map((row, index) => ({
       id: index + 1,
-      category: q.category,
-      level: q.level,
-      texto: q.text
+      category: row[0],
+      level: row[1],
+      texto: row[2]
     }))
 
-  const testsSheet = workbook.Sheets['tests']
-  const testsRaw = XLSX.utils.sheet_to_json(testsSheet, { header: ['test', 'category', 'level'] })
-
+  const testsRaw = await readXlsxFile(blob, { sheet: 'tests' })
   const testsData = testsRaw.slice(1)
   const tests = {}
 
   for (const row of testsData) {
-    const testId = row.test
+    const testId = row[0]
     if (!tests[testId]) {
       tests[testId] = []
     }
     tests[testId].push({
-      category: row.category,
-      level: row.level
+      category: row[1],
+      level: row[2]
     })
   }
 

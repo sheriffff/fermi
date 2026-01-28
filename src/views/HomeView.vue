@@ -30,7 +30,7 @@ import { RouterLink } from 'vue-router'
       </div>
 
       <!-- Botones principales -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Botón Adultos -->
         <RouterLink
           to="/test"
@@ -44,6 +44,22 @@ import { RouterLink } from 'vue-router'
           </h3>
           <p class="text-neutral-500 text-sm">
             Haz un test online (~20 minutos)
+          </p>
+        </RouterLink>
+
+        <!-- Botón Profesor -->
+        <RouterLink
+          to="/profe"
+          class="card-elevated group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
+        >
+          <div class="mb-4">
+            <span class="text-5xl group-hover:scale-110 transition-transform duration-300 inline-block">👩‍🏫</span>
+          </div>
+          <h3 class="text-xl font-semibold text-neutral-800 mb-2">
+            Soy Profesor
+          </h3>
+          <p class="text-neutral-500 text-sm">
+            Descarga los materiales para aplicar el test en tu aula
           </p>
         </RouterLink>
 
@@ -63,19 +79,19 @@ import { RouterLink } from 'vue-router'
           </p>
         </RouterLink>
 
-        <!-- Botón Profesor -->
+        <!-- Botón Admin -->
         <RouterLink
-          to="/profe"
+          to="/admin"
           class="card-elevated group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
         >
           <div class="mb-4">
-            <span class="text-5xl group-hover:scale-110 transition-transform duration-300 inline-block">👩‍🏫</span>
+            <span class="text-5xl group-hover:scale-110 transition-transform duration-300 inline-block">🤠</span>
           </div>
           <h3 class="text-xl font-semibold text-neutral-800 mb-2">
-            Soy Profesor
+            Soy Admin
           </h3>
           <p class="text-neutral-500 text-sm">
-            Descarga los materiales para aplicar el test en tu aula
+            Panel de administración
           </p>
         </RouterLink>
       </div>

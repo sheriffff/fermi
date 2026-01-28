@@ -11,12 +11,13 @@ const isAuthenticated = ref(false)
 const passwordInput = ref('')
 const authError = ref(false)
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'fermi2026'
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD
 
-function handleLogin() {
+async function handleLogin() {
   if (passwordInput.value === ADMIN_PASSWORD) {
     isAuthenticated.value = true
     authError.value = false
+    await cargarGrupos()
   } else {
     authError.value = true
   }
@@ -193,23 +194,10 @@ async function exportarCSV(tabla) {
 // LIFECYCLE
 // ============================================
 
-onMounted(async () => {
-  // Auto-login en desarrollo
-  if (import.meta.env.DEV) {
-    isAuthenticated.value = true
-  }
-
-  if (isAuthenticated.value) {
-    await cargarGrupos()
-    initializeGrid()
-  }
+onMounted(() => {
+  initializeGrid()
 })
 
-// Cuando se autentica, cargar datos
-async function onAuthenticated() {
-  await cargarGrupos()
-  initializeGrid()
-}
 </script>
 
 <template>
@@ -225,7 +213,7 @@ async function onAuthenticated() {
           Panel de Administración
         </h1>
 
-        <form @submit.prevent="handleLogin(); onAuthenticated()" class="space-y-4">
+        <form @submit.prevent="handleLogin" class="space-y-4">
           <input
             v-model="passwordInput"
             type="password"

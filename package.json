@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.91.0",
+    "read-excel-file": "^6.0.2",
     "vue": "^3.5.26",
-    "vue-router": "^4.6.4",
-    "xlsx": "^0.18.5"
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
