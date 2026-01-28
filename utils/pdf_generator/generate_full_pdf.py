@@ -1,27 +1,21 @@
-# command: `python utils/generate_full_pdf.py`
-# Generates a full PDF with:
-# - 1 page: pdf_instrucciones_profes.pdf
-# - 1 blank page
-# - 8 pages: all tests A, B, C, D (2 pages each)
-# Total: 10 pages
+# command: `python generate_full_pdf.py`
 
 import subprocess
 import sys
+from pathlib import Path
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 import io
-import os
 
 def generate_all_tests():
     """Generate all test PDFs using generate_test_pdf.py"""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    script_path = os.path.join(script_dir, "generate_test_pdf.py")
+    script_path = Path(__file__).parent / "generate_test_pdf.py"
 
     for test_id in ['A', 'B', 'C', 'D']:
         print(f"Generating test {test_id}...")
         result = subprocess.run(
-            [sys.executable, script_path, test_id],
+            [sys.executable, str(script_path), test_id],
             capture_output=True,
             text=True
         )
@@ -49,25 +43,25 @@ def get_page_size(pdf_path):
 
 def generate_full_pdf():
     """Merge all PDFs into one final document"""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(script_dir, "data")
+    utils_dir = Path(__file__).parent
+    data_dir = utils_dir / "data"
 
     # Generate all test PDFs first
     generate_all_tests()
 
     # Paths to source files
-    instructions_pdf = os.path.join(data_dir, "pdf_instrucciones_profes.pdf")
-    test_pdfs = [os.path.join(data_dir, f"examen_modelo_{t}.pdf") for t in ['A', 'B', 'C', 'D']]
-    output_pdf = os.path.join(data_dir, "profe_imprimir.pdf")
+    instructions_pdf = utils_dir / "hoja_instrucciones_profes.pdf"
+    test_pdfs = [data_dir / f"examen_modelo_{t}.pdf" for t in ['A', 'B', 'C', 'D']]
+    output_pdf = data_dir / "profe_imprimir.pdf"
 
     # Check instructions file exists
-    if not os.path.exists(instructions_pdf):
+    if not instructions_pdf.exists():
         print(f"Error: No se encontró {instructions_pdf}")
         sys.exit(1)
 
     # Check all test files exist
     for pdf in test_pdfs:
-        if not os.path.exists(pdf):
+        if not pdf.exists():
             print(f"Error: No se encontró {pdf}")
             sys.exit(1)
 
@@ -75,7 +69,7 @@ def generate_full_pdf():
     writer = PdfWriter()
 
     # Add instructions page, scaled to A4
-    instructions_reader = PdfReader(instructions_pdf)
+    instructions_reader = PdfReader(str(instructions_pdf))
     instr_page = instructions_reader.pages[0]
     instr_width = float(instr_page.mediabox.width)
     instr_height = float(instr_page.mediabox.height)
@@ -87,7 +81,7 @@ def generate_full_pdf():
     # Scale the page
     instr_page.scale(scale, scale)
     writer.add_page(instr_page)
-    print(f"Añadido: pdf_instrucciones_profes.pdf (escalado de {instr_width:.0f}x{instr_height:.0f} a {a4_width:.0f}x{instr_height*scale:.0f})")
+    print(f"Añadido: hoja_instrucciones_profes.pdf (escalado de {instr_width:.0f}x{instr_height:.0f} a {a4_width:.0f}x{instr_height*scale:.0f})")
 
     # Add blank page with A4 size
     blank_buffer = create_blank_page(A4)
@@ -97,17 +91,17 @@ def generate_full_pdf():
 
     # Add all test PDFs (2 pages each = 8 pages)
     for test_id, pdf_path in zip(['A', 'B', 'C', 'D'], test_pdfs):
-        test_reader = PdfReader(pdf_path)
+        test_reader = PdfReader(str(pdf_path))
         for page in test_reader.pages:
             writer.add_page(page)
         print(f"Añadido: examen_modelo_{test_id}.pdf")
 
     # Write final PDF
-    with open(output_pdf, 'wb') as f:
+    with open(str(output_pdf), 'wb') as f:
         writer.write(f)
 
     # Count pages in final PDF
-    reader = PdfReader(output_pdf)
+    reader = PdfReader(str(output_pdf))
     total_pages = len(reader.pages)
 
     print(f"\n✅ PDF completo generado: {output_pdf}")

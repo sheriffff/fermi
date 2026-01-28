@@ -1,5 +1,6 @@
-# command: `python utils/generate_test_pdf.py C`
+# command: `python utils/pdf_generator/generate_test_pdf.py C`
 import sys
+from pathlib import Path
 import openpyxl
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
@@ -11,7 +12,11 @@ from reportlab.lib.enums import TA_LEFT
 from pdf_params import PDFParams as PDF
 
 def load_test_questions(test_id):
-    wb = openpyxl.load_workbook('public/questions.xlsx')
+    # Get project root (2 levels up from this script)
+    project_root = Path(__file__).parent.parent.parent
+    questions_file = project_root / "public" / "questions.xlsx"
+
+    wb = openpyxl.load_workbook(str(questions_file))
     tests_sheet = wb['tests']
     questions_sheet = wb['questions']
 
@@ -53,8 +58,12 @@ def generate_pdf(test_id):
         print(f"Error: Se esperaban 8 preguntas para el test {test_id}, se encontraron {len(questions)}")
         return
 
-    filename = f"utils/data/examen_modelo_{test_id}.pdf"
-    c = canvas.Canvas(filename, pagesize=A4)
+    # Get data directory relative to this script
+    data_dir = Path(__file__).parent / "data"
+    data_dir.mkdir(exist_ok=True)
+
+    filename = data_dir / f"examen_modelo_{test_id}.pdf"
+    c = canvas.Canvas(str(filename), pagesize=A4)
     width, height = A4
 
     margin_left = PDF.MARGIN_HORIZONTAL
@@ -80,12 +89,13 @@ def generate_pdf(test_id):
 
         emoji_y = y_pos - 0.2 * cm
 
-        emoji_path = "utils/emoji_dart.png"
-        c.drawImage(emoji_path, start_x, emoji_y, width=emoji_size, height=emoji_size, preserveAspectRatio=True, anchor='sw', mask='auto')
+        # Get emoji path relative to this script
+        emoji_path = Path(__file__).parent / "emoji_dart.png"
+        c.drawImage(str(emoji_path), start_x, emoji_y, width=emoji_size, height=emoji_size, preserveAspectRatio=True, anchor='sw', mask='auto')
         title_x = start_x + emoji_size + spacing
         c.drawString(title_x, y_pos, title_text)
         emoji_right_x = title_x + title_width + spacing
-        c.drawImage(emoji_path, emoji_right_x, emoji_y, width=emoji_size, height=emoji_size, preserveAspectRatio=True, anchor='sw', mask='auto')
+        c.drawImage(str(emoji_path), emoji_right_x, emoji_y, width=emoji_size, height=emoji_size, preserveAspectRatio=True, anchor='sw', mask='auto')
 
         y_pos -= 0.5 * cm
         c.setFont("Helvetica", 9)
