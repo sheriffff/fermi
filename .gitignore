@@ -1,6 +1,6 @@
 .env*
 fermi_TODO_human.md
-PASOS.md
+CLAUDE.md
 utils/pdf_generator/data
 
 # Logs
