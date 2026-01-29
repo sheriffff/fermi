@@ -19,7 +19,7 @@ function handleDownload() {
 
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-neutral-800">
-          Soy Profesor
+          Hola Profesor <span class="text-4xl">👩‍🏫</span>
         </h1>
       </div>
 
