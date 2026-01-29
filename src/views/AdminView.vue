@@ -227,11 +227,11 @@ onMounted(() => {
           <div class="card space-y-3">
             <h3 class="font-semibold text-neutral-700">Datos comunes</h3>
             <div>
-              <label class="label">Profe ID (opcional)</label>
+              <label class="label">ID Profe (opcional)</label>
               <input v-model="sharedMeta.profeId" type="text" class="input"/>
             </div>
             <div>
-              <label class="label">Aula ID (opcional)</label>
+              <label class="label">ID Aula (opcional)</label>
               <input v-model="sharedMeta.aulaId" type="text" class="input"/>
             </div>
             <div>

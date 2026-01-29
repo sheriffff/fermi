@@ -54,8 +54,8 @@ CREATE INDEX idx_responses_online_model ON responses_online(test_model);
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS users_paper (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    profe_id UUID,
-    aula_id UUID,
+    profe_identifier VARCHAR(100),
+    aula_identifier VARCHAR(100),
     age INTEGER NOT NULL CHECK (age >= 4 AND age <= 120),
     sex VARCHAR(20) NOT NULL CHECK (sex IN ('masculino', 'femenino', 'otro', 'prefiero_no_decir')),
     time_of_day VARCHAR(20),
@@ -66,8 +66,8 @@ CREATE TABLE IF NOT EXISTS users_paper (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_users_paper_profe ON users_paper(profe_id);
-CREATE INDEX idx_users_paper_aula ON users_paper(aula_id);
+CREATE INDEX idx_users_paper_profe ON users_paper(profe_identifier);
+CREATE INDEX idx_users_paper_aula ON users_paper(aula_identifier);
 CREATE INDEX idx_users_paper_model ON users_paper(test_model);
 
 -- -----------------------------------------------------
@@ -166,8 +166,8 @@ CREATE OR REPLACE VIEW view_responses_paper AS
 SELECT
     r.id,
     r.user_id,
-    u.profe_id,
-    u.aula_id,
+    u.profe_identifier,
+    u.aula_identifier,
     u.age,
     u.sex,
     u.time_of_day,
