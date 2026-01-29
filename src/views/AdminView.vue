@@ -56,7 +56,33 @@ function initializeGrid() {
   }
 }
 
+const validationError = ref('')
+
+function validateGrid() {
+  for (let i = 0; i < gridData.value.length; i++) {
+    const row = gridData.value[i]
+    const hasAnyAnswer = row.preguntas.some(p => p.base !== '' || p.exp !== '')
+    if (!hasAnyAnswer) continue
+    for (let j = 0; j < row.preguntas.length; j++) {
+      const p = row.preguntas[j]
+      const hasBase = p.base !== ''
+      const hasExp = p.exp !== ''
+      if (hasBase !== hasExp) {
+        return `Fila ${i + 1}, P${j + 1}: falta ${hasBase ? 'b' : 'a'}`
+      }
+    }
+  }
+  return ''
+}
+
 async function saveData() {
+  const error = validateGrid()
+  if (error) {
+    validationError.value = error
+    setTimeout(() => { validationError.value = '' }, 4000)
+    return
+  }
+
   saveStatus.value = 'saving'
 
   try {
@@ -270,8 +296,8 @@ onMounted(() => {
               <button @click="exportCSV('responses_paper')" class="btn-ghost w-full text-sm !justify-start">📥 responses_paper</button>
               <button @click="exportCSV('logs_download')" class="btn-ghost w-full text-sm !justify-start">📥 logs_download</button>
               <p class="text-xs font-medium text-neutral-400 uppercase pt-2">Vistas joineadas</p>
-              <button @click="exportCSV('view_responses_online')" class="btn-ghost w-full text-sm !justify-start">📥 view_responses_online</button>
-              <button @click="exportCSV('view_responses_paper')" class="btn-ghost w-full text-sm !justify-start">📥 view_responses_paper</button>
+              <button @click="exportCSV('view_responses_online')" class="btn-ghost w-full text-sm !justify-start whitespace-nowrap">📥 view_resp_online</button>
+              <button @click="exportCSV('view_responses_paper')" class="btn-ghost w-full text-sm !justify-start whitespace-nowrap">📥 view_resp_paper</button>
             </div>
           </div>
         </div>
@@ -291,6 +317,7 @@ onMounted(() => {
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b border-neutral-200">
+                  <th class="py-2 px-2 text-left font-medium text-neutral-600 w-8">#</th>
                   <th class="py-2 px-2 text-center font-medium text-neutral-600 w-16">Edad</th>
                   <th class="py-2 px-2 text-center font-medium text-neutral-600 w-16">Sexo</th>
                   <th class="py-2 px-2 text-center font-medium text-neutral-600 w-20">Asig. fav.</th>
@@ -312,6 +339,7 @@ onMounted(() => {
                   <th></th>
                   <th></th>
                   <th></th>
+                  <th></th>
                   <template v-for="p in NUM_PREGUNTAS" :key="'header-' + p">
                     <th class="py-1" :class="p > 1 ? 'pl-3' : 'pl-1'">a</th>
                     <th class="py-1 px-1">b</th>
@@ -324,6 +352,9 @@ onMounted(() => {
                   :key="rowIdx"
                   class="border-b border-neutral-50 hover:bg-neutral-50"
                 >
+                  <td class="py-1 px-2 font-mono text-neutral-400 text-sm">
+                    {{ rowIdx + 1 }}
+                  </td>
                   <td class="py-1 px-1">
                     <select
                       v-model="row.meta.age"
@@ -408,6 +439,10 @@ onMounted(() => {
               <button @click="initializeGrid" class="btn-outline">
                 Limpiar Grid
               </button>
+
+              <span v-if="validationError" class="text-sm text-red-500 font-medium animate-pulse">
+                {{ validationError }}
+              </span>
 
               <span class="text-xs text-neutral-400 ml-auto">
                 💡 Usa <kbd class="px-1 py-0.5 bg-neutral-100 rounded">Tab</kbd> para navegar entre campos
