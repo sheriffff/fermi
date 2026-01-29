@@ -42,6 +42,14 @@ def get_page_size(pdf_path):
     return (width, height)
 
 
+def add_pdf_pages(writer, pdf_path, name):
+    """Add all pages from a PDF file to the writer"""
+    reader = PdfReader(str(pdf_path))
+    for page in reader.pages:
+        writer.add_page(page)
+    print(f"Añadido: {name} ({len(reader.pages)} páginas)")
+
+
 def generate_full_pdf():
     """Merge all PDFs into one final document"""
     utils_dir = Path(__file__).parent
@@ -51,45 +59,50 @@ def generate_full_pdf():
     generate_all_tests()
 
     instructions_pdf = utils_dir / "hoja_instrucciones_profes.pdf"
+    hoja_informativa_pdf = utils_dir / "Hoja informativa.pdf"
+    consentimiento_pdf = utils_dir / "Consentimiento informado.pdf"
     test_pdfs = [data_dir / f"examen_modelo_{t}.pdf" for t in ['A', 'B', 'C', 'D']]
     output_pdf = public_dir / "profe_instrucciones_y_tests.pdf"
 
-    # Check instructions file exists
-    if not instructions_pdf.exists():
-        print(f"Error: No se encontró {instructions_pdf}")
-        sys.exit(1)
+    required_pdfs = [
+        (instructions_pdf, "hoja_instrucciones_profes.pdf"),
+        (hoja_informativa_pdf, "Hoja informativa.pdf"),
+        (consentimiento_pdf, "Consentimiento informado.pdf"),
+    ]
+    for pdf_path, name in required_pdfs:
+        if not pdf_path.exists():
+            print(f"Error: No se encontró {name}")
+            sys.exit(1)
 
-    # Check all test files exist
     for pdf in test_pdfs:
         if not pdf.exists():
             print(f"Error: No se encontró {pdf}")
             sys.exit(1)
 
-    # Create PDF writer
     writer = PdfWriter()
 
-    # Add instructions page, scaled to A4
-    instructions_reader = PdfReader(str(instructions_pdf))
-    instr_page = instructions_reader.pages[0]
-    instr_width = float(instr_page.mediabox.width)
-    instr_height = float(instr_page.mediabox.height)
+    # 1. Add instructions (2 pages)
+    add_pdf_pages(writer, instructions_pdf, "hoja_instrucciones_profes.pdf")
 
-    # Calculate scale factor to fit A4 width
-    a4_width, a4_height = A4
-    scale = a4_width / instr_width
+    # 2. Add Hoja Informativa (1 page)
+    add_pdf_pages(writer, hoja_informativa_pdf, "Hoja informativa.pdf")
 
-    # Scale the page
-    instr_page.scale(scale, scale)
-    writer.add_page(instr_page)
-    print(f"Añadido: hoja_instrucciones_profes.pdf (escalado de {instr_width:.0f}x{instr_height:.0f} a {a4_width:.0f}x{instr_height*scale:.0f})")
-
-    # Add blank page with A4 size
+    # 3. Add blank page (separator)
     blank_buffer = create_blank_page(A4)
     blank_reader = PdfReader(blank_buffer)
     writer.add_page(blank_reader.pages[0])
-    print("Añadida: página en blanco")
+    print("Añadida: página en blanco (separador)")
 
-    # Add all test PDFs (2 pages each = 8 pages)
+    # 4. Add Consentimiento Informado (1 page)
+    add_pdf_pages(writer, consentimiento_pdf, "Consentimiento informado.pdf")
+
+    # 5. Add blank page (separator)
+    blank_buffer2 = create_blank_page(A4)
+    blank_reader2 = PdfReader(blank_buffer2)
+    writer.add_page(blank_reader2.pages[0])
+    print("Añadida: página en blanco (separador)")
+
+    # 6. Add all test PDFs (2 pages each = 8 pages)
     for test_id, pdf_path in zip(['A', 'B', 'C', 'D'], test_pdfs):
         test_reader = PdfReader(str(pdf_path))
         for page in test_reader.pages:

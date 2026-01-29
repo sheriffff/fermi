@@ -21,9 +21,6 @@ function handleDownload() {
         <h1 class="text-3xl font-bold text-neutral-800">
           Soy Profesor
         </h1>
-        <p class="text-neutral-600 mt-2">
-          Descarga los materiales e instrucciones para hacer los tests en tus aulas
-        </p>
       </div>
 
       <div class="card text-center space-y-6">
@@ -32,11 +29,12 @@ function handleDownload() {
             En el siguiente PDF encontrarás:
           </p>
           <ul class="text-sm text-neutral-600 list-disc list-inside mb-3">
-            <li>Instrucciones para el profesor</li>
-            <li>4 modelos de test: A, B, C, D</li>
+            <li>Instrucciones para el profesor.</li>
+            <li>Documentos legales necesarios.</li>
+            <li>4 tests diferentes A, B, C y D.</li>
           </ul>
           <p class="text-sm text-amber-700 font-medium">
-            Imprimir a doble cara: 10 páginas = 5 hojas
+            Descárgalo e imprímelo a doble cara.
           </p>
         </div>
 
@@ -44,7 +42,7 @@ function handleDownload() {
           @click="handleDownload"
           class="btn-primary btn-large w-full"
         >
-          Descargar PDF con instrucciones + 4 tests
+          Descargar PDF
         </button>
       </div>
     </div>

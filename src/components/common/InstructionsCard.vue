@@ -97,7 +97,7 @@ const warningTimeText = computed(() => {
           <div>
             <p class="font-semibold text-neutral-800">Esto no es un exámen.</p>
             <p class="text-sm text-neutral-500">
-              Disfruta!
+              Y es anónimo. No busques información. Disfruta!
             </p>
           </div>
         </div>

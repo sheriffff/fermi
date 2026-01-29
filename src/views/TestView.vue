@@ -11,8 +11,8 @@ import InstructionsCard from '@/components/common/InstructionsCard.vue'
 // ============================================
 // CONFIGURACIÓN DE TIEMPOS
 // ============================================
-const QUESTION_TIME = 120 // Segundos por pregunta (3 minutos)
-const WARNING_TIME = 20  // Segundos antes del final para avisar
+const QUESTION_TIME = 150 // Segundos por pregunta (3 minutos)
+const WARNING_TIME = 30  // Segundos antes del final para avisar
 
 // ============================================
 // ESTADO DEL FLUJO
@@ -334,22 +334,6 @@ async function finishTest() {
             </p>
           </div>
 
-          <!-- Aviso de sinceridad -->
-          <div class="card bg-secondary-50 border-secondary-200 mb-6">
-            <div class="flex gap-3">
-              <span class="text-2xl">💡</span>
-              <div>
-                <p class="font-medium text-secondary-700 mb-1">
-                  Esto NO es un examen de conocimientos. Y es anónimo!
-                </p>
-                <p class="text-sm text-secondary-600">
-                  Quiero ver cómo funciona el cerebro. Cómo estimamos cantidades.
-                  Coge un papel y un boli para hacer algún cálculo. No busques información. A pelo.
-                </p>
-              </div>
-            </div>
-          </div>
-
           <!-- Formulario -->
           <div class="card">
             <form @submit.prevent="startTest" class="space-y-6">
@@ -424,9 +408,9 @@ async function finishTest() {
                   />
                 </div>
                 <p class="text-xs text-neutral-400 mt-2 italic">
-                  Opcional. No hace falta para el estudio. Si lo rellenas, acuérdate, sácale una foto.
-                  Te servirá a tí si quieres encontrarte luego en las listas de resultados y compararte con diferentes segmentos de la población.
-                  No te pido el nombre porque quiero que sea anónimo. No me hagas inyección SQL, porfa.
+                  Opcional. Si lo rellenas, acuérdate, sácale una foto:
+                  te servirá a tí si quieres encontrarte luego en las listas de resultados y compararte con
+                  diferentes segmentos de la población.
                 </p>
               </div>
 
@@ -489,8 +473,8 @@ async function finishTest() {
                 class="btn-primary btn-large w-full"
                 :disabled="!isMetadataValid || isLoading"
               >
-                <span v-if="isLoading">Cargando preguntas...</span>
-                <span v-else>Comenzar Test →</span>
+                <span v-if="isLoading">...</span>
+                <span v-else>Ver Instrucciones →</span>
               </button>
             </form>
           </div>
