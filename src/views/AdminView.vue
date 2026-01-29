@@ -1,12 +1,8 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { obtenerGrupos, guardarRespuestasPapel, exportarTabla } from '@/lib/supabase'
-import { useNumberFormat } from '@/composables/useNumberFormat'
+import { createUserPaper, saveResponsesPaper, exportTable } from '@/lib/supabase'
 
-// ============================================
-// AUTENTICACIÓN SIMPLE
-// ============================================
 const isAuthenticated = ref(false)
 const passwordInput = ref('')
 const authError = ref(false)
@@ -17,151 +13,105 @@ async function handleLogin() {
   if (passwordInput.value === ADMIN_PASSWORD) {
     isAuthenticated.value = true
     authError.value = false
-    await cargarGrupos()
   } else {
     authError.value = true
   }
 }
 
-// ============================================
-// ESTADO DEL PANEL
-// ============================================
-const grupos = ref([])
-const selectedGrupo = ref('')
 const selectedModelo = ref('A')
-const numAlumnos = ref(5)
 const isLoading = ref(false)
-const saveStatus = ref('') // 'saving' | 'saved' | 'error'
+const saveStatus = ref('')
 
-// Grid de datos: estructura para entrada rápida
-// Cada fila es un alumno, cada columna es una pregunta con base y exponente
 const NUM_PREGUNTAS = 8
+const NUM_ALUMNOS = 10
 const gridData = ref([])
 
-// ============================================
-// COMPOSABLES
-// ============================================
-const { fromScientificNotation, formatNumber } = useNumberFormat()
-
-// ============================================
-// COMPUTED
-// ============================================
-const grupoSeleccionado = computed(() => {
-  return grupos.value.find(g => g.id === selectedGrupo.value)
+const sharedMeta = ref({
+  profeId: '',
+  aulaId: '',
+  timeOfDay: ''
 })
 
-// ============================================
-// MÉTODOS
-// ============================================
+const setAllAge = ref('14')
 
-async function cargarGrupos() {
-  try {
-    const data = await obtenerGrupos()
-    grupos.value = data || []
-  } catch (e) {
-    console.error('Error cargando grupos:', e)
+function setAllAges() {
+  for (const row of gridData.value) {
+    row.meta.age = setAllAge.value
   }
 }
 
 function initializeGrid() {
   gridData.value = []
-  for (let i = 0; i < numAlumnos.value; i++) {
-    const row = {
-      alumnoIdx: i + 1,
-      preguntas: []
-    }
-    for (let p = 0; p < NUM_PREGUNTAS; p++) {
-      row.preguntas.push({
-        base: '',
-        exp: ''
-      })
-    }
-    gridData.value.push(row)
+  for (let i = 0; i < NUM_ALUMNOS; i++) {
+    gridData.value.push({
+      meta: {
+        age: '14',
+        sex: 'masculino',
+        favoriteSubject: 'matematicas',
+        mathMarkLastPeriod: '7',
+        isPhysicsChemistryStudent: false
+      },
+      preguntas: Array.from({ length: NUM_PREGUNTAS }, () => ({ base: '', exp: '' }))
+    })
   }
 }
 
-function addRow() {
-  numAlumnos.value++
-  const newRow = {
-    alumnoIdx: gridData.value.length + 1,
-    preguntas: []
-  }
-  for (let p = 0; p < NUM_PREGUNTAS; p++) {
-    newRow.preguntas.push({ base: '', exp: '' })
-  }
-  gridData.value.push(newRow)
-}
-
-function removeLastRow() {
-  if (gridData.value.length > 1) {
-    gridData.value.pop()
-    numAlumnos.value--
-  }
-}
-
-async function guardarDatos() {
-  if (!selectedGrupo.value) {
-    alert('Selecciona un grupo primero')
-    return
-  }
-
+async function saveData() {
   saveStatus.value = 'saving'
 
   try {
-    const respuestas = []
-
     for (const row of gridData.value) {
-      for (let p = 0; p < row.preguntas.length; p++) {
-        const pregunta = row.preguntas[p]
+      const hasAnswers = row.preguntas.some(p => p.base !== '' && p.exp !== '')
+      if (!hasAnswers || !row.meta.age) continue
 
-        // Solo guardar si hay datos
-        if (pregunta.base !== '' && pregunta.exp !== '') {
-          respuestas.push({
-            id_grupo: selectedGrupo.value,
-            modelo: selectedModelo.value,
-            alumno_idx: row.alumnoIdx,
-            pregunta_num: p + 1,
-            base_a: parseFloat(pregunta.base) || 0,
-            exp_b: parseInt(pregunta.exp) || 0
-          })
-        }
+      const userId = await createUserPaper({
+        profeId: sharedMeta.value.profeId || null,
+        aulaId: sharedMeta.value.aulaId || null,
+        age: parseInt(row.meta.age),
+        sex: row.meta.sex || 'prefiero_no_decir',
+        timeOfDay: sharedMeta.value.timeOfDay || null,
+        favoriteSubject: row.meta.favoriteSubject || null,
+        mathMarkLastPeriod: row.meta.mathMarkLastPeriod ? parseFloat(row.meta.mathMarkLastPeriod) : null,
+        isPhysicsChemistryStudent: row.meta.isPhysicsChemistryStudent,
+        testModel: selectedModelo.value
+      })
+
+      const respuestas = row.preguntas
+        .map((p, idx) => ({
+          questionN: idx + 1,
+          baseA: parseFloat(p.base),
+          expB: parseInt(p.exp)
+        }))
+        .filter(r => !isNaN(r.baseA) && !isNaN(r.expB))
+
+      if (respuestas.length > 0) {
+        await saveResponsesPaper(userId, selectedModelo.value, respuestas)
       }
-    }
-
-    if (respuestas.length > 0) {
-      await guardarRespuestasPapel(respuestas)
     }
 
     saveStatus.value = 'saved'
     setTimeout(() => { saveStatus.value = '' }, 3000)
-
   } catch (e) {
     console.error('Error guardando:', e)
     saveStatus.value = 'error'
   }
 }
 
-// ============================================
-// EXPORTACIÓN CSV
-// ============================================
-
-async function exportarCSV(tabla) {
+async function exportCSV(tabla) {
   try {
-    const data = await exportarTabla(tabla)
+    const data = await exportTable(tabla)
 
     if (!data || data.length === 0) {
       alert(`La tabla "${tabla}" está vacía`)
       return
     }
 
-    // Convertir a CSV
     const headers = Object.keys(data[0])
     const csvRows = [
       headers.join(','),
       ...data.map(row =>
         headers.map(h => {
           const val = row[h]
-          // Escapar valores con comas o comillas
           if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
             return `"${val.replace(/"/g, '""')}"`
           }
@@ -174,8 +124,6 @@ async function exportarCSV(tabla) {
     ]
 
     const csv = csvRows.join('\n')
-
-    // Descargar
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -183,21 +131,15 @@ async function exportarCSV(tabla) {
     link.download = `${tabla}_${new Date().toISOString().split('T')[0]}.csv`
     link.click()
     URL.revokeObjectURL(url)
-
   } catch (e) {
     console.error('Error exportando:', e)
     alert('Error al exportar. Revisa la consola.')
   }
 }
 
-// ============================================
-// LIFECYCLE
-// ============================================
-
 onMounted(() => {
   initializeGrid()
 })
-
 </script>
 
 <template>
@@ -235,7 +177,6 @@ onMounted(() => {
 
     <div v-else class="max-w-7xl mx-auto">
 
-      <!-- Header -->
       <div class="flex items-center justify-between mb-8">
         <div>
           <h1 class="text-2xl font-bold text-neutral-800">
@@ -253,31 +194,41 @@ onMounted(() => {
 
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-        <!-- Sidebar: Configuración -->
+        <!-- Sidebar -->
         <div class="space-y-4">
 
-          <!-- Selector de Grupo -->
-          <div class="card">
-            <h3 class="font-semibold text-neutral-700 mb-3">Grupo</h3>
-            <select v-model="selectedGrupo" class="select" @change="initializeGrid">
-              <option value="" disabled>Selecciona grupo</option>
-              <option
-                v-for="grupo in grupos"
-                :key="grupo.id"
-                :value="grupo.id"
-              >
-                {{ grupo.codigo_grupo }}
-                <span v-if="grupo.centro">- {{ grupo.centro }}</span>
-              </option>
-            </select>
-
-            <div v-if="grupoSeleccionado" class="mt-3 text-sm text-neutral-500">
-              <p><strong>Centro:</strong> {{ grupoSeleccionado.centro || 'No indicado' }}</p>
-              <p><strong>Alumnos previstos:</strong> {{ grupoSeleccionado.alumnos_previstos }}</p>
+          <!-- Shared metadata -->
+          <div class="card space-y-3">
+            <h3 class="font-semibold text-neutral-700">Datos comunes</h3>
+            <div>
+              <label class="label">Profe ID (opcional)</label>
+              <input v-model="sharedMeta.profeId" type="text" class="input"/>
+            </div>
+            <div>
+              <label class="label">Aula ID (opcional)</label>
+              <input v-model="sharedMeta.aulaId" type="text" class="input"/>
+            </div>
+            <div>
+              <label class="label">Hora del día</label>
+              <div class="flex flex-wrap gap-1">
+                <button
+                  v-for="h in [8,9,10,11,12,13,14,15,16,17]"
+                  :key="h"
+                  @click="sharedMeta.timeOfDay = sharedMeta.timeOfDay === String(h) ? '' : String(h)"
+                  :class="[
+                    'px-2 py-1 text-xs rounded-lg font-medium transition-all',
+                    sharedMeta.timeOfDay === String(h)
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                  ]"
+                >
+                  {{ h }}h
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Selector de Modelo -->
+          <!-- Model selector -->
           <div class="card">
             <h3 class="font-semibold text-neutral-700 mb-3">Modelo</h3>
             <div class="flex gap-2">
@@ -297,77 +248,35 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Control de filas -->
+          <!-- Set all ages -->
           <div class="card">
-            <h3 class="font-semibold text-neutral-700 mb-3">Alumnos</h3>
-            <div class="flex items-center gap-3">
-              <button
-                @click="removeLastRow"
-                class="btn-ghost px-3 py-2"
-                :disabled="numAlumnos <= 1"
-              >
-                −
-              </button>
-              <span class="font-mono text-xl flex-1 text-center">
-                {{ numAlumnos }}
-              </span>
-              <button @click="addRow" class="btn-ghost px-3 py-2">
-                +
-              </button>
+            <h3 class="font-semibold text-neutral-700 mb-3">Edad de todos</h3>
+            <div class="flex gap-2">
+              <select v-model="setAllAge" class="select flex-1">
+                <option v-for="a in [10,11,12,13,14,15,16,17,18,19,20]" :key="a" :value="String(a)">{{ a }}</option>
+              </select>
+              <button @click="setAllAges" class="btn-primary">Aplicar</button>
             </div>
           </div>
 
-          <!-- Acciones -->
-          <div class="card space-y-3">
-            <button
-              @click="guardarDatos"
-              class="btn-primary w-full"
-              :disabled="!selectedGrupo || saveStatus === 'saving'"
-            >
-              <span v-if="saveStatus === 'saving'">Guardando...</span>
-              <span v-else-if="saveStatus === 'saved'">✓ Guardado</span>
-              <span v-else-if="saveStatus === 'error'">Error - Reintentar</span>
-              <span v-else>Guardar Datos</span>
-            </button>
-
-            <button @click="initializeGrid" class="btn-outline w-full">
-              Limpiar Grid
-            </button>
-          </div>
-
-          <!-- Exportación -->
+          <!-- Export -->
           <div class="card">
             <h3 class="font-semibold text-neutral-700 mb-3">Exportar CSV</h3>
-            <div class="space-y-2">
-              <button
-                @click="exportarCSV('respuestas_online')"
-                class="btn-ghost w-full text-sm justify-start"
-              >
-                📥 respuestas_online
-              </button>
-              <button
-                @click="exportarCSV('respuestas_papel')"
-                class="btn-ghost w-full text-sm justify-start"
-              >
-                📥 respuestas_papel
-              </button>
-              <button
-                @click="exportarCSV('profesores')"
-                class="btn-ghost w-full text-sm justify-start"
-              >
-                📥 profesores
-              </button>
-              <button
-                @click="exportarCSV('log_descargas')"
-                class="btn-ghost w-full text-sm justify-start"
-              >
-                📥 log_descargas
-              </button>
+            <div class="space-y-1">
+              <p class="text-xs font-medium text-neutral-400 uppercase">Tablas</p>
+              <button @click="exportCSV('users_online')" class="btn-ghost w-full text-sm !justify-start">📥 users_online</button>
+              <button @click="exportCSV('responses_online')" class="btn-ghost w-full text-sm !justify-start">📥 responses_online</button>
+              <button @click="exportCSV('users_paper')" class="btn-ghost w-full text-sm !justify-start">📥 users_paper</button>
+              <button @click="exportCSV('responses_paper')" class="btn-ghost w-full text-sm !justify-start">📥 responses_paper</button>
+              <button @click="exportCSV('logs_download')" class="btn-ghost w-full text-sm !justify-start">📥 logs_download</button>
+              <p class="text-xs font-medium text-neutral-400 uppercase pt-2">Vistas joineadas</p>
+              <button @click="exportCSV('view_responses_online')" class="btn-ghost w-full text-sm !justify-start">📥 view_responses_online</button>
+              <button @click="exportCSV('view_responses_paper')" class="btn-ghost w-full text-sm !justify-start">📥 view_responses_paper</button>
             </div>
           </div>
         </div>
 
-        <!-- Grid de entrada de datos -->
+        <!-- Grid -->
         <div class="lg:col-span-3">
           <div class="card overflow-x-auto">
             <div class="mb-4 flex items-center justify-between">
@@ -382,13 +291,16 @@ onMounted(() => {
             <table class="w-full text-sm">
               <thead>
                 <tr class="border-b border-neutral-200">
-                  <th class="py-2 px-2 text-left font-medium text-neutral-600 w-16">
-                    #
-                  </th>
+                  <th class="py-2 px-2 text-center font-medium text-neutral-600 w-16">Edad</th>
+                  <th class="py-2 px-2 text-center font-medium text-neutral-600 w-16">Sexo</th>
+                  <th class="py-2 px-2 text-center font-medium text-neutral-600 w-20">Asig. fav.</th>
+                  <th class="py-2 px-2 text-center font-medium text-neutral-600 w-16">Nota mat.</th>
+                  <th class="py-2 px-2 text-center font-medium text-neutral-600 w-12">FyQ</th>
                   <th
                     v-for="p in NUM_PREGUNTAS"
                     :key="p"
-                    class="py-2 px-1 text-center font-medium text-neutral-600"
+                    class="py-2 text-center font-medium text-neutral-600"
+                    :class="p > 1 ? 'pl-3' : 'pl-1'"
                     colspan="2"
                   >
                     P{{ p }}
@@ -396,8 +308,12 @@ onMounted(() => {
                 </tr>
                 <tr class="border-b border-neutral-100 text-xs text-neutral-400">
                   <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
                   <template v-for="p in NUM_PREGUNTAS" :key="'header-' + p">
-                    <th class="py-1 px-1">a</th>
+                    <th class="py-1" :class="p > 1 ? 'pl-3' : 'pl-1'">a</th>
                     <th class="py-1 px-1">b</th>
                   </template>
                 </tr>
@@ -405,32 +321,70 @@ onMounted(() => {
               <tbody>
                 <tr
                   v-for="(row, rowIdx) in gridData"
-                  :key="row.alumnoIdx"
+                  :key="rowIdx"
                   class="border-b border-neutral-50 hover:bg-neutral-50"
                 >
-                  <td class="py-2 px-2 font-mono text-neutral-500">
-                    {{ row.alumnoIdx }}
+                  <td class="py-1 px-1">
+                    <select
+                      v-model="row.meta.age"
+                      class="w-14 px-0.5 py-1 text-xs border border-neutral-200 rounded focus:border-primary-500 focus:outline-none"
+                    >
+                      <option v-for="a in [10,11,12,13,14,15,16,17,18,19,20]" :key="a" :value="String(a)">{{ a }}</option>
+                    </select>
+                  </td>
+                  <td class="py-1 px-1">
+                    <select v-model="row.meta.sex" class="w-14 px-0.5 py-1 text-xs border border-neutral-200 rounded focus:border-primary-500 focus:outline-none">
+                      <option value="">-</option>
+                      <option value="masculino">M</option>
+                      <option value="femenino">F</option>
+                      <option value="otro">O</option>
+                    </select>
+                  </td>
+                  <td class="py-1 px-1">
+                    <select v-model="row.meta.favoriteSubject" class="w-20 px-0.5 py-1 text-xs border border-neutral-200 rounded focus:border-primary-500 focus:outline-none">
+                      <option value="">-</option>
+                      <option value="matematicas">Mates</option>
+                      <option value="lengua">Lengua</option>
+                      <option value="ingles">Inglés</option>
+                      <option value="fisica_quimica">FyQ</option>
+                      <option value="biologia">Bio</option>
+                      <option value="historia">Historia</option>
+                      <option value="geografia">Geo</option>
+                      <option value="tecnologia">Tecno</option>
+                      <option value="educacion_fisica">EF</option>
+                      <option value="musica">Música</option>
+                      <option value="plastica">Plástica</option>
+                      <option value="otra">Otra</option>
+                    </select>
+                  </td>
+                  <td class="py-1 px-1">
+                    <select v-model="row.meta.mathMarkLastPeriod" class="w-14 px-0.5 py-1 text-xs border border-neutral-200 rounded focus:border-primary-500 focus:outline-none">
+                      <option v-for="n in [1,2,3,4,5,6,7,8,9,10]" :key="n" :value="String(n)">{{ n }}</option>
+                    </select>
+                  </td>
+                  <td class="py-1 px-1 text-center">
+                    <input
+                      v-model="row.meta.isPhysicsChemistryStudent"
+                      type="checkbox"
+                      class="w-4 h-4 rounded text-primary-500"
+                    />
                   </td>
                   <template v-for="(pregunta, pIdx) in row.preguntas" :key="pIdx">
-                    <!-- Base (a) -->
-                    <td class="py-1 px-1">
+                    <td class="py-1" :class="pIdx > 0 ? 'pl-3' : 'pl-1'">
                       <input
                         v-model="pregunta.base"
                         type="text"
                         inputmode="decimal"
                         class="w-12 px-1 py-1 text-center font-mono text-sm border border-neutral-200 rounded focus:border-primary-500 focus:outline-none"
-                        :tabindex="rowIdx * NUM_PREGUNTAS * 2 + pIdx * 2 + 1"
                         placeholder="a"
                       />
                     </td>
-                    <!-- Exponente (b) -->
                     <td class="py-1 px-1">
                       <input
                         v-model="pregunta.exp"
                         type="text"
                         inputmode="numeric"
                         class="w-10 px-1 py-1 text-center font-mono text-sm border border-neutral-200 rounded focus:border-primary-500 focus:outline-none"
-                        :tabindex="rowIdx * NUM_PREGUNTAS * 2 + pIdx * 2 + 2"
                         placeholder="b"
                       />
                     </td>
@@ -439,8 +393,25 @@ onMounted(() => {
               </tbody>
             </table>
 
-            <div class="mt-4 text-xs text-neutral-400">
-              <p>💡 Usa <kbd class="px-1 py-0.5 bg-neutral-100 rounded">Tab</kbd> para navegar entre campos</p>
+            <div class="mt-4 flex items-center gap-3">
+              <button
+                @click="saveData"
+                class="btn-primary"
+                :disabled="saveStatus === 'saving'"
+              >
+                <span v-if="saveStatus === 'saving'">Guardando...</span>
+                <span v-else-if="saveStatus === 'saved'">✓ Guardado</span>
+                <span v-else-if="saveStatus === 'error'">Error - Reintentar</span>
+                <span v-else>Guardar Datos</span>
+              </button>
+
+              <button @click="initializeGrid" class="btn-outline">
+                Limpiar Grid
+              </button>
+
+              <span class="text-xs text-neutral-400 ml-auto">
+                💡 Usa <kbd class="px-1 py-0.5 bg-neutral-100 rounded">Tab</kbd> para navegar entre campos
+              </span>
             </div>
           </div>
         </div>

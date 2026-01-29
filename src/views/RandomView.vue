@@ -2,7 +2,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useNumberFormat } from '@/composables/useNumberFormat'
-import { getRandomQuestion as fetchRandomQuestion } from '@/lib/questions'
+import { useTimer } from '@/composables/useTimer'
+import { getRandomPlayQuestion } from '@/lib/questions'
+import { savePlayResponse } from '@/lib/supabase'
 import FermiInput from '@/components/common/FermiInput.vue'
 
 const currentQuestion = ref(null)
@@ -12,6 +14,7 @@ const isLoading = ref(true)
 const fermiInputRef = ref(null)
 
 const { formatNumber, cleanInput } = useNumberFormat()
+const { start: startTimer, stop: stopTimer, reset: resetTimer, getElapsedTime } = useTimer(9999)
 
 const formattedAnswer = computed(() => {
   const cleaned = cleanInput(currentAnswer.value)
@@ -25,19 +28,32 @@ const isAnswerComplete = computed(() => {
 
 async function getNewQuestion() {
   isLoading.value = true
-  currentQuestion.value = await fetchRandomQuestion()
+  currentQuestion.value = await getRandomPlayQuestion()
   currentAnswer.value = ''
   showResult.value = false
   isLoading.value = false
+  resetTimer(9999)
+  startTimer()
 }
 
 onMounted(() => {
   getNewQuestion()
 })
 
-function handleSubmit() {
-  if (isAnswerComplete.value) {
-    showResult.value = true
+async function handleSubmit() {
+  if (!isAnswerComplete.value) return
+  stopTimer()
+  showResult.value = true
+
+  try {
+    const cleaned = cleanInput(currentAnswer.value)
+    await savePlayResponse({
+      idPlayQuestion: currentQuestion.value.id,
+      response: cleaned ? parseInt(cleaned, 10) : null,
+      time: getElapsedTime()
+    })
+  } catch (e) {
+    console.error('Error guardando respuesta play:', e)
   }
 }
 </script>
@@ -91,10 +107,6 @@ function handleSubmit() {
             </p>
           </div>
 
-          <p class="text-sm text-neutral-500 text-center">
-            Respuesta registrada. ¿Quieres probar otra?
-          </p>
-
           <button
             @click="getNewQuestion"
             class="btn-primary btn-large w-full"
@@ -105,9 +117,6 @@ function handleSubmit() {
         </template>
       </div>
 
-      <div class="text-center mt-6 text-sm text-neutral-400">
-        <p>Esta modalidad no guarda datos. Es solo para practicar.</p>
-      </div>
     </div>
   </div>
 </template>

@@ -79,3 +79,29 @@ export async function getAvailableTests() {
   const { tests } = await loadExcel()
   return Object.keys(tests).sort()
 }
+
+let playQuestionsCache = null
+
+async function loadPlayQuestions() {
+  if (playQuestionsCache) return playQuestionsCache
+
+  const response = await fetch('/questions.xlsx')
+  const blob = await response.blob()
+
+  const raw = await readXlsxFile(blob, { sheet: 'other_questions' })
+  playQuestionsCache = raw
+    .slice(1)
+    .filter(row => row[1])
+    .map(row => ({
+      id: parseInt(row[0]),
+      texto: row[1]
+    }))
+
+  return playQuestionsCache
+}
+
+export async function getRandomPlayQuestion() {
+  const questions = await loadPlayQuestions()
+  const randomIndex = Math.floor(Math.random() * questions.length)
+  return questions[randomIndex]
+}

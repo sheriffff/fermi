@@ -12,103 +12,101 @@ export const supabase = createClient(
   supabaseAnonKey || 'placeholder-key'
 )
 
-// Helper functions for common operations
-
-/**
- * Registra un nuevo profesor y genera código de grupo
- */
-export async function registrarProfesor({ nombre, centro, alumnosPrevistos }) {
-  const { data, error } = await supabase
-    .from('profesores')
-    .insert({
-      nombre: nombre || null,
-      centro: centro || null,
-      alumnos_previstos: alumnosPrevistos || 0
-    })
-    .select()
-    .single()
-
-  if (error) throw error
-  return data
-}
-
-/**
- * Registra una descarga de PDF
- */
-export async function registrarDescarga(idProfe, archivo) {
+export async function logDownload() {
   const { error } = await supabase
-    .from('log_descargas')
-    .insert({
-      id_profe: idProfe,
-      archivo
-    })
+    .from('logs_download')
+    .insert({})
 
   if (error) throw error
 }
 
-/**
- * Guarda las respuestas del test online
- */
-export async function guardarRespuestasOnline({
-  edad,
-  sexo,
-  piVsE,
-  segundaVez,
-  modelo,
-  respuestas,
-  tiempos
-}) {
+export async function createUserOnline({ age, sex, piVsE, nTestsBefore, userAlias, testModel }) {
   const { data, error } = await supabase
-    .from('respuestas_online')
+    .from('users_online')
     .insert({
-      edad,
-      sexo,
+      age,
+      sex,
       pi_vs_e: piVsE,
-      segunda_vez: segundaVez,
-      modelo,
-      respuestas,
-      tiempos,
+      n_tests_before: nTestsBefore,
+      user_alias: userAlias || null,
+      test_model: testModel,
       user_agent: navigator.userAgent
     })
-    .select()
+    .select('id')
     .single()
 
   if (error) throw error
-  return data
+  return data.id
 }
 
-/**
- * Guarda respuestas de papel (admin)
- */
-export async function guardarRespuestasPapel(respuestas) {
-  const { data, error } = await supabase
-    .from('respuestas_papel')
-    .upsert(respuestas, { onConflict: 'id_grupo,alumno_idx,pregunta_num' })
-    .select()
+export async function saveResponsesOnline(userId, testModel, responses) {
+  const rows = responses.map(r => ({
+    user_id: userId,
+    test_model: testModel,
+    question_n: r.questionN,
+    response: r.response,
+    time: r.time
+  }))
+
+  const { error } = await supabase
+    .from('responses_online')
+    .insert(rows)
 
   if (error) throw error
-  return data
 }
 
-/**
- * Obtiene todos los profesores/grupos para el selector admin
- */
-export async function obtenerGrupos() {
+export async function createUserPaper({ profeId, aulaId, age, sex, timeOfDay, favoriteSubject, mathMarkLastPeriod, isPhysicsChemistryStudent, testModel }) {
   const { data, error } = await supabase
-    .from('profesores')
-    .select('id, codigo_grupo, nombre, centro, created_at')
-    .order('created_at', { ascending: false })
+    .from('users_paper')
+    .insert({
+      profe_id: profeId || null,
+      aula_id: aulaId || null,
+      age,
+      sex,
+      time_of_day: timeOfDay || null,
+      favorite_subject: favoriteSubject || null,
+      math_mark_last_period: mathMarkLastPeriod ?? null,
+      is_physics_chemistry_student: isPhysicsChemistryStudent || false,
+      test_model: testModel
+    })
+    .select('id')
+    .single()
 
   if (error) throw error
-  return data
+  return data.id
 }
 
-/**
- * Exporta una tabla a formato CSV
- */
-export async function exportarTabla(tabla) {
+export async function saveResponsesPaper(userId, testModel, responses) {
+  const rows = responses.map(r => ({
+    user_id: userId,
+    test_model: testModel,
+    question_n: r.questionN,
+    base_a: r.baseA,
+    exp_b: r.expB
+  }))
+
+  const { error } = await supabase
+    .from('responses_paper')
+    .insert(rows)
+
+  if (error) throw error
+}
+
+export async function savePlayResponse({ idPlayQuestion, response, time }) {
+  const { error } = await supabase
+    .from('responses_play_unique')
+    .insert({
+      id_play_question: idPlayQuestion,
+      response,
+      time
+    })
+
+  if (error) throw error
+}
+
+export async function exportTable(table) {
   const { data, error } = await supabase
-    .from(tabla)
+    .from(table)
     .select('*')
 
   if (error) throw error

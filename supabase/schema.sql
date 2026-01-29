@@ -1,270 +1,221 @@
 -- =====================================================
--- ESQUEMA SQL PARA SUPABASE - FERMI TESTS TFM
+-- SQL SCHEMA FOR SUPABASE - FERMI TESTS TFM
 -- =====================================================
--- Ejecutar este script en el SQL Editor de Supabase
+-- Run this script in Supabase SQL Editor
 -- =====================================================
 
 -- -----------------------------------------------------
--- 1. TABLA: profesores
--- Almacena información de profesores y genera códigos de grupo
+-- 1. TABLE: logs_download
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS profesores (
+CREATE TABLE IF NOT EXISTS logs_download (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    codigo_grupo VARCHAR(8) UNIQUE NOT NULL,  -- Código corto para pizarra (ej: ABC123)
-    nombre VARCHAR(255),                       -- Opcional
-    centro VARCHAR(255),                       -- Opcional
-    alumnos_previstos INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Índice para búsqueda rápida por código
-CREATE INDEX idx_profesores_codigo ON profesores(codigo_grupo);
-
 -- -----------------------------------------------------
--- 2. TABLA: log_descargas
--- Registro de cada descarga de PDF realizada
+-- 2. TABLE: users_online
+-- Online test participants
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS log_descargas (
+CREATE TABLE IF NOT EXISTS users_online (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    id_profe UUID REFERENCES profesores(id) ON DELETE CASCADE,
-    archivo VARCHAR(50) NOT NULL,              -- Ej: 'ModeloA.pdf', 'Instrucciones.pdf'
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Índice para análisis por profesor
-CREATE INDEX idx_log_descargas_profe ON log_descargas(id_profe);
-
--- -----------------------------------------------------
--- 3. TABLA: respuestas_online
--- Respuestas de adultos que realizan el test online
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS respuestas_online (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    -- Metadata del participante
-    edad INTEGER NOT NULL CHECK (edad >= 18 AND edad <= 120),
-    sexo VARCHAR(20) NOT NULL CHECK (sexo IN ('masculino', 'femenino', 'otro', 'prefiero_no_decir')),
+    age INTEGER NOT NULL CHECK (age >= 18 AND age <= 120),
+    sex VARCHAR(20) NOT NULL CHECK (sex IN ('masculino', 'femenino', 'otro', 'prefiero_no_decir')),
     pi_vs_e VARCHAR(10) NOT NULL CHECK (pi_vs_e IN ('si', 'no', 'no_se')),
-    segunda_vez BOOLEAN DEFAULT FALSE,
-    -- Datos del test
-    modelo CHAR(1) NOT NULL CHECK (modelo IN ('A', 'B', 'C', 'D')),
-    respuestas JSONB NOT NULL,                 -- { "p1": 5200000, "p2": 340, ... }
-    tiempos JSONB NOT NULL,                    -- { "p1": 45, "p2": 120, ... } en segundos
-    -- Metadatos
-    user_agent TEXT,                           -- Para análisis técnico
+    n_tests_before INTEGER NOT NULL DEFAULT 0,
+    user_alias VARCHAR(100),
+    test_model CHAR(1) NOT NULL CHECK (test_model IN ('A', 'B', 'C', 'D')),
+    user_agent TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Índices para análisis
-CREATE INDEX idx_respuestas_online_modelo ON respuestas_online(modelo);
-CREATE INDEX idx_respuestas_online_fecha ON respuestas_online(created_at);
+CREATE INDEX idx_users_online_test_model ON users_online(test_model);
 
 -- -----------------------------------------------------
--- 4. TABLA: respuestas_papel
--- Entrada manual de exámenes en papel desde /admin
--- Formato: a × 10^b para cada respuesta
+-- 3. TABLE: responses_online
+-- One row per question per user (tidy format)
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS respuestas_papel (
+CREATE TABLE IF NOT EXISTS responses_online (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    id_grupo UUID REFERENCES profesores(id) ON DELETE CASCADE,
-    modelo CHAR(1) NOT NULL CHECK (modelo IN ('A', 'B', 'C', 'D')),
-    alumno_idx INTEGER NOT NULL,               -- Número de alumno dentro del grupo (1, 2, 3...)
-    pregunta_num INTEGER NOT NULL,             -- Número de pregunta (1-12)
-    base_a NUMERIC(10, 2) NOT NULL,            -- Parte "a" de a × 10^b
-    exp_b INTEGER NOT NULL,                    -- Exponente "b" de a × 10^b
-    -- Metadatos
+    user_id UUID NOT NULL REFERENCES users_online(id) ON DELETE CASCADE,
+    test_model CHAR(1) NOT NULL CHECK (test_model IN ('A', 'B', 'C', 'D')),
+    question_n INTEGER NOT NULL,
+    response NUMERIC,
+    time INTEGER,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    -- Constraint único para evitar duplicados
-    CONSTRAINT unique_respuesta_papel UNIQUE (id_grupo, alumno_idx, pregunta_num)
+    CONSTRAINT unique_response_online UNIQUE (user_id, question_n)
 );
 
--- Índices para consultas
-CREATE INDEX idx_respuestas_papel_grupo ON respuestas_papel(id_grupo);
-CREATE INDEX idx_respuestas_papel_modelo ON respuestas_papel(modelo);
+CREATE INDEX idx_responses_online_user ON responses_online(user_id);
+CREATE INDEX idx_responses_online_model ON responses_online(test_model);
 
 -- -----------------------------------------------------
--- 5. TABLA: preguntas
--- Banco de preguntas por modelo
+-- 4. TABLE: users_paper
+-- Paper test students (entered by admin)
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS preguntas (
+CREATE TABLE IF NOT EXISTS users_paper (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    modelo CHAR(1) NOT NULL CHECK (modelo IN ('A', 'B', 'C', 'D')),
-    numero INTEGER NOT NULL,                   -- Orden dentro del modelo (1-12)
-    texto TEXT NOT NULL,                       -- Texto de la pregunta
-    unidad VARCHAR(50),                        -- Unidad esperada (ej: "km", "personas", "litros")
-    valor_referencia NUMERIC,                  -- Valor "correcto" de referencia (opcional)
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    CONSTRAINT unique_pregunta UNIQUE (modelo, numero)
+    profe_id UUID,
+    aula_id UUID,
+    age INTEGER NOT NULL CHECK (age >= 4 AND age <= 120),
+    sex VARCHAR(20) NOT NULL CHECK (sex IN ('masculino', 'femenino', 'otro', 'prefiero_no_decir')),
+    time_of_day VARCHAR(20),
+    favorite_subject VARCHAR(100),
+    math_mark_last_period NUMERIC,
+    is_physics_chemistry_student BOOLEAN DEFAULT FALSE,
+    test_model CHAR(1) NOT NULL CHECK (test_model IN ('A', 'B', 'C', 'D')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Índice para obtener preguntas por modelo
-CREATE INDEX idx_preguntas_modelo ON preguntas(modelo, numero);
+CREATE INDEX idx_users_paper_profe ON users_paper(profe_id);
+CREATE INDEX idx_users_paper_aula ON users_paper(aula_id);
+CREATE INDEX idx_users_paper_model ON users_paper(test_model);
+
+-- -----------------------------------------------------
+-- 5. TABLE: responses_paper
+-- One row per question per paper student (tidy format)
+-- Format: a × 10^b per response
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS responses_paper (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users_paper(id) ON DELETE CASCADE,
+    test_model CHAR(1) NOT NULL CHECK (test_model IN ('A', 'B', 'C', 'D')),
+    question_n INTEGER NOT NULL,
+    base_a NUMERIC(10, 2) NOT NULL,
+    exp_b INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT unique_response_paper UNIQUE (user_id, question_n)
+);
+
+CREATE INDEX idx_responses_paper_user ON responses_paper(user_id);
+CREATE INDEX idx_responses_paper_model ON responses_paper(test_model);
 
 -- =====================================================
 -- ROW LEVEL SECURITY (RLS)
 -- =====================================================
 
--- Habilitar RLS en todas las tablas
-ALTER TABLE profesores ENABLE ROW LEVEL SECURITY;
-ALTER TABLE log_descargas ENABLE ROW LEVEL SECURITY;
-ALTER TABLE respuestas_online ENABLE ROW LEVEL SECURITY;
-ALTER TABLE respuestas_papel ENABLE ROW LEVEL SECURITY;
-ALTER TABLE preguntas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE logs_download ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users_online ENABLE ROW LEVEL SECURITY;
+ALTER TABLE responses_online ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users_paper ENABLE ROW LEVEL SECURITY;
+ALTER TABLE responses_paper ENABLE ROW LEVEL SECURITY;
 
 -- -----------------------------------------------------
--- POLÍTICAS PÚBLICAS (para formularios anónimos)
+-- PUBLIC POLICIES (anonymous forms)
 -- -----------------------------------------------------
 
--- Profesores: pueden registrarse (INSERT) y ver su propio código
-CREATE POLICY "Permitir registro de profesores" ON profesores
+CREATE POLICY "Allow download log inserts" ON logs_download
     FOR INSERT TO anon WITH CHECK (true);
 
-CREATE POLICY "Permitir lectura pública de profesores" ON profesores
-    FOR SELECT TO anon USING (true);
-
--- Log descargas: permitir inserts desde el frontend
-CREATE POLICY "Permitir registro de descargas" ON log_descargas
+CREATE POLICY "Allow user registration" ON users_online
     FOR INSERT TO anon WITH CHECK (true);
 
--- Respuestas online: permitir envío de respuestas
-CREATE POLICY "Permitir envío de respuestas online" ON respuestas_online
+CREATE POLICY "Allow online response inserts" ON responses_online
     FOR INSERT TO anon WITH CHECK (true);
 
--- Respuestas papel: solo admin (authenticated) puede insertar
-CREATE POLICY "Admin puede insertar respuestas papel" ON respuestas_papel
+-- -----------------------------------------------------
+-- ADMIN POLICIES (authenticated)
+-- -----------------------------------------------------
+
+CREATE POLICY "Admin can insert paper users" ON users_paper
     FOR INSERT TO authenticated WITH CHECK (true);
 
-CREATE POLICY "Admin puede leer respuestas papel" ON respuestas_papel
+CREATE POLICY "Admin can read paper users" ON users_paper
     FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY "Admin puede actualizar respuestas papel" ON respuestas_papel
+CREATE POLICY "Admin can update paper users" ON users_paper
     FOR UPDATE TO authenticated USING (true);
 
-CREATE POLICY "Admin puede eliminar respuestas papel" ON respuestas_papel
+CREATE POLICY "Admin can delete paper users" ON users_paper
     FOR DELETE TO authenticated USING (true);
 
--- Preguntas: lectura pública
-CREATE POLICY "Lectura pública de preguntas" ON preguntas
+CREATE POLICY "Admin can insert paper responses" ON responses_paper
+    FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Admin can read paper responses" ON responses_paper
+    FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Admin can update paper responses" ON responses_paper
+    FOR UPDATE TO authenticated USING (true);
+
+CREATE POLICY "Admin can delete paper responses" ON responses_paper
+    FOR DELETE TO authenticated USING (true);
+
+-- =====================================================
+-- VIEWS
+-- =====================================================
+
+CREATE OR REPLACE VIEW view_responses_online AS
+SELECT
+    r.id,
+    r.user_id,
+    u.age,
+    u.sex,
+    u.pi_vs_e,
+    u.n_tests_before,
+    u.user_alias,
+    r.test_model,
+    r.question_n,
+    r.response,
+    r.time,
+    r.created_at
+FROM responses_online r
+JOIN users_online u ON r.user_id = u.id
+ORDER BY r.user_id, r.question_n;
+
+CREATE OR REPLACE VIEW view_responses_paper AS
+SELECT
+    r.id,
+    r.user_id,
+    u.profe_id,
+    u.aula_id,
+    u.age,
+    u.sex,
+    u.time_of_day,
+    u.favorite_subject,
+    u.math_mark_last_period,
+    u.is_physics_chemistry_student,
+    r.test_model,
+    r.question_n,
+    r.base_a,
+    r.exp_b,
+    (r.base_a * POWER(10, r.exp_b)) AS computed_value,
+    r.created_at
+FROM responses_paper r
+JOIN users_paper u ON r.user_id = u.id
+ORDER BY r.user_id, r.question_n;
+
+-- -----------------------------------------------------
+-- 6. TABLE: responses_play_unique
+-- Responses from the "Pregunta Aleatoria" (/random) section of the web app.
+-- Each row is one answer to a single random question (no user registration).
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS responses_play_unique (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    id_play_question INTEGER NOT NULL,
+    response NUMERIC,
+    time INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE responses_play_unique ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow play response inserts" ON responses_play_unique
+    FOR INSERT TO anon WITH CHECK (true);
+
+-- -----------------------------------------------------
+-- 7. TABLE: admin_config
+-- Single-row table for app-level settings (e.g. access password hash)
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS admin_config (
+    id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+    password_hash TEXT NOT NULL
+);
+
+ALTER TABLE admin_config ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read" ON admin_config
     FOR SELECT TO anon USING (true);
 
 -- =====================================================
--- FUNCIONES AUXILIARES
--- =====================================================
-
--- Función para generar código de grupo corto y único
-CREATE OR REPLACE FUNCTION generate_codigo_grupo()
-RETURNS VARCHAR(8) AS $$
-DECLARE
-    chars TEXT := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';  -- Sin I, O, 1, 0 para evitar confusión
-    result VARCHAR(8) := '';
-    i INTEGER;
-BEGIN
-    FOR i IN 1..6 LOOP
-        result := result || substr(chars, floor(random() * length(chars) + 1)::integer, 1);
-    END LOOP;
-    RETURN result;
-END;
-$$ LANGUAGE plpgsql;
-
--- Trigger para auto-generar código al insertar profesor
-CREATE OR REPLACE FUNCTION trigger_set_codigo_grupo()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.codigo_grupo IS NULL OR NEW.codigo_grupo = '' THEN
-        NEW.codigo_grupo := generate_codigo_grupo();
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER set_codigo_grupo_on_insert
-    BEFORE INSERT ON profesores
-    FOR EACH ROW
-    EXECUTE FUNCTION trigger_set_codigo_grupo();
-
--- =====================================================
--- DATOS INICIALES: Preguntas de ejemplo
--- (Reemplazar con las preguntas reales del TFM)
--- =====================================================
-
--- Modelo A - Preguntas de ejemplo
-INSERT INTO preguntas (modelo, numero, texto, unidad) VALUES
-('A', 1, '¿Cuántos granos de arena hay en una playa de 100 metros de largo?', 'granos'),
-('A', 2, '¿Cuántos litros de agua consume una persona al año?', 'litros'),
-('A', 3, '¿Cuántos árboles hay en España?', 'árboles'),
-('A', 4, '¿Cuántos kilómetros recorre la Tierra alrededor del Sol en un año?', 'km'),
-('A', 5, '¿Cuántas pizzas se comen en España en un día?', 'pizzas'),
-('A', 6, '¿Cuántos latidos da el corazón humano en 70 años?', 'latidos'),
-('A', 7, '¿Cuántos profesores de secundaria hay en España?', 'profesores'),
-('A', 8, '¿Cuántas palabras pronuncia una persona promedio al día?', 'palabras');
-
--- Modelo B - Preguntas de ejemplo
-INSERT INTO preguntas (modelo, numero, texto, unidad) VALUES
-('B', 1, '¿Cuántos coches hay actualmente en Madrid?', 'coches'),
-('B', 2, '¿Cuántos pelos tiene una persona en la cabeza?', 'pelos'),
-('B', 3, '¿Cuántos vuelos comerciales hay al día en el mundo?', 'vuelos'),
-('B', 4, '¿Cuántos metros cuadrados tiene el campus de una universidad media?', 'm²'),
-('B', 5, '¿Cuántas botellas de agua de 1L caben en una piscina olímpica?', 'botellas'),
-('B', 6, '¿Cuántos médicos hay trabajando en España?', 'médicos'),
-('B', 7, '¿Cuántos SMS se enviaban al día en España en 2010?', 'SMS'),
-('B', 8, '¿Cuántos kilómetros de carreteras hay en España?', 'km');
-
--- Modelo C - Preguntas de ejemplo
-INSERT INTO preguntas (modelo, numero, texto, unidad) VALUES
-('C', 1, '¿Cuántas estrellas puede ver una persona a simple vista en una noche clara?', 'estrellas'),
-('C', 2, '¿Cuántos estudiantes universitarios hay en España?', 'estudiantes'),
-('C', 3, '¿Cuántas toneladas de basura genera una ciudad de 1 millón de habitantes al año?', 'toneladas'),
-('C', 4, '¿Cuántos restaurantes hay en Barcelona?', 'restaurantes'),
-('C', 5, '¿Cuántos libros diferentes se han publicado en la historia de la humanidad?', 'libros'),
-('C', 6, '¿Cuántas veces late el corazón de un colibrí en un minuto?', 'latidos'),
-('C', 7, '¿Cuántos teléfonos móviles se venden al año en el mundo?', 'móviles'),
-('C', 8, '¿Cuántos caracteres tiene un libro de 300 páginas?', 'caracteres');
-
--- Modelo D - Preguntas de ejemplo
-INSERT INTO preguntas (modelo, numero, texto, unidad) VALUES
-('D', 1, '¿Cuántos litros de petróleo consume el mundo en un día?', 'litros'),
-('D', 2, '¿Cuántas hormigas hay en una colonia típica?', 'hormigas'),
-('D', 3, '¿Cuántos fotogramas tiene una película de 2 horas?', 'fotogramas'),
-('D', 4, '¿Cuántos correos electrónicos se envían al día en el mundo?', 'emails'),
-('D', 5, '¿Cuántas neuronas tiene el cerebro humano?', 'neuronas'),
-('D', 6, '¿Cuántos kilogramos de comida consume una persona al año?', 'kg'),
-('D', 7, '¿Cuántos ascensores hay en Nueva York?', 'ascensores'),
-('D', 8, '¿Cuántos segundos tiene una vida de 80 años?', 'segundos');
-
--- =====================================================
--- VISTAS ÚTILES PARA EXPORTACIÓN
--- =====================================================
-
--- Vista consolidada de respuestas online para análisis
-CREATE OR REPLACE VIEW vista_respuestas_online AS
-SELECT
-    id,
-    edad,
-    sexo,
-    pi_vs_e,
-    segunda_vez,
-    modelo,
-    respuestas,
-    tiempos,
-    created_at
-FROM respuestas_online
-ORDER BY created_at DESC;
-
--- Vista consolidada de respuestas papel
-CREATE OR REPLACE VIEW vista_respuestas_papel AS
-SELECT
-    rp.id,
-    p.codigo_grupo,
-    rp.modelo,
-    rp.alumno_idx,
-    rp.pregunta_num,
-    rp.base_a,
-    rp.exp_b,
-    (rp.base_a * POWER(10, rp.exp_b)) as valor_calculado,
-    rp.created_at
-FROM respuestas_papel rp
-JOIN profesores p ON rp.id_grupo = p.id
-ORDER BY p.codigo_grupo, rp.alumno_idx, rp.pregunta_num;
-
--- =====================================================
--- FIN DEL ESQUEMA
+-- END SCHEMA
 -- =====================================================

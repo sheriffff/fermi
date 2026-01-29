@@ -3,7 +3,7 @@ import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
-import { guardarRespuestasOnline } from '@/lib/supabase'
+import { createUserOnline, saveResponsesOnline } from '@/lib/supabase'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import FermiInput from '@/components/common/FermiInput.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
@@ -295,18 +295,27 @@ async function finishTest() {
   isLoading.value = true
 
   try {
-    await guardarRespuestasOnline({
-      edad: parseInt(metadata.value.edad),
-      sexo: metadata.value.sexo,
+    const userId = await createUserOnline({
+      age: parseInt(metadata.value.edad),
+      sex: metadata.value.sexo,
       piVsE: metadata.value.piVsE,
-      segundaVez: metadata.value.segundaVez,
-      modelo: modeloAsignado.value,
-      respuestas: respuestas.value,
-      tiempos: tiempos.value
+      nTestsBefore: metadata.value.segundaVez ? metadata.value.modelosYaHechos.length : 0,
+      userAlias: metadata.value.codigoPersonal,
+      testModel: modeloAsignado.value
     })
+
+    const rows = Object.keys(respuestas.value).map(key => {
+      const n = parseInt(key.replace('p', ''), 10)
+      return {
+        questionN: n,
+        response: respuestas.value[key],
+        time: tiempos.value[key]
+      }
+    })
+
+    await saveResponsesOnline(userId, modeloAsignado.value, rows)
   } catch (e) {
     console.error('Error guardando respuestas:', e)
-    // Continuar de todos modos para mostrar pantalla final
   } finally {
     isLoading.value = false
     currentStep.value = 'finished'
