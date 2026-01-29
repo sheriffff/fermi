@@ -47,7 +47,7 @@ function initializeGrid() {
       meta: {
         age: '14',
         sex: 'masculino',
-        favoriteSubject: 'matematicas',
+        favoriteSubject: 'educacion_fisica',
         mathMarkLastPeriod: '7',
         isPhysicsChemistryStudent: false
       },
@@ -69,6 +69,12 @@ function validateGrid() {
       const hasExp = p.exp !== ''
       if (hasBase !== hasExp) {
         return `Fila ${i + 1}, P${j + 1}: falta ${hasBase ? 'b' : 'a'}`
+      }
+      if (hasBase && isNaN(Number(p.base))) {
+        return `Fila ${i + 1}, P${j + 1}: a no es número válido`
+      }
+      if (hasExp && (!Number.isInteger(Number(p.exp)) || p.exp.trim() === '')) {
+        return `Fila ${i + 1}, P${j + 1}: b no es entero válido`
       }
     }
   }
@@ -374,15 +380,16 @@ onMounted(() => {
                   <td class="py-1 px-1">
                     <select v-model="row.meta.favoriteSubject" class="w-20 px-0.5 py-1 text-xs border border-neutral-200 rounded focus:border-primary-500 focus:outline-none">
                       <option value="">-</option>
-                      <option value="matematicas">Mates</option>
-                      <option value="lengua">Lengua</option>
-                      <option value="ingles">Inglés</option>
-                      <option value="fisica_quimica">FyQ</option>
-                      <option value="biologia">Bio</option>
-                      <option value="historia">Historia</option>
-                      <option value="geografia">Geo</option>
-                      <option value="tecnologia">Tecno</option>
                       <option value="educacion_fisica">EF</option>
+                      <option value="matematicas">Mates</option>
+                      <option value="fisica_quimica">FyQ</option>
+                      <option value="tecnologia">Tecno</option>
+                      <option value="economia">Economía</option>
+                      <option value="biologia_geologia">BioGeo</option>
+                      <option value="lengua">Lengua</option>
+                      <option value="filosofia">Filo</option>
+                      <option value="historia">Historia</option>
+                      <option value="ingles">Inglés</option>
                       <option value="musica">Música</option>
                       <option value="plastica">Plástica</option>
                       <option value="otra">Otra</option>
