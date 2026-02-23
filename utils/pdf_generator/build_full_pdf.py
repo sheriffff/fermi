@@ -8,6 +8,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 import io
 
+
 def generate_all_tests():
     """Generate all test PDFs using build_test_pdf.py"""
     script_path = Path(__file__).parent / "build_test_pdf.py"
@@ -24,6 +25,7 @@ def generate_all_tests():
             sys.exit(1)
         print(result.stdout.strip())
 
+
 def create_blank_page(page_size=A4):
     """Create a blank page as bytes with the given size"""
     buffer = io.BytesIO()
@@ -32,6 +34,7 @@ def create_blank_page(page_size=A4):
     c.save()
     buffer.seek(0)
     return buffer
+
 
 def get_page_size(pdf_path):
     """Get the page size of the first page of a PDF"""
@@ -119,6 +122,7 @@ def generate_full_pdf():
 
     print(f"\n✅ PDF completo generado: public/profe_instrucciones_y_tests.pdf")
     print(f"📄 Total de páginas: {total_pages}")
+
 
 if __name__ == "__main__":
     generate_full_pdf()
