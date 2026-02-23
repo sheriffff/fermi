@@ -54,20 +54,18 @@ CREATE INDEX idx_responses_online_model ON responses_online(test_model);
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS users_paper (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    profe_identifier VARCHAR(100),
-    aula_identifier VARCHAR(100),
     age INTEGER NOT NULL CHECK (age >= 4 AND age <= 120),
     sex VARCHAR(20) NOT NULL CHECK (sex IN ('masculino', 'femenino', 'otro', 'prefiero_no_decir')),
     time_of_day VARCHAR(20),
     favorite_subject VARCHAR(100),
     math_mark_last_period NUMERIC,
     is_physics_chemistry_student BOOLEAN DEFAULT FALSE,
+    school_type VARCHAR(20) CHECK (school_type IN ('publico', 'privado', 'concertado')),
+    mood VARCHAR(20) CHECK (mood IN ('mal', 'regular', 'bien', 'muy_bien')),
     test_model CHAR(1) NOT NULL CHECK (test_model IN ('A', 'B', 'C', 'D')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_users_paper_profe ON users_paper(profe_identifier);
-CREATE INDEX idx_users_paper_aula ON users_paper(aula_identifier);
 CREATE INDEX idx_users_paper_model ON users_paper(test_model);
 
 -- -----------------------------------------------------
@@ -180,14 +178,14 @@ WITH (security_invoker = true) AS
 SELECT
     r.id,
     r.user_id,
-    u.profe_identifier,
-    u.aula_identifier,
     u.age,
     u.sex,
     u.time_of_day,
     u.favorite_subject,
     u.math_mark_last_period,
     u.is_physics_chemistry_student,
+    u.school_type,
+    u.mood,
     r.test_model,
     r.question_n,
     r.base_a,

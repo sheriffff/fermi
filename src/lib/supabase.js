@@ -55,18 +55,18 @@ export async function saveResponsesOnline(userId, testModel, responses) {
   if (error) throw error
 }
 
-export async function createUserPaper({ profeId, aulaId, age, sex, timeOfDay, favoriteSubject, mathMarkLastPeriod, isPhysicsChemistryStudent, testModel }) {
+export async function createUserPaper({ age, sex, timeOfDay, favoriteSubject, mathMarkLastPeriod, isPhysicsChemistryStudent, schoolType, mood, testModel }) {
   const { data, error } = await supabase
     .from('users_paper')
     .insert({
-      profe_id: profeId || null,
-      aula_id: aulaId || null,
       age,
       sex,
       time_of_day: timeOfDay || null,
       favorite_subject: favoriteSubject || null,
       math_mark_last_period: mathMarkLastPeriod ?? null,
       is_physics_chemistry_student: isPhysicsChemistryStudent || false,
+      school_type: schoolType || null,
+      mood: mood || null,
       test_model: testModel
     })
     .select('id')

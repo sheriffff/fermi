@@ -27,7 +27,8 @@ const NUM_ALUMNOS = 10
 const gridData = ref([])
 
 const sharedMeta = ref({
-  timeOfDay: ''
+  timeOfDay: '',
+  schoolType: ''
 })
 
 const setAllAge = ref('14')
@@ -47,7 +48,8 @@ function initializeGrid() {
         sex: 'masculino',
         favoriteSubject: 'educacion_fisica',
         mathMarkLastPeriod: '7',
-        isPhysicsChemistryStudent: false
+        isPhysicsChemistryStudent: false,
+        mood: 'bien'
       },
       preguntas: Array.from({ length: NUM_PREGUNTAS }, () => ({ base: '', exp: '' }))
     })
@@ -95,14 +97,14 @@ async function saveData() {
       if (!hasAnswers || !row.meta.age) continue
 
       const userId = await createUserPaper({
-        profeId: null,
-        aulaId: null,
         age: parseInt(row.meta.age),
         sex: row.meta.sex || 'prefiero_no_decir',
         timeOfDay: sharedMeta.value.timeOfDay || null,
         favoriteSubject: row.meta.favoriteSubject || null,
         mathMarkLastPeriod: row.meta.mathMarkLastPeriod ? parseFloat(row.meta.mathMarkLastPeriod) : null,
         isPhysicsChemistryStudent: row.meta.isPhysicsChemistryStudent,
+        schoolType: sharedMeta.value.schoolType || null,
+        mood: row.meta.mood || null,
         testModel: selectedModelo.value
       })
 
@@ -231,6 +233,24 @@ onMounted(() => {
           <div class="card space-y-3">
             <h3 class="font-semibold text-neutral-700">Datos comunes</h3>
             <div>
+              <label class="label">Tipo de centro</label>
+              <div class="flex flex-wrap gap-1">
+                <button
+                  v-for="t in [{val: 'publico', label: 'Público'}, {val: 'privado', label: 'Privado'}, {val: 'concertado', label: 'Concertado'}]"
+                  :key="t.val"
+                  @click="sharedMeta.schoolType = sharedMeta.schoolType === t.val ? '' : t.val"
+                  :class="[
+                    'px-2 py-1 text-xs rounded-lg font-medium transition-all',
+                    sharedMeta.schoolType === t.val
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                  ]"
+                >
+                  {{ t.label }}
+                </button>
+              </div>
+            </div>
+            <div>
               <label class="label">Hora del día</label>
               <div class="flex flex-wrap gap-1">
                 <button
@@ -319,6 +339,7 @@ onMounted(() => {
                   <th class="py-2 px-2 text-center font-medium text-neutral-600 w-20">Asig. fav.</th>
                   <th class="py-2 px-2 text-center font-medium text-neutral-600 w-16">Nota mat.</th>
                   <th class="py-2 px-2 text-center font-medium text-neutral-600 w-12">FyQ</th>
+                  <th class="py-2 px-2 text-center font-medium text-neutral-600 w-16">Ánimo</th>
                   <th
                     v-for="p in NUM_PREGUNTAS"
                     :key="p"
@@ -330,6 +351,7 @@ onMounted(() => {
                   </th>
                 </tr>
                 <tr class="border-b border-neutral-100 text-xs text-neutral-400">
+                  <th></th>
                   <th></th>
                   <th></th>
                   <th></th>
@@ -396,6 +418,15 @@ onMounted(() => {
                       type="checkbox"
                       class="w-4 h-4 rounded text-primary-500"
                     />
+                  </td>
+                  <td class="py-1 px-1">
+                    <select v-model="row.meta.mood" class="w-16 px-0.5 py-1 text-xs border border-neutral-200 rounded focus:border-primary-500 focus:outline-none">
+                      <option value="">-</option>
+                      <option value="mal">Mal</option>
+                      <option value="regular">Reg</option>
+                      <option value="bien">Bien</option>
+                      <option value="muy_bien">M.bien</option>
+                    </select>
                   </td>
                   <template v-for="(pregunta, pIdx) in row.preguntas" :key="pIdx">
                     <td class="py-1" :class="pIdx > 0 ? 'pl-3' : 'pl-1'">
