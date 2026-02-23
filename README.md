@@ -3,6 +3,8 @@
 
 por [Manuel López Sheriff](https://www.linkedin.com/in/sheriff-data)
 
+🔗 **https://estima-esto.vercel.app**
+
 ---
 
 ¿Qué tal estimamos magnitudes?:
