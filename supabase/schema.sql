@@ -116,6 +116,18 @@ CREATE POLICY "Allow online response inserts" ON responses_online
 -- ADMIN POLICIES (authenticated)
 -- -----------------------------------------------------
 
+CREATE POLICY "Admin can read download logs" ON logs_download
+    FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Admin can read online users" ON users_online
+    FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Admin can read online responses" ON responses_online
+    FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Admin can read play responses" ON responses_play_unique
+    FOR SELECT TO authenticated USING (true);
+
 CREATE POLICY "Admin can insert paper users" ON users_paper
     FOR INSERT TO authenticated WITH CHECK (true);
 
@@ -141,10 +153,11 @@ CREATE POLICY "Admin can delete paper responses" ON responses_paper
     FOR DELETE TO authenticated USING (true);
 
 -- =====================================================
--- VIEWS
+-- VIEWS (security_invoker = true → RLS of underlying tables applies)
 -- =====================================================
 
-CREATE OR REPLACE VIEW view_responses_online AS
+CREATE OR REPLACE VIEW view_responses_online
+WITH (security_invoker = true) AS
 SELECT
     r.id,
     r.user_id,
@@ -162,7 +175,8 @@ FROM responses_online r
 JOIN users_online u ON r.user_id = u.id
 ORDER BY r.user_id, r.question_n;
 
-CREATE OR REPLACE VIEW view_responses_paper AS
+CREATE OR REPLACE VIEW view_responses_paper
+WITH (security_invoker = true) AS
 SELECT
     r.id,
     r.user_id,
@@ -202,19 +216,33 @@ ALTER TABLE responses_play_unique ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow play response inserts" ON responses_play_unique
     FOR INSERT TO anon WITH CHECK (true);
 
--- -----------------------------------------------------
--- 7. TABLE: admin_config
--- Single-row table for app-level settings (e.g. access password hash)
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS admin_config (
-    id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
-    password_hash TEXT NOT NULL
-);
+-- =====================================================
+-- AUTHENTICATION
+-- =====================================================
+-- Admin access uses Supabase Auth (built-in).
+-- Create the admin user from the Supabase dashboard:
+--   Authentication → Users → Add User
+-- The authenticated policies on users_paper / responses_paper
+-- already grant full CRUD to any authenticated user.
+-- =====================================================
 
-ALTER TABLE admin_config ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow public read" ON admin_config
-    FOR SELECT TO anon USING (true);
+-- =====================================================
+-- STORAGE: scribbles bucket
+-- =====================================================
+-- Create bucket "scribbles" from Supabase dashboard (Storage → New bucket)
+-- Set it as a non-public bucket.
+--
+-- Storage policies (run in SQL Editor):
+--
+-- Allow anonymous uploads:
+-- CREATE POLICY "Allow anon scribble uploads"
+-- ON storage.objects FOR INSERT TO anon
+-- WITH CHECK (bucket_id = 'scribbles');
+--
+-- Allow authenticated reads:
+-- CREATE POLICY "Allow auth scribble reads"
+-- ON storage.objects FOR SELECT TO authenticated
+-- USING (bucket_id = 'scribbles');
 
 -- =====================================================
 -- END SCHEMA

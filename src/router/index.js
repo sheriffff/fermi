@@ -25,6 +25,11 @@ const routes = [
     path: '/admin',
     name: 'admin',
     component: () => import('@/views/AdminView.vue')
+  },
+  {
+    path: '/upload/:userId',
+    name: 'upload',
+    component: () => import('@/views/UploadView.vue')
   }
 ]
 

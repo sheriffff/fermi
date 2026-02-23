@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import QRCode from 'qrcode'
 import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
 import { createUserOnline, saveResponsesOnline } from '@/lib/supabase'
@@ -20,6 +21,8 @@ const WARNING_TIME = 30  // Segundos antes del final para avisar
 const currentStep = ref('metadata') // 'metadata' | 'instructions' | 'test' | 'finished'
 const isLoading = ref(false)
 const error = ref(null)
+const savedUserId = ref(null)
+const qrDataUrl = ref(null)
 
 // Aviso de 30 segundos
 const showTimeWarning = ref(false)
@@ -41,6 +44,29 @@ const metadata = ref({
 
 // Generar opciones de edad desde 4 hasta 99
 const edadOptions = Array.from({ length: 96 }, (_, i) => i + 4)
+
+// TODO: en el futuro, sacar la distribución real de edades desde Supabase
+function normalPdf(x, mean, std) {
+  return Math.exp(-0.5 * ((x - mean) / std) ** 2) / (std * Math.sqrt(2 * Math.PI))
+}
+const histMean = 40
+const histStd = 15
+const histBins = []
+const fakeTotal = 300
+for (let start = 4; start < 100; start += 5) {
+  const end = Math.min(start + 4, 99)
+  let sum = 0
+  for (let a = start; a <= end; a++) sum += normalPdf(a, histMean, histStd)
+  histBins.push({ start, end, density: sum })
+}
+const densityTotal = histBins.reduce((s, b) => s + b.density, 0)
+histBins.forEach(b => { b.count = Math.round((b.density / densityTotal) * fakeTotal) })
+const histMax = Math.max(...histBins.map(b => b.density))
+
+function selectedBinIndex() {
+  const age = Number(metadata.value.edad)
+  return histBins.findIndex(b => age >= b.start && age <= b.end)
+}
 
 const sexoOptions = [
   { value: 'Masculino', label: 'Masculino' },
@@ -314,11 +340,22 @@ async function finishTest() {
     })
 
     await saveResponsesOnline(userId, modeloAsignado.value, rows)
+
+    savedUserId.value = userId
   } catch (e) {
     console.error('Error guardando respuestas:', e)
   } finally {
     isLoading.value = false
     currentStep.value = 'finished'
+  }
+
+  if (savedUserId.value) {
+    try {
+      const uploadUrl = `${window.location.origin}/upload/${savedUserId.value}`
+      qrDataUrl.value = await QRCode.toDataURL(uploadUrl, { width: 200, margin: 2 })
+    } catch (e) {
+      console.error('Error generando QR:', e)
+    }
   }
 }
 </script>
@@ -362,6 +399,31 @@ async function finishTest() {
                       {{ edad }}
                     </option>
                   </select>
+                  <div v-if="metadata.edad" class="mt-2">
+                    <div class="age-histogram">
+                    <div
+                      v-for="(bin, i) in histBins"
+                      :key="bin.start"
+                      class="age-bar-wrapper group"
+                    >
+                      <div class="age-tooltip">{{ bin.start }}–{{ bin.end }} años · {{ bin.count }} pers.</div>
+                      <span v-if="selectedBinIndex() === i" class="age-you-label">TÚ</span>
+                      <div
+                        v-if="selectedBinIndex() !== i"
+                        class="age-bar"
+                        :style="{ height: (bin.density / histMax) * 70 + '%' }"
+                      ></div>
+                      <div
+                        v-else
+                        class="age-you-pin"
+                      >
+                        <div class="age-you-dot"></div>
+                        <div class="age-you-stick"></div>
+                      </div>
+                    </div>
+                    </div>
+                    <p class="text-[10px] text-neutral-400 text-center mt-1 italic">Distribución de edades de los participantes</p>
+                  </div>
                 </div>
 
                 <!-- Columna 2: Sexo -->
@@ -573,9 +635,20 @@ async function finishTest() {
               Tus respuestas han sido guardadas correctamente.
               Tu contribución es muy valiosa para esta investigación.
             </p>
-            <RouterLink to="/" class="btn-primary btn-large">
-              Volver al inicio
-            </RouterLink>
+
+            <div v-if="qrDataUrl" class="mb-8 p-6 bg-neutral-50 rounded-2xl inline-block">
+              <p class="text-neutral-700 font-medium mb-3">
+                ¿Hiciste garabatos? Escanea para subir fotos
+              </p>
+              <img :src="qrDataUrl" alt="QR para subir fotos" class="mx-auto" />
+              <p class="text-xs text-neutral-400 mt-2">Abre la cámara de tu móvil y apunta al QR</p>
+            </div>
+
+            <div>
+              <RouterLink to="/" class="btn-primary btn-large">
+                Volver al inicio
+              </RouterLink>
+            </div>
           </div>
         </div>
       </Transition>
@@ -612,6 +685,48 @@ async function finishTest() {
   0%, 100% { transform: translateX(0) scale(1.25); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-2px) scale(1.25); }
   20%, 40%, 60%, 80% { transform: translateX(2px) scale(1.25); }
+}
+
+.age-histogram {
+  @apply flex items-end gap-1;
+  height: 56px;
+}
+
+.age-bar-wrapper {
+  @apply flex-1 flex flex-col items-center justify-end min-w-0 relative;
+  height: 100%;
+}
+
+.age-tooltip {
+  @apply absolute bottom-full mb-1 px-2 py-1 text-[10px] text-white bg-neutral-700 rounded whitespace-nowrap;
+  @apply opacity-0 pointer-events-none transition-opacity duration-150 z-10;
+}
+
+.age-bar-wrapper:hover .age-tooltip {
+  @apply opacity-100;
+}
+
+.age-bar {
+  @apply w-full bg-blue-200 rounded-t;
+  transition: height 0.25s ease;
+}
+
+.age-you-label {
+  @apply text-[10px] font-bold text-green-600 leading-none mb-0.5;
+}
+
+.age-you-pin {
+  @apply flex flex-col items-center;
+}
+
+.age-you-dot {
+  @apply w-3 h-3 rounded-full bg-green-500;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+
+.age-you-stick {
+  @apply w-0.5 bg-green-400 rounded-full;
+  height: 20px;
 }
 </style>
 

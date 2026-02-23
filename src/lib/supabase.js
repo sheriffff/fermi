@@ -104,6 +104,21 @@ export async function savePlayResponse({ idPlayQuestion, response, time }) {
   if (error) throw error
 }
 
+export async function uploadScribble(userId, file) {
+  const MAX_SIZE = 5 * 1024 * 1024
+  if (file.size > MAX_SIZE) throw new Error('El archivo supera 5MB')
+
+  const ext = file.name.split('.').pop() || 'jpg'
+  const path = `${userId}/${Date.now()}.${ext}`
+
+  const { error } = await supabase.storage
+    .from('scribbles')
+    .upload(path, file)
+
+  if (error) throw error
+  return path
+}
+
 export async function exportTable(table) {
   const { data, error } = await supabase
     .from(table)
