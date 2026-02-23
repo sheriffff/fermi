@@ -7,10 +7,19 @@ const isAuthenticated = ref(false)
 const passwordInput = ref('')
 const authError = ref(false)
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD
+const ADMIN_PASSWORD_HASH = 'a06cd80a62f31eeee3da744d28e7071227e6e5faeda82b91659ff4705949cde8'
+
+async function hashPassword(password) {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(password)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
 
 async function handleLogin() {
-  if (passwordInput.value === ADMIN_PASSWORD) {
+  const inputHash = await hashPassword(passwordInput.value)
+  if (inputHash === ADMIN_PASSWORD_HASH) {
     isAuthenticated.value = true
     authError.value = false
   } else {
