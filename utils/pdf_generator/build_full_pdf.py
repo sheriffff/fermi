@@ -13,12 +13,10 @@ def generate_all_tests():
     """Generate all test PDFs using build_test_pdf.py"""
     script_path = Path(__file__).parent / "build_test_pdf.py"
 
-    for test_id in ['A', 'B', 'C', 'D']:
+    for test_id in ["A", "B", "C", "D"]:
         print(f"Generating test {test_id}...")
         result = subprocess.run(
-            [sys.executable, str(script_path), test_id],
-            capture_output=True,
-            text=True
+            [sys.executable, str(script_path), test_id], capture_output=True, text=True
         )
         if result.returncode != 0:
             print(f"Error generating test {test_id}: {result.stderr}")
@@ -64,7 +62,7 @@ def generate_full_pdf():
     instructions_pdf = utils_dir / "hoja_instrucciones_profes.pdf"
     hoja_informativa_pdf = utils_dir / "Hoja informativa.pdf"
     consentimiento_pdf = utils_dir / "Consentimiento informado.pdf"
-    test_pdfs = [data_dir / f"examen_modelo_{t}.pdf" for t in ['A', 'B', 'C', 'D']]
+    test_pdfs = [data_dir / f"examen_modelo_{t}.pdf" for t in ["A", "B", "C", "D"]]
     output_pdf = public_dir / "profe_instrucciones_y_tests.pdf"
 
     required_pdfs = [
@@ -106,14 +104,14 @@ def generate_full_pdf():
     print("Añadida: página en blanco (separador)")
 
     # 6. Add all test PDFs (2 pages each = 8 pages)
-    for test_id, pdf_path in zip(['A', 'B', 'C', 'D'], test_pdfs):
+    for test_id, pdf_path in zip(["A", "B", "C", "D"], test_pdfs):
         test_reader = PdfReader(str(pdf_path))
         for page in test_reader.pages:
             writer.add_page(page)
         print(f"Añadido: examen_modelo_{test_id}.pdf")
 
     # Write final PDF
-    with open(str(output_pdf), 'wb') as f:
+    with open(str(output_pdf), "wb") as f:
         writer.write(f)
 
     # Count pages in final PDF

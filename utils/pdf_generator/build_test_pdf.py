@@ -109,6 +109,7 @@ def generate_pdf(test_id):
         col1_x = margin_left
         col2_x = margin_left + PDF.FORM_COL_SPACING
         box_width = PDF.FORM_BOX_WIDTH
+        start_y = y_pos
 
         c.setFont("Helvetica", 10)
         c.drawString(col1_x, y_pos, "Edad:")
@@ -150,6 +151,30 @@ def generate_pdf(test_id):
         draw_checkbox(c, no_x, y_pos - PDF.FORM_CHECKBOX_OFFSET_Y)
         c.drawString(no_x + PDF.FORM_CHECKBOX_LABEL_SPACING, y_pos, "No")
         y_pos -= PDF.FORM_CHECKBOX_ROW_SPACING
+
+        # --- Right column fields ---
+        rx = margin_left + 12 * cm
+        ry = start_y
+
+        c.setFont("Helvetica", 10)
+        c.drawString(rx, ry, "Tipo de centro:")
+        ry -= 0.55 * cm
+        draw_checkbox(c, rx, ry - PDF.FORM_CHECKBOX_OFFSET_Y)
+        c.drawString(rx + PDF.FORM_CHECKBOX_LABEL_SPACING, ry, "Público")
+        ry -= 0.5 * cm
+        draw_checkbox(c, rx, ry - PDF.FORM_CHECKBOX_OFFSET_Y)
+        c.drawString(rx + PDF.FORM_CHECKBOX_LABEL_SPACING, ry, "Privado")
+        ry -= 0.5 * cm
+        draw_checkbox(c, rx, ry - PDF.FORM_CHECKBOX_OFFSET_Y)
+        c.drawString(rx + PDF.FORM_CHECKBOX_LABEL_SPACING, ry, "Concertado")
+        ry -= 1.2 * cm
+
+        c.drawString(rx, ry, "¿Cómo te encuentras hoy?")
+        ry -= 0.55 * cm
+        for label in ["Mal", "Regular", "Bien", "Muy bien"]:
+            draw_checkbox(c, rx, ry - PDF.FORM_CHECKBOX_OFFSET_Y)
+            c.drawString(rx + PDF.FORM_CHECKBOX_LABEL_SPACING, ry, label)
+            ry -= 0.5 * cm
 
         return y_pos
 
