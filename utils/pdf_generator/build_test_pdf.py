@@ -105,28 +105,6 @@ def generate_pdf(test_id):
         c.setFont("Helvetica", 10)
         return y_pos
 
-    def draw_double_border_box(c, x, y, w, h, gap=0.1*cm):
-        c.rect(x, y, w, h)
-        c.rect(x + gap, y + gap, w - 2*gap, h - 2*gap)
-
-    def draw_profe_boxes():
-        right_col_x = width - 1 * cm - 3 * cm
-        right_box_width = 3 * cm
-        right_box_height = 1 * cm
-        top_y = height - 1 * cm
-
-        c.setFont("Helvetica", 9)
-        c.drawString(right_col_x, top_y, "ID Profesor")
-        c.setFont("Helvetica", 5)
-        c.drawString(right_col_x, top_y - 0.3 * cm, "Rellena el profesor. Opcional.")
-        draw_double_border_box(c, right_col_x, top_y - 0.45 * cm - right_box_height, right_box_width, right_box_height)
-
-        c.setFont("Helvetica", 9)
-        c.drawString(right_col_x, top_y - 1.8 * cm, "ID Aula")
-        c.setFont("Helvetica", 5)
-        c.drawString(right_col_x, top_y - 2.1 * cm, "Opcional.")
-        draw_double_border_box(c, right_col_x, top_y - 2.25 * cm - right_box_height, right_box_width, right_box_height)
-
     def draw_form_fields(y_pos):
         col1_x = margin_left
         col2_x = margin_left + PDF.FORM_COL_SPACING
@@ -223,8 +201,10 @@ def generate_pdf(test_id):
         total_space = PDF.ANSWER_TOTAL_SPACE_PAGE1 if page == 1 else PDF.ANSWER_TOTAL_SPACE_PAGE2
         separator_y = y_pos - total_space
         box_bottom_y = separator_y + PDF.ANSWER_BOX_LINE_GAP
-        answer_box_width = (content_width - PDF.QUESTION_NUMBER_INDENT) / 2
-        answer_box_x = margin_left + PDF.QUESTION_NUMBER_INDENT + (content_width - PDF.QUESTION_NUMBER_INDENT) / 2
+        answer_box_width = (content_width - PDF.QUESTION_NUMBER_INDENT) / 3
+        answer_box_x = margin_right - answer_box_width
+        c.setFont("Helvetica", 9)
+        c.drawString(answer_box_x, box_bottom_y + PDF.ANSWER_BOX_HEIGHT + 0.1 * cm, "Respuesta:")
         c.rect(answer_box_x, box_bottom_y, answer_box_width, PDF.ANSWER_BOX_HEIGHT)
 
         if draw_separator:
@@ -250,7 +230,6 @@ def generate_pdf(test_id):
         c.drawRightString(width - 1 * cm, 1 * cm, footer_text)
 
     y = height - PDF.MARGIN_TOP
-    draw_profe_boxes()
     y = draw_header(y)
     y = draw_form_fields(y)
     y = draw_separator_lines(y)

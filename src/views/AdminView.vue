@@ -27,8 +27,6 @@ const NUM_ALUMNOS = 10
 const gridData = ref([])
 
 const sharedMeta = ref({
-  profeId: '',
-  aulaId: '',
   timeOfDay: ''
 })
 
@@ -97,8 +95,8 @@ async function saveData() {
       if (!hasAnswers || !row.meta.age) continue
 
       const userId = await createUserPaper({
-        profeId: sharedMeta.value.profeId || null,
-        aulaId: sharedMeta.value.aulaId || null,
+        profeId: null,
+        aulaId: null,
         age: parseInt(row.meta.age),
         sex: row.meta.sex || 'prefiero_no_decir',
         timeOfDay: sharedMeta.value.timeOfDay || null,
@@ -232,14 +230,6 @@ onMounted(() => {
           <!-- Shared metadata -->
           <div class="card space-y-3">
             <h3 class="font-semibold text-neutral-700">Datos comunes</h3>
-            <div>
-              <label class="label">ID Profe (opcional)</label>
-              <input v-model="sharedMeta.profeId" type="text" class="input"/>
-            </div>
-            <div>
-              <label class="label">ID Aula (opcional)</label>
-              <input v-model="sharedMeta.aulaId" type="text" class="input"/>
-            </div>
             <div>
               <label class="label">Hora del día</label>
               <div class="flex flex-wrap gap-1">
