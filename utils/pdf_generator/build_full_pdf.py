@@ -1,4 +1,4 @@
-# command: `python generate_full_pdf.py`
+# command: `python build_full_pdf.py`
 
 import subprocess
 import sys
@@ -9,8 +9,8 @@ from reportlab.pdfgen import canvas
 import io
 
 def generate_all_tests():
-    """Generate all test PDFs using generate_test_pdf.py"""
-    script_path = Path(__file__).parent / "generate_test_pdf.py"
+    """Generate all test PDFs using build_test_pdf.py"""
+    script_path = Path(__file__).parent / "build_test_pdf.py"
 
     for test_id in ['A', 'B', 'C', 'D']:
         print(f"Generating test {test_id}...")

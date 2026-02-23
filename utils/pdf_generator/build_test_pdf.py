@@ -1,4 +1,4 @@
-# command: `python utils/pdf_generator/generate_test_pdf.py C`
+# command: `python utils/pdf_generator/build_test_pdf.py C`
 import sys
 from pathlib import Path
 import openpyxl
@@ -22,19 +22,17 @@ def load_test_questions(test_id):
 
     questions = {}
     for i in range(2, questions_sheet.max_row + 1):
-        cat = questions_sheet.cell(i, 1).value
-        level = questions_sheet.cell(i, 2).value
-        text = questions_sheet.cell(i, 3).value
-        if cat and level and text:
-            questions[(cat, level)] = text
+        q_id = questions_sheet.cell(i, 3).value
+        text = questions_sheet.cell(i, 4).value
+        if q_id is not None and text:
+            questions[q_id] = text
 
     test_questions = []
     for i in range(2, tests_sheet.max_row + 1):
         t_id = tests_sheet.cell(i, 1).value
-        cat = tests_sheet.cell(i, 2).value
-        level = tests_sheet.cell(i, 3).value
-        if t_id == test_id and cat and level:
-            question_text = questions.get((cat, level), 'NOT FOUND')
+        q_id = tests_sheet.cell(i, 2).value
+        if t_id == test_id and q_id is not None:
+            question_text = questions.get(q_id, 'NOT FOUND')
             test_questions.append(question_text)
 
     return test_questions

@@ -11,12 +11,12 @@ async function loadExcel() {
   const questionsRaw = await readXlsxFile(blob, { sheet: 'questions' })
   const questions = questionsRaw
     .slice(1)
-    .filter(row => row[2] && row[2] !== 'Prueba')
-    .map((row, index) => ({
-      id: index + 1,
+    .filter(row => row[3])
+    .map(row => ({
+      id: row[2],
       category: row[0],
       level: row[1],
-      texto: row[2]
+      texto: row[3]
     }))
 
   const testsRaw = await readXlsxFile(blob, { sheet: 'tests' })
@@ -28,10 +28,7 @@ async function loadExcel() {
     if (!tests[testId]) {
       tests[testId] = []
     }
-    tests[testId].push({
-      category: row[1],
-      level: row[2]
-    })
+    tests[testId].push(row[1])
   }
 
   questionsCache = { questions, tests }
@@ -45,24 +42,22 @@ export async function getAllQuestions() {
 
 export async function getTestQuestions(testId) {
   const { questions, tests } = await loadExcel()
-  const testConfig = tests[testId]
+  const questionIds = tests[testId]
 
-  if (!testConfig) {
+  if (!questionIds) {
     console.error(`Test ${testId} no encontrado`)
     return []
   }
 
+  const questionsById = new Map(questions.map(q => [q.id, q]))
   const testQuestions = []
 
-  for (const config of testConfig) {
-    const question = questions.find(
-      q => q.category === config.category && q.level === config.level
-    )
-
+  for (const qId of questionIds) {
+    const question = questionsById.get(qId)
     if (question) {
       testQuestions.push(question)
     } else {
-      console.warn(`Pregunta no encontrada: ${config.category} nivel ${config.level}`)
+      console.warn(`Pregunta no encontrada: id ${qId}`)
     }
   }
 
