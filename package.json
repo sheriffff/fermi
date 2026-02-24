@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.91.0",
+    "@supabase/supabase-js": "^2.97.0",
     "qrcode": "^1.5.4",
     "read-excel-file": "^6.0.2",
     "vue": "^3.5.26",
