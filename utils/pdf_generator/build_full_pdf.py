@@ -54,20 +54,21 @@ def add_pdf_pages(writer, pdf_path, name):
 def generate_full_pdf():
     """Merge all PDFs into one final document"""
     utils_dir = Path(__file__).parent
-    data_dir = utils_dir / "data"
+    docs_dir = utils_dir / "docs"
+    tests_dir = utils_dir / "tests"
     public_dir = utils_dir.parent.parent / "public"
 
     generate_all_tests()
 
-    instructions_pdf = utils_dir / "hoja_instrucciones_profes.pdf"
-    hoja_informativa_pdf = utils_dir / "Hoja informativa.pdf"
-    consentimiento_pdf = utils_dir / "Consentimiento informado.pdf"
-    test_pdfs = [data_dir / f"examen_modelo_{t}.pdf" for t in ["A", "B", "C", "D"]]
+    instructions_pdf = docs_dir / "Hoja Instrucciones Profes.pdf"
+    hoja_informativa_pdf = docs_dir / "Hoja Informativa.pdf"
+    consentimiento_pdf = docs_dir / "Consentimiento informado.pdf"
+    test_pdfs = [tests_dir / f"examen_modelo_{t}.pdf" for t in ["A", "B", "C", "D"]]
     output_pdf = public_dir / "profe_instrucciones_y_tests.pdf"
 
     required_pdfs = [
-        (instructions_pdf, "hoja_instrucciones_profes.pdf"),
-        (hoja_informativa_pdf, "Hoja informativa.pdf"),
+        (instructions_pdf, "Hoja Instrucciones Profes.pdf"),
+        (hoja_informativa_pdf, "Hoja Informativa.pdf"),
         (consentimiento_pdf, "Consentimiento informado.pdf"),
     ]
     for pdf_path, name in required_pdfs:
@@ -82,11 +83,15 @@ def generate_full_pdf():
 
     writer = PdfWriter()
 
-    # 1. Add instructions (2 pages)
-    add_pdf_pages(writer, instructions_pdf, "hoja_instrucciones_profes.pdf")
+    # 1. Add instructions (1 page) + blank page for double-sided printing
+    add_pdf_pages(writer, instructions_pdf, "Hoja Instrucciones Profes.pdf")
+    blank_buffer_instr = create_blank_page(A4)
+    blank_reader_instr = PdfReader(blank_buffer_instr)
+    writer.add_page(blank_reader_instr.pages[0])
+    print("Añadida: página en blanco (reverso instrucciones)")
 
     # 2. Add Hoja Informativa (1 page)
-    add_pdf_pages(writer, hoja_informativa_pdf, "Hoja informativa.pdf")
+    add_pdf_pages(writer, hoja_informativa_pdf, "Hoja Informativa.pdf")
 
     # 3. Add blank page (separator)
     blank_buffer = create_blank_page(A4)

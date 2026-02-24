@@ -57,10 +57,10 @@ def generate_pdf(test_id):
         return
 
     # Get data directory relative to this script
-    data_dir = Path(__file__).parent / "data"
-    data_dir.mkdir(exist_ok=True)
+    tests_dir = Path(__file__).parent / "tests"
+    tests_dir.mkdir(exist_ok=True)
 
-    filename = data_dir / f"examen_modelo_{test_id}.pdf"
+    filename = tests_dir / f"examen_modelo_{test_id}.pdf"
     c = canvas.Canvas(str(filename), pagesize=A4)
     width, height = A4
 
@@ -258,7 +258,10 @@ def generate_pdf(test_id):
     y = draw_header(y)
     y = draw_form_fields(y)
     y = draw_separator_lines(y)
-    y -= PDF.SECTION_SPACING
+    y -= 0.45 * cm
+    c.setFont("Helvetica", 11)
+    c.drawString(margin_left, y, "Puedes usar calculadora y hacer operaciones en esta misma hoja.")
+    y -= 0.8 * cm
     y = render_questions_page(y, 0, 4, page=1)  # 4 questions on page 1 (compact)
     draw_footer(1)
 
