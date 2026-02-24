@@ -1,18 +1,22 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('⚠️ Supabase credentials not found. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local')
+if (!supabaseUrl || !supabaseKey) {
+  console.warn('⚠️ Supabase credentials not found. Please set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in .env')
 }
 
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-key'
+  supabaseKey || 'placeholder-key'
 )
 
+const dbEnabled = import.meta.env.VITE_LOG_TO_DDBB !== 'false'
+console.log('[supabase] dbEnabled:', dbEnabled, '| VITE_LOG_TO_DDBB:', import.meta.env.VITE_LOG_TO_DDBB)
+
 export async function logDownload() {
+  if (!dbEnabled) return
   const { error } = await supabase
     .from('logs_download')
     .insert({})
@@ -21,6 +25,7 @@ export async function logDownload() {
 }
 
 export async function createUserOnline({ age, sex, piVsE, whichTestsBefore, userAlias, testModel }) {
+  if (!dbEnabled) return 'fake-user-id'
   const { data, error } = await supabase
     .from('users_online')
     .insert({
@@ -40,6 +45,7 @@ export async function createUserOnline({ age, sex, piVsE, whichTestsBefore, user
 }
 
 export async function saveResponsesOnline(userId, testModel, responses) {
+  if (!dbEnabled) return
   const rows = responses.map(r => ({
     user_id: userId,
     test_model: testModel,
@@ -56,6 +62,7 @@ export async function saveResponsesOnline(userId, testModel, responses) {
 }
 
 export async function createUserPaper({ age, sex, timeOfDay, favoriteSubject, mathMarkLastPeriod, isPhysicsChemistryStudent, schoolType, mood, testModel }) {
+  if (!dbEnabled) return 'fake-user-id'
   const { data, error } = await supabase
     .from('users_paper')
     .insert({
@@ -77,6 +84,7 @@ export async function createUserPaper({ age, sex, timeOfDay, favoriteSubject, ma
 }
 
 export async function saveResponsesPaper(userId, testModel, responses) {
+  if (!dbEnabled) return
   const rows = responses.map(r => ({
     user_id: userId,
     test_model: testModel,
@@ -93,6 +101,7 @@ export async function saveResponsesPaper(userId, testModel, responses) {
 }
 
 export async function savePlayResponse({ idPlayQuestion, response, time }) {
+  if (!dbEnabled) return
   const { error } = await supabase
     .from('responses_play_unique')
     .insert({
@@ -105,6 +114,7 @@ export async function savePlayResponse({ idPlayQuestion, response, time }) {
 }
 
 export async function uploadScribble(userId, file) {
+  if (!dbEnabled) return 'fake-path'
   const MAX_SIZE = 5 * 1024 * 1024
   if (file.size > MAX_SIZE) throw new Error('El archivo supera 5MB')
 
