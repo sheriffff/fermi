@@ -128,44 +128,44 @@ CREATE POLICY "Allow play response inserts" ON responses_play_unique
     FOR INSERT TO anon WITH CHECK (true);
 
 -- -----------------------------------------------------
--- ADMIN POLICIES (authenticated)
+-- ADMIN POLICIES (anon — auth is client-side only)
 -- -----------------------------------------------------
 
-CREATE POLICY "Admin can read download logs" ON logs_download
-    FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Allow read download logs" ON logs_download
+    FOR SELECT TO anon USING (true);
 
-CREATE POLICY "Admin can read online users" ON users_online
-    FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Allow read online users" ON users_online
+    FOR SELECT TO anon USING (true);
 
-CREATE POLICY "Admin can read online responses" ON responses_online
-    FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Allow read online responses" ON responses_online
+    FOR SELECT TO anon USING (true);
 
-CREATE POLICY "Admin can read play responses" ON responses_play_unique
-    FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Allow read play responses" ON responses_play_unique
+    FOR SELECT TO anon USING (true);
 
-CREATE POLICY "Admin can insert paper users" ON users_paper
-    FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Allow insert paper users" ON users_paper
+    FOR INSERT TO anon WITH CHECK (true);
 
-CREATE POLICY "Admin can read paper users" ON users_paper
-    FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Allow read paper users" ON users_paper
+    FOR SELECT TO anon USING (true);
 
-CREATE POLICY "Admin can update paper users" ON users_paper
-    FOR UPDATE TO authenticated USING (true);
+CREATE POLICY "Allow update paper users" ON users_paper
+    FOR UPDATE TO anon USING (true);
 
-CREATE POLICY "Admin can delete paper users" ON users_paper
-    FOR DELETE TO authenticated USING (true);
+CREATE POLICY "Allow delete paper users" ON users_paper
+    FOR DELETE TO anon USING (true);
 
-CREATE POLICY "Admin can insert paper responses" ON responses_paper
-    FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Allow insert paper responses" ON responses_paper
+    FOR INSERT TO anon WITH CHECK (true);
 
-CREATE POLICY "Admin can read paper responses" ON responses_paper
-    FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Allow read paper responses" ON responses_paper
+    FOR SELECT TO anon USING (true);
 
-CREATE POLICY "Admin can update paper responses" ON responses_paper
-    FOR UPDATE TO authenticated USING (true);
+CREATE POLICY "Allow update paper responses" ON responses_paper
+    FOR UPDATE TO anon USING (true);
 
-CREATE POLICY "Admin can delete paper responses" ON responses_paper
-    FOR DELETE TO authenticated USING (true);
+CREATE POLICY "Allow delete paper responses" ON responses_paper
+    FOR DELETE TO anon USING (true);
 
 -- =====================================================
 -- VIEWS (security_invoker = true → RLS of underlying tables applies)
