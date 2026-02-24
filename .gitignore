@@ -1,8 +1,9 @@
 .env*
 fermi_TODO_human.md
-CLAUDE.md
+
 utils/pdf_generator/tests
 utils/pdf_generator/docs
+
 supabase/.temp/
 codigos_qr
 
