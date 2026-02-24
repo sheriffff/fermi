@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router'
 import QRCode from 'qrcode'
 import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
-import { createUserOnline, saveResponsesOnline } from '@/lib/supabase'
+import { createUserOnline, saveResponsesOnline, getOnlineAges } from '@/lib/supabase'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import FermiInput from '@/components/common/FermiInput.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
@@ -12,7 +12,7 @@ import InstructionsCard from '@/components/common/InstructionsCard.vue'
 // ============================================
 // CONFIGURACIÓN DE TIEMPOS
 // ============================================
-const QUESTION_TIME = 150 // Segundos por pregunta (3 minutos)
+const QUESTION_TIME = 120 // Segundos por pregunta (2 minutos)
 const WARNING_TIME = 30  // Segundos antes del final para avisar
 
 // ============================================
@@ -45,27 +45,29 @@ const metadata = ref({
 // Generar opciones de edad desde 4 hasta 99
 const edadOptions = Array.from({ length: 96 }, (_, i) => i + 4)
 
-// TODO: en el futuro, sacar la distribución real de edades desde Supabase
-function normalPdf(x, mean, std) {
-  return Math.exp(-0.5 * ((x - mean) / std) ** 2) / (std * Math.sqrt(2 * Math.PI))
+const histBins = ref([])
+const histMax = ref(1)
+
+async function loadAgeHistogram() {
+  try {
+    const ages = await getOnlineAges()
+    if (ages.length === 0) return
+    const bins = []
+    for (let start = 4; start < 100; start += 5) {
+      const end = Math.min(start + 4, 99)
+      const count = ages.filter(a => a >= start && a <= end).length
+      bins.push({ start, end, count })
+    }
+    histBins.value = bins
+    histMax.value = Math.max(...bins.map(b => b.count), 1)
+  } catch (e) {
+    // silently fail
+  }
 }
-const histMean = 40
-const histStd = 15
-const histBins = []
-const fakeTotal = 300
-for (let start = 4; start < 100; start += 5) {
-  const end = Math.min(start + 4, 99)
-  let sum = 0
-  for (let a = start; a <= end; a++) sum += normalPdf(a, histMean, histStd)
-  histBins.push({ start, end, density: sum })
-}
-const densityTotal = histBins.reduce((s, b) => s + b.density, 0)
-histBins.forEach(b => { b.count = Math.round((b.density / densityTotal) * fakeTotal) })
-const histMax = Math.max(...histBins.map(b => b.density))
 
 function selectedBinIndex() {
   const age = Number(metadata.value.edad)
-  return histBins.findIndex(b => age >= b.start && age <= b.end)
+  return histBins.value.findIndex(b => age >= b.start && age <= b.end)
 }
 
 const sexoOptions = [
@@ -85,10 +87,11 @@ const primerasPreguntasPorModelo = ref({})
 
 // Cargar las primeras preguntas de cada modelo al montar
 onMounted(async () => {
+  loadAgeHistogram()
+
   const tests = await getAvailableTests()
   modeloOptions.value = tests
 
-  // Cargar primera pregunta de cada test para reconocimiento
   for (const testNum of tests) {
     const questions = await getTestQuestions(testNum)
     if (questions.length > 0) {
@@ -399,7 +402,7 @@ async function finishTest() {
                       {{ edad }}
                     </option>
                   </select>
-                  <div v-if="metadata.edad" class="mt-2">
+                  <div v-if="metadata.edad && histBins.length > 0" class="mt-2">
                     <div class="age-histogram">
                     <div
                       v-for="(bin, i) in histBins"
@@ -411,7 +414,7 @@ async function finishTest() {
                       <div
                         v-if="selectedBinIndex() !== i"
                         class="age-bar"
-                        :style="{ height: (bin.density / histMax) * 70 + '%' }"
+                        :style="{ height: (bin.count / histMax) * 70 + '%' }"
                       ></div>
                       <div
                         v-else
@@ -422,7 +425,7 @@ async function finishTest() {
                       </div>
                     </div>
                     </div>
-                    <p class="text-[10px] text-neutral-400 text-center mt-1 italic">Distribución de edades de los participantes</p>
+                    <p class="text-[10px] text-neutral-400 text-center mt-1 italic">Distribución de edades de los participantes hasta ahora</p>
                   </div>
                 </div>
 

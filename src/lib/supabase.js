@@ -143,6 +143,15 @@ export async function uploadScribble(userId, file) {
   return path
 }
 
+export async function getOnlineAges() {
+  const { data, error } = await supabase
+    .from('users_online')
+    .select('age')
+
+  if (error) throw error
+  return data.map(r => r.age)
+}
+
 export async function exportTable(table) {
   const { data, error } = await supabase
     .from(table)
