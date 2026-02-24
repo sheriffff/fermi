@@ -18,7 +18,6 @@ export const supabase = createClient(
 )
 
 const dbEnabled = import.meta.env.VITE_LOG_TO_DDBB !== 'false'
-console.log('[supabase] dbEnabled:', dbEnabled, '| VITE_LOG_TO_DDBB:', import.meta.env.VITE_LOG_TO_DDBB)
 
 export async function logDownload() {
   if (!dbEnabled) return
