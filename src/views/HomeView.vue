@@ -106,7 +106,7 @@ function handlePorClick() {
             Quiero Participar
           </h3>
           <p class="text-neutral-500 text-sm">
-            Haz un test online (~20 minutos)
+            Haz un test online (~15 minutos)
           </p>
         </RouterLink>
 
