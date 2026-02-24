@@ -111,7 +111,8 @@ export async function savePlayResponse({ idPlayQuestion, response, time }) {
     .insert({
       id_play_question: idPlayQuestion,
       response,
-      time
+      time,
+      user_agent: navigator.userAgent
     })
 
   if (error) throw error

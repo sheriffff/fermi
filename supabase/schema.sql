@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS responses_play_unique (
     id_play_question INTEGER NOT NULL,
     response NUMERIC,
     time INTEGER,
+    user_agent TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

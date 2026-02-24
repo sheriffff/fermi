@@ -1,5 +1,9 @@
 # Esquema de Base de Datos — Fermi Tests TFM
 
+> **Workflow de cambios en el schema**: al modificar la estructura de la BD hay que hacer **dos cosas**:
+> 1. Editar `supabase/schema.sql` (para que sea reproducible desde cero)
+> 2. Ejecutar el ALTER/CREATE correspondiente en el **SQL Editor de Supabase** (para aplicarlo a la DB live)
+
 ## Relaciones
 
 ```
@@ -121,12 +125,13 @@ UNIQUE(user_id, question_n) — Formato: `base_a × 10^exp_b`
 | `id_play_question` | INTEGER     | NOT NULL           |
 | `response`         | NUMERIC     | nullable           |
 | `time`             | INTEGER     | nullable           |
+| `user_agent`       | TEXT        | nullable           |
 | `created_at`       | TIMESTAMPTZ | default NOW()      |
 
-| id       | id_play_question | response   | time | created_at               |
-|----------|------------------|------------|------|--------------------------|
-| `uuid-pl1`| 7              | 800000     | 60   | 2026-02-23 18:00:00+01   |
-| `uuid-pl2`| 3              | 25000000   | 90   | 2026-02-23 18:05:00+01   |
+| id       | id_play_question | response   | time | user_agent          | created_at               |
+|----------|------------------|------------|------|---------------------|--------------------------|
+| `uuid-pl1`| 7              | 800000     | 60   | Mozilla/5.0 ...     | 2026-02-23 18:00:00+01   |
+| `uuid-pl2`| 3              | 25000000   | 90   | Chrome/120 ...      | 2026-02-23 18:05:00+01   |
 
 ---
 
