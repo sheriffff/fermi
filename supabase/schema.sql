@@ -87,6 +87,19 @@ CREATE TABLE IF NOT EXISTS responses_paper (
 CREATE INDEX idx_responses_paper_user ON responses_paper(user_id);
 CREATE INDEX idx_responses_paper_model ON responses_paper(test_model);
 
+-- -----------------------------------------------------
+-- 6. TABLE: responses_play_unique
+-- Responses from the "Pregunta Aleatoria" (/random) section of the web app.
+-- Each row is one answer to a single random question (no user registration).
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS responses_play_unique (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    id_play_question INTEGER NOT NULL,
+    response NUMERIC,
+    time INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- =====================================================
 -- ROW LEVEL SECURITY (RLS)
 -- =====================================================
@@ -96,6 +109,7 @@ ALTER TABLE users_online ENABLE ROW LEVEL SECURITY;
 ALTER TABLE responses_online ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users_paper ENABLE ROW LEVEL SECURITY;
 ALTER TABLE responses_paper ENABLE ROW LEVEL SECURITY;
+ALTER TABLE responses_play_unique ENABLE ROW LEVEL SECURITY;
 
 -- -----------------------------------------------------
 -- PUBLIC POLICIES (anonymous forms)
@@ -108,6 +122,9 @@ CREATE POLICY "Allow user registration" ON users_online
     FOR INSERT TO anon WITH CHECK (true);
 
 CREATE POLICY "Allow online response inserts" ON responses_online
+    FOR INSERT TO anon WITH CHECK (true);
+
+CREATE POLICY "Allow play response inserts" ON responses_play_unique
     FOR INSERT TO anon WITH CHECK (true);
 
 -- -----------------------------------------------------
@@ -195,24 +212,6 @@ SELECT
 FROM responses_paper r
 JOIN users_paper u ON r.user_id = u.id
 ORDER BY r.user_id, r.question_n;
-
--- -----------------------------------------------------
--- 6. TABLE: responses_play_unique
--- Responses from the "Pregunta Aleatoria" (/random) section of the web app.
--- Each row is one answer to a single random question (no user registration).
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS responses_play_unique (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    id_play_question INTEGER NOT NULL,
-    response NUMERIC,
-    time INTEGER,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-ALTER TABLE responses_play_unique ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow play response inserts" ON responses_play_unique
-    FOR INSERT TO anon WITH CHECK (true);
 
 -- =====================================================
 -- AUTHENTICATION
