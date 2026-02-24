@@ -1,11 +1,13 @@
 <script setup>
 import { RouterLink } from 'vue-router'
+import { logDownload } from '@/lib/supabase'
 
 function handleDownload() {
   const link = document.createElement('a')
   link.href = '/profe_instrucciones_y_tests.pdf'
   link.download = 'profe_instrucciones_y_tests.pdf'
   link.click()
+  logDownload().catch(() => {})
 }
 </script>
 
