@@ -69,9 +69,9 @@ function selectedBinIndex() {
 }
 
 const sexoOptions = [
-  { value: 'Masculino', label: 'Masculino' },
-  { value: 'Femenino', label: 'Femenino' },
-  { value: 'Otro', label: 'Otro' }
+  { value: 'masculino', label: 'Masculino' },
+  { value: 'femenino', label: 'Femenino' },
+  { value: 'otro', label: 'Otro' }
 ]
 
 const piVsEOptions = [

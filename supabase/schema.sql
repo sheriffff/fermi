@@ -18,9 +18,9 @@ CREATE TABLE IF NOT EXISTS logs_download (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS users_online (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    age INTEGER NOT NULL CHECK (age >= 18 AND age <= 120),
-    sex VARCHAR(20) NOT NULL CHECK (sex IN ('masculino', 'femenino', 'otro', 'prefiero_no_decir')),
-    pi_vs_e VARCHAR(10) NOT NULL CHECK (pi_vs_e IN ('si', 'no', 'no_se')),
+    age INTEGER NOT NULL CHECK (age >= 4 AND age <= 120),
+    sex VARCHAR(20) CHECK (sex IN ('masculino', 'femenino', 'otro', 'prefiero_no_decir')),
+    pi_vs_e VARCHAR(10) NOT NULL CHECK (pi_vs_e IN ('pi', 'e', 'no_se')),
     which_tests_before VARCHAR(10) NOT NULL DEFAULT '',
     user_alias VARCHAR(100),
     test_model CHAR(1) NOT NULL CHECK (test_model IN ('A', 'B', 'C', 'D')),

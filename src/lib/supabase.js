@@ -9,7 +9,12 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseKey || 'placeholder-key'
+  supabaseKey || 'placeholder-key',
+  {
+    global: {
+      headers: { Authorization: `Bearer ${supabaseKey}` }
+    }
+  }
 )
 
 const dbEnabled = import.meta.env.VITE_LOG_TO_DDBB !== 'false'
@@ -26,22 +31,22 @@ export async function logDownload() {
 
 export async function createUserOnline({ age, sex, piVsE, whichTestsBefore, userAlias, testModel }) {
   if (!dbEnabled) return 'fake-user-id'
-  const { data, error } = await supabase
+  const id = crypto.randomUUID()
+  const { error } = await supabase
     .from('users_online')
     .insert({
+      id,
       age,
-      sex,
+      sex: sex || null,
       pi_vs_e: piVsE,
       which_tests_before: whichTestsBefore,
       user_alias: userAlias || null,
       test_model: testModel,
       user_agent: navigator.userAgent
     })
-    .select('id')
-    .single()
 
   if (error) throw error
-  return data.id
+  return id
 }
 
 export async function saveResponsesOnline(userId, testModel, responses) {
@@ -63,9 +68,11 @@ export async function saveResponsesOnline(userId, testModel, responses) {
 
 export async function createUserPaper({ age, sex, timeOfDay, favoriteSubject, mathMarkLastPeriod, isPhysicsChemistryStudent, schoolType, mood, testModel }) {
   if (!dbEnabled) return 'fake-user-id'
-  const { data, error } = await supabase
+  const id = crypto.randomUUID()
+  const { error } = await supabase
     .from('users_paper')
     .insert({
+      id,
       age,
       sex,
       time_of_day: timeOfDay || null,
@@ -76,11 +83,9 @@ export async function createUserPaper({ age, sex, timeOfDay, favoriteSubject, ma
       mood: mood || null,
       test_model: testModel
     })
-    .select('id')
-    .single()
 
   if (error) throw error
-  return data.id
+  return id
 }
 
 export async function saveResponsesPaper(userId, testModel, responses) {
