@@ -79,7 +79,7 @@ const sexoOptions = [
 const piVsEOptions = [
   { value: 'pi', label: 'π (pi)' },
   { value: 'e', label: 'e (Euler)' },
-  { value: 'no_se', label: 'No lo sé' }
+  { value: 'no_se', label: 'No lo sé / No lo recuerdo' }
 ]
 
 const modeloOptions = ref(['A', 'B', 'C', 'D'])
@@ -472,19 +472,17 @@ async function finishTest() {
               <!-- ID - selector 1/3, texto ancho completo -->
               <div>
                 <div class="w-1/3">
-                  <label class="label">Alias (opcional)</label>
+                  <label class="label">Alias</label>
                   <input
                     v-model="metadata.codigoPersonal"
                     type="text"
                     class="input"
-                    placeholder="Ej: Einstein42"
+                    placeholder="Einstein42"
                     maxlength="20"
                   />
                 </div>
                 <p class="text-xs text-neutral-400 mt-2 italic">
-                  Opcional. Si lo rellenas, acuérdate, sácale una foto:
-                  te servirá a tí si quieres encontrarte luego en las listas de resultados y compararte con
-                  diferentes segmentos de la población.
+                  Opcional. Te sirve para encontrarte en las listas de resultados y compararte con la población.
                 </p>
               </div>
 
