@@ -20,14 +20,14 @@ export async function logDownload() {
   if (error) throw error
 }
 
-export async function createUserOnline({ age, sex, piVsE, nTestsBefore, userAlias, testModel }) {
+export async function createUserOnline({ age, sex, piVsE, whichTestsBefore, userAlias, testModel }) {
   const { data, error } = await supabase
     .from('users_online')
     .insert({
       age,
       sex,
       pi_vs_e: piVsE,
-      n_tests_before: nTestsBefore,
+      which_tests_before: whichTestsBefore,
       user_alias: userAlias || null,
       test_model: testModel,
       user_agent: navigator.userAgent

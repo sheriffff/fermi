@@ -33,16 +33,16 @@ logs_download          (sin FK, solo registro)
 | `age`            | INTEGER      | NOT NULL, CHECK 18–120                                     |
 | `sex`            | VARCHAR(20)  | NOT NULL, IN (masculino, femenino, otro, prefiero_no_decir)|
 | `pi_vs_e`        | VARCHAR(10)  | NOT NULL, IN (si, no, no_se)                               |
-| `n_tests_before` | INTEGER      | NOT NULL, default 0                                        |
+| `which_tests_before` | VARCHAR(10) | NOT NULL, default ''                                      |
 | `user_alias`     | VARCHAR(100) | nullable                                                   |
 | `test_model`     | CHAR(1)      | NOT NULL, IN (A, B, C, D)                                  |
 | `user_agent`     | TEXT         | nullable                                                   |
 | `created_at`     | TIMESTAMPTZ  | default NOW()                                              |
 
-| id       | age | sex       | pi_vs_e | n_tests_before | user_alias | test_model | user_agent          | created_at               |
-|----------|-----|-----------|---------|----------------|------------|------------|---------------------|--------------------------|
-| `uuid-1` | 34  | masculino | si      | 0              | pepito23   | A          | Mozilla/5.0 ...     | 2026-02-20 10:30:00+01   |
-| `uuid-2` | 27  | femenino  | no_se   | 2              | NULL       | C          | Chrome/120 ...      | 2026-02-21 14:15:00+01   |
+| id       | age | sex       | pi_vs_e | which_tests_before | user_alias | test_model | user_agent          | created_at               |
+|----------|-----|-----------|---------|---------------------|------------|------------|---------------------|--------------------------|
+| `uuid-1` | 34  | masculino | si      |                     | pepito23   | A          | Mozilla/5.0 ...     | 2026-02-20 10:30:00+01   |
+| `uuid-2` | 27  | femenino  | no_se   | AC                  | NULL       | C          | Chrome/120 ...      | 2026-02-21 14:15:00+01   |
 
 ---
 
@@ -133,7 +133,7 @@ UNIQUE(user_id, question_n) — Formato: `base_a × 10^exp_b`
 ## Vistas
 
 ### `view_responses_online`
-JOIN de `responses_online` + `users_online` → añade age, sex, pi_vs_e, n_tests_before, user_alias.
+JOIN de `responses_online` + `users_online` → añade age, sex, pi_vs_e, which_tests_before, user_alias.
 
 ### `view_responses_paper`
 JOIN de `responses_paper` + `users_paper` → añade age, sex, time_of_day, favorite_subject, math_mark_last_period, is_physics_chemistry_student, school_type, mood + columna calculada `computed_value = base_a × 10^exp_b`.

@@ -325,7 +325,7 @@ async function finishTest() {
       age: parseInt(metadata.value.edad),
       sex: metadata.value.sexo,
       piVsE: metadata.value.piVsE,
-      nTestsBefore: metadata.value.segundaVez ? metadata.value.modelosYaHechos.length : 0,
+      whichTestsBefore: metadata.value.modelosYaHechos.join(''),
       userAlias: metadata.value.codigoPersonal,
       testModel: modeloAsignado.value
     })
