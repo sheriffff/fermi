@@ -115,6 +115,7 @@ src/components/
 - **Test Models**: Four parallel test models (A, B, C, D) with different questions but equivalent difficulty distribution.
 - **Admin Entry Format**: Paper tests entered as scientific notation (base × 10^exponent) to handle wide range of Fermi estimates.
 - **No Backend API**: Application uses Supabase client-side SDK directly with RLS for security.
+- **Admin Easter Egg**: Triple-click "por" in the footer of HomeView to navigate to `/admin`. There is no visible admin button.
 
 ## Node Version
 

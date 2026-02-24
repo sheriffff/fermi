@@ -3,8 +3,24 @@ import { RouterLink } from 'vue-router'
 import { ref } from 'vue'
 import ImageModal from '@/components/common/ImageModal.vue'
 
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const showImageModal = ref(false)
 const showInfoModal = ref(false)
+
+const porClicks = ref(0)
+let porTimer = null
+function handlePorClick() {
+  porClicks.value++
+  clearTimeout(porTimer)
+  if (porClicks.value >= 3) {
+    porClicks.value = 0
+    router.push('/admin')
+    return
+  }
+  porTimer = setTimeout(() => { porClicks.value = 0 }, 1000)
+}
 </script>
 
 <template>
@@ -126,25 +142,10 @@ const showInfoModal = ref(false)
           </p>
         </RouterLink>
 
-        <!-- Botón Admin -->
-        <RouterLink
-          to="/admin"
-          class="card-elevated group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
-        >
-          <div class="mb-4">
-            <span class="text-5xl group-hover:scale-110 transition-transform duration-300 inline-block">🤠</span>
-          </div>
-          <h3 class="text-xl font-semibold text-neutral-800 mb-2">
-            Soy Admin
-          </h3>
-          <p class="text-neutral-500 text-sm">
-            Panel de administración
-          </p>
-        </RouterLink>
       </div>
 
       <div class="text-center mt-12 text-sm text-neutral-500">
-        por <a href="https://www.linkedin.com/in/sheriff-data" target="_blank" class="text-primary-600 hover:underline">Manuel López Sheriff</a>
+        <span @click.prevent="handlePorClick" class="cursor-default select-none">por</span> <a href="https://www.linkedin.com/in/sheriff-data" target="_blank" class="text-primary-600 hover:underline">Manuel López Sheriff</a>
       </div>
     </div>
   </div>
