@@ -133,15 +133,23 @@ CREATE POLICY "Allow play response inserts" ON responses_play_unique
 
 CREATE POLICY "Allow read download logs" ON logs_download
     FOR SELECT TO anon USING (true);
+CREATE POLICY "Allow delete download logs" ON logs_download
+    FOR DELETE TO anon USING (true);
 
 CREATE POLICY "Allow read online users" ON users_online
     FOR SELECT TO anon USING (true);
+CREATE POLICY "Allow delete online users" ON users_online
+    FOR DELETE TO anon USING (true);
 
 CREATE POLICY "Allow read online responses" ON responses_online
     FOR SELECT TO anon USING (true);
+CREATE POLICY "Allow delete online responses" ON responses_online
+    FOR DELETE TO anon USING (true);
 
 CREATE POLICY "Allow read play responses" ON responses_play_unique
     FOR SELECT TO anon USING (true);
+CREATE POLICY "Allow delete play responses" ON responses_play_unique
+    FOR DELETE TO anon USING (true);
 
 CREATE POLICY "Allow insert paper users" ON users_paper
     FOR INSERT TO anon WITH CHECK (true);
