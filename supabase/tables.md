@@ -41,12 +41,13 @@ logs_download          (sin FK, solo registro)
 | `user_alias`     | VARCHAR(100) | nullable                                                   |
 | `test_model`     | CHAR(1)      | NOT NULL, IN (A, B, C, D)                                  |
 | `user_agent`     | TEXT         | nullable                                                   |
+| `device_type`    | VARCHAR(10)  | nullable, IN (mobile, tablet, desktop)                     |
 | `created_at`     | TIMESTAMPTZ  | default NOW()                                              |
 
-| id       | age | sex       | pi_vs_e | which_tests_before | user_alias | test_model | user_agent          | created_at               |
-|----------|-----|-----------|---------|---------------------|------------|------------|---------------------|--------------------------|
-| `uuid-1` | 34  | masculino | pi      |                     | pepito23   | A          | Mozilla/5.0 ...     | 2026-02-20 10:30:00+01   |
-| `uuid-2` | 27  | NULL      | no_se   | AC                  | NULL       | C          | Chrome/120 ...      | 2026-02-21 14:15:00+01   |
+| id       | age | sex       | pi_vs_e | which_tests_before | user_alias | test_model | device_type | created_at               |
+|----------|-----|-----------|---------|---------------------|------------|------------|-------------|--------------------------|
+| `uuid-1` | 34  | masculino | pi      |                     | pepito23   | A          | desktop     | 2026-02-20 10:30:00+01   |
+| `uuid-2` | 27  | NULL      | no_se   | AC                  | NULL       | C          | mobile      | 2026-02-21 14:15:00+01   |
 
 ---
 
@@ -126,12 +127,13 @@ UNIQUE(user_id, question_n) — Formato: `base_a × 10^exp_b`
 | `response`         | NUMERIC     | nullable           |
 | `time`             | INTEGER     | nullable           |
 | `user_agent`       | TEXT        | nullable           |
+| `device_type`      | VARCHAR(10) | nullable, IN (mobile, tablet, desktop) |
 | `created_at`       | TIMESTAMPTZ | default NOW()      |
 
-| id       | id_play_question | response   | time | user_agent          | created_at               |
-|----------|------------------|------------|------|---------------------|--------------------------|
-| `uuid-pl1`| 7              | 800000     | 60   | Mozilla/5.0 ...     | 2026-02-23 18:00:00+01   |
-| `uuid-pl2`| 3              | 25000000   | 90   | Chrome/120 ...      | 2026-02-23 18:05:00+01   |
+| id       | id_play_question | response   | time | device_type | created_at               |
+|----------|------------------|------------|------|-------------|--------------------------|
+| `uuid-pl1`| 7              | 800000     | 60   | mobile      | 2026-02-23 18:00:00+01   |
+| `uuid-pl2`| 3              | 25000000   | 90   | desktop     | 2026-02-23 18:05:00+01   |
 
 ---
 

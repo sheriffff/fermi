@@ -19,6 +19,13 @@ export const supabase = createClient(
 
 const dbEnabled = import.meta.env.VITE_LOG_TO_DDBB !== 'false'
 
+function getDeviceType() {
+  const ua = navigator.userAgent
+  if (/tablet|ipad|playbook|silk/i.test(ua) || (navigator.maxTouchPoints > 1 && /macintosh/i.test(ua))) return 'tablet'
+  if (/mobi|android|iphone|ipod|phone/i.test(ua)) return 'mobile'
+  return 'desktop'
+}
+
 export async function logDownload() {
   if (!dbEnabled) return
   const { error } = await supabase
@@ -41,7 +48,8 @@ export async function createUserOnline({ age, sex, piVsE, whichTestsBefore, user
       which_tests_before: whichTestsBefore,
       user_alias: userAlias || null,
       test_model: testModel,
-      user_agent: navigator.userAgent
+      user_agent: navigator.userAgent,
+      device_type: getDeviceType()
     })
 
   if (error) throw error
@@ -112,7 +120,8 @@ export async function savePlayResponse({ idPlayQuestion, response, time }) {
       id_play_question: idPlayQuestion,
       response,
       time,
-      user_agent: navigator.userAgent
+      user_agent: navigator.userAgent,
+      device_type: getDeviceType()
     })
 
   if (error) throw error

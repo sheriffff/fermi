@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS users_online (
     user_alias VARCHAR(100),
     test_model CHAR(1) NOT NULL CHECK (test_model IN ('A', 'B', 'C', 'D')),
     user_agent TEXT,
+    device_type VARCHAR(10) CHECK (device_type IN ('mobile', 'tablet', 'desktop')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -98,6 +99,7 @@ CREATE TABLE IF NOT EXISTS responses_play_unique (
     response NUMERIC,
     time INTEGER,
     user_agent TEXT,
+    device_type VARCHAR(10) CHECK (device_type IN ('mobile', 'tablet', 'desktop')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
