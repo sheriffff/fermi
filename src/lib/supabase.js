@@ -115,7 +115,7 @@ export async function saveResponsesPaper(userId, testModel, responses) {
 export async function savePlayResponse({ idPlayQuestion, response, time }) {
   if (!dbEnabled) return
   const { error } = await supabase
-    .from('responses_play_unique')
+    .from('responses_play_random')
     .insert({
       id_play_question: idPlayQuestion,
       response,

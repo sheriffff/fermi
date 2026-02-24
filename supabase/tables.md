@@ -9,7 +9,7 @@
 ```
 users_online  1───N  responses_online
 users_paper   1───N  responses_paper
-responses_play_unique  (sin FK, respuestas sueltas)
+responses_play_random  (sin FK, respuestas sueltas)
 logs_download          (sin FK, solo registro)
 ```
 
@@ -118,7 +118,7 @@ UNIQUE(user_id, question_n) — Formato: `base_a × 10^exp_b`
 
 ---
 
-## 6. `responses_play_unique`
+## 6. `responses_play_random`
 
 | Columna            | Tipo        | Restricciones      |
 |--------------------|-------------|--------------------|

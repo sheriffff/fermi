@@ -89,11 +89,11 @@ CREATE INDEX idx_responses_paper_user ON responses_paper(user_id);
 CREATE INDEX idx_responses_paper_model ON responses_paper(test_model);
 
 -- -----------------------------------------------------
--- 6. TABLE: responses_play_unique
+-- 6. TABLE: responses_play_random
 -- Responses from the "Pregunta Aleatoria" (/random) section of the web app.
 -- Each row is one answer to a single random question (no user registration).
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS responses_play_unique (
+CREATE TABLE IF NOT EXISTS responses_play_random (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     id_play_question INTEGER NOT NULL,
     response NUMERIC,
@@ -112,7 +112,7 @@ ALTER TABLE users_online ENABLE ROW LEVEL SECURITY;
 ALTER TABLE responses_online ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users_paper ENABLE ROW LEVEL SECURITY;
 ALTER TABLE responses_paper ENABLE ROW LEVEL SECURITY;
-ALTER TABLE responses_play_unique ENABLE ROW LEVEL SECURITY;
+ALTER TABLE responses_play_random ENABLE ROW LEVEL SECURITY;
 
 -- -----------------------------------------------------
 -- PUBLIC POLICIES (anonymous forms)
@@ -127,7 +127,7 @@ CREATE POLICY "Allow user registration" ON users_online
 CREATE POLICY "Allow online response inserts" ON responses_online
     FOR INSERT TO anon WITH CHECK (true);
 
-CREATE POLICY "Allow play response inserts" ON responses_play_unique
+CREATE POLICY "Allow play response inserts" ON responses_play_random
     FOR INSERT TO anon WITH CHECK (true);
 
 -- -----------------------------------------------------
@@ -149,9 +149,9 @@ CREATE POLICY "Allow read online responses" ON responses_online
 CREATE POLICY "Allow delete online responses" ON responses_online
     FOR DELETE TO anon USING (true);
 
-CREATE POLICY "Allow read play responses" ON responses_play_unique
+CREATE POLICY "Allow read play responses" ON responses_play_random
     FOR SELECT TO anon USING (true);
-CREATE POLICY "Allow delete play responses" ON responses_play_unique
+CREATE POLICY "Allow delete play responses" ON responses_play_random
     FOR DELETE TO anon USING (true);
 
 CREATE POLICY "Allow insert paper users" ON users_paper

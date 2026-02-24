@@ -7,7 +7,7 @@ Run curl DELETE requests against all 6 tables in this order (responses before us
 2. users_online (where created_at > now() - N minutes)
 3. responses_paper (where created_at > now() - N minutes)
 4. users_paper (where created_at > now() - N minutes)
-5. responses_play_unique (where created_at > now() - N minutes)
+5. responses_play_random (where created_at > now() - N minutes)
 6. logs_download (where created_at > now() - N minutes)
 
 Use the Supabase REST API with these details:
