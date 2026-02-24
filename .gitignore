@@ -5,6 +5,7 @@ utils/pdf_generator/tests
 utils/pdf_generator/docs
 
 supabase/.temp/
+backups/
 codigos_qr
 
 # Logs
