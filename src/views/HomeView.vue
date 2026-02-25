@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import ImageModal from '@/components/common/ImageModal.vue'
 
 import { useRouter } from 'vue-router'
+import { setDbEnabled } from '@/lib/supabase'
 
 const router = useRouter()
 const showImageModal = ref(false)
@@ -21,6 +22,20 @@ function handlePorClick() {
   }
   porTimer = setTimeout(() => { porClicks.value = 0 }, 1000)
 }
+
+const fermiClicks = ref(0)
+let fermiTimer = null
+function handleFermiClick() {
+  fermiClicks.value++
+  clearTimeout(fermiTimer)
+  if (fermiClicks.value >= 3) {
+    fermiClicks.value = 0
+    setDbEnabled(false)
+    document.body.style.backgroundColor = '#fefce8'
+    return
+  }
+  fermiTimer = setTimeout(() => { fermiClicks.value = 0 }, 1000)
+}
 </script>
 
 <template>
@@ -29,7 +44,7 @@ function handlePorClick() {
       <!-- Logo / Título -->
       <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-neutral-800 mb-4">
-          Problemas de Fermi
+          Problemas de <span @click.prevent="handleFermiClick" class="cursor-default select-none">Fermi</span>
         </h1>
         <p class="text-xl text-neutral-600 leading-relaxed">
           Investigando sobre nuestra capacidad de estimación

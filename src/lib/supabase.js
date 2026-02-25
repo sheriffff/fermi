@@ -17,7 +17,11 @@ export const supabase = createClient(
   }
 )
 
-const dbEnabled = import.meta.env.VITE_LOG_TO_DDBB !== 'false'
+let dbEnabled = import.meta.env.VITE_LOG_TO_DDBB !== 'false'
+
+export function setDbEnabled(value) {
+  dbEnabled = value
+}
 
 function getDeviceType() {
   const ua = navigator.userAgent
