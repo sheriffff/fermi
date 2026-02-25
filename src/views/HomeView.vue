@@ -44,10 +44,10 @@ function handleFermiClick() {
       <!-- Logo / Título -->
       <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-neutral-800 mb-4">
-          Problemas de <span @click.prevent="handleFermiClick" class="cursor-default select-none">Fermi</span>
+          🎯 Gymkana de <span @click.prevent="handleFermiClick" class="cursor-default select-none">Fermi 🎯</span>
         </h1>
         <p class="text-xl text-neutral-600 leading-relaxed">
-          Investigando sobre nuestra capacidad de estimación
+          Explorando el arte de estimar
         </p>
       </div>
 
@@ -118,7 +118,7 @@ function handleFermiClick() {
           class="card-elevated group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
         >
           <div class="mb-4">
-            <span class="text-5xl group-hover:scale-110 transition-transform duration-300 inline-block">🎯</span>
+            <span class="text-5xl group-hover:scale-110 transition-transform duration-300 inline-block">☝️</span>
           </div>
           <h3 class="text-xl font-semibold text-neutral-800 mb-2">
             Quiero Participar
