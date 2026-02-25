@@ -244,7 +244,7 @@ async function handleSubmit() {
               Si tú dices 1.000 y el resultado es 100.000, tu error logarítmico es 2.
             </p>
             <p class="text-neutral-600 leading-relaxed mb-4">
-              En los problemas de Fermi, lo que importa no es el resultado exacto, sino el <strong>orden de magnitud</strong> (el número de cifras). Por eso medimos el error en esta escala logarítmica.
+              En los problemas de Fermi, lo que importa no es el resultado exacto, sino el <strong>orden de magnitud</strong> (el número de cifras). Por eso medimos el error en esta escala, la logarítmica.
             </p>
 
             <div class="bg-neutral-50 rounded-xl p-4 sm:p-5 mb-5">

@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router'
 import QRCode from 'qrcode'
 import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
-import { createUserOnline, saveResponsesOnline, getOnlineDemographics } from '@/lib/supabase'
+import { createUserOnline, saveResponsesOnline } from '@/lib/supabase'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import FermiInput from '@/components/common/FermiInput.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
@@ -58,45 +58,6 @@ const metadata = ref({
 // Generar opciones de edad desde 4 hasta 99
 const edadOptions = Array.from({ length: 96 }, (_, i) => i + 4)
 
-const histBins = ref([])
-const histMax = ref(1)
-const sexCounts = ref({ masculino: 0, femenino: 0, otro: 0, sin: 0 })
-const sexTotal = ref(0)
-
-async function loadDemographics() {
-  try {
-    const rows = await getOnlineDemographics()
-    if (rows.length === 0) return
-
-    const ages = rows.map(r => r.age)
-    const bins = []
-    for (let start = 4; start < 100; start += 5) {
-      const end = Math.min(start + 4, 99)
-      const count = ages.filter(a => a >= start && a <= end).length
-      bins.push({ start, end, count })
-    }
-    histBins.value = bins
-    histMax.value = Math.max(...bins.map(b => b.count), 1)
-
-    const sc = { masculino: 0, femenino: 0, otro: 0, sin: 0 }
-    for (const r of rows) {
-      if (r.sex === 'masculino') sc.masculino++
-      else if (r.sex === 'femenino') sc.femenino++
-      else if (r.sex === 'otro') sc.otro++
-      else sc.sin++
-    }
-    sexCounts.value = sc
-    sexTotal.value = rows.length
-  } catch (e) {
-    // silently fail
-  }
-}
-
-function selectedBinIndex() {
-  const age = Number(metadata.value.edad)
-  return histBins.value.findIndex(b => age >= b.start && age <= b.end)
-}
-
 const sexoOptions = [
   { value: 'masculino', label: 'Masculino' },
   { value: 'femenino', label: 'Femenino' },
@@ -114,8 +75,6 @@ const primerasPreguntasPorModelo = ref({})
 
 // Cargar las primeras preguntas de cada modelo al montar
 onMounted(async () => {
-  loadDemographics()
-
   const tests = await getAvailableTests()
   modeloOptions.value = tests
 
@@ -411,9 +370,6 @@ async function finishTest() {
             <h1 class="text-3xl font-bold text-neutral-800">
               ¡Juguemos a Estimar! 🎯
             </h1>
-            <p class="text-neutral-600 mt-2">
-              Un test de 8 preguntas sobre estimación de cantidades
-            </p>
           </div>
 
           <!-- Formulario -->
@@ -457,63 +413,12 @@ async function finishTest() {
                 </div>
               </div>
 
-              <div v-if="histBins.length > 0 || sexTotal > 0" class="hidden md:grid grid-cols-2 gap-4">
-                <div v-if="histBins.length > 0">
-                  <div class="age-histogram">
-                    <div
-                      v-for="(bin, i) in histBins"
-                      :key="bin.start"
-                      class="age-bar-wrapper group"
-                    >
-                      <div class="age-tooltip">{{ bin.start }}–{{ bin.end }} años · {{ bin.count }} pers.</div>
-                      <span v-if="selectedBinIndex() === i" class="age-you-label">TÚ</span>
-                      <div
-                        v-if="selectedBinIndex() !== i"
-                        class="age-bar"
-                        :style="{ height: Math.max((bin.count / histMax) * 70, 4) + '%' }"
-                      ></div>
-                      <div
-                        v-else
-                        class="age-you-pin"
-                      >
-                        <div class="age-you-dot"></div>
-                        <div class="age-you-stick"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <p class="text-[10px] text-neutral-400 text-center mt-1">Distribución de edades de los participantes</p>
-                </div>
-
-                <div v-if="sexTotal > 0" class="flex items-end gap-2">
-                  <div
-                    v-for="bar in [
-                      { label: 'M', count: sexCounts.masculino, color: 'bg-blue-300' },
-                      { label: 'F', count: sexCounts.femenino, color: 'bg-pink-300' },
-                      { label: 'Otro', count: sexCounts.otro, color: 'bg-purple-300' }
-                    ]"
-                    :key="bar.label"
-                    class="flex-1 flex flex-col items-center gap-1 group relative"
-                  >
-                    <div class="sex-tooltip">{{ bar.label }} · {{ bar.count }} pers.</div>
-                    <div class="sex-bar-container">
-                      <div
-                        class="sex-bar rounded-t"
-                        :class="bar.color"
-                        :style="{ height: Math.max((bar.count / Math.max(sexCounts.masculino, sexCounts.femenino, sexCounts.otro, 1)) * 100, 4) + '%' }"
-                      ></div>
-                    </div>
-                    <span class="text-[10px] text-neutral-500 font-medium">{{ bar.label }}</span>
-                  </div>
-                  <div class="sr-only">Distribución de sexo de los participantes</div>
-                </div>
-              </div>
-
               <div>
                 <label class="label">Alias <span class="font-normal text-neutral-400">(opcional)</span></label>
                 <input
                   v-model="metadata.codigoPersonal"
                   type="text"
-                  class="input"
+                  class="input max-w-[200px]"
                   placeholder="Einstein42"
                   maxlength="20"
                 />
@@ -546,7 +451,7 @@ async function finishTest() {
                 </label>
               </div>
               <p class="text-xs text-neutral-400 italic">
-                Me ayuda a calibrar tu familiaridad con las mates.
+                Me ayuda a calibrar tu familiaridad con las matemáticas.
               </p>
             </div>
 
@@ -608,7 +513,7 @@ async function finishTest() {
               :disabled="!isMetadataValid || isLoading"
             >
               <span v-if="isLoading">Cargando...</span>
-              <span v-else>Ver Instrucciones →</span>
+              <span v-else>Vamos →</span>
             </button>
           </form>
         </div>
@@ -758,65 +663,5 @@ async function finishTest() {
   20%, 40%, 60%, 80% { transform: translateX(2px) scale(1.25); }
 }
 
-.age-histogram {
-  @apply flex items-end gap-1;
-  height: 56px;
-}
-
-.age-bar-wrapper {
-  @apply flex-1 flex flex-col items-center justify-end min-w-0 relative;
-  height: 100%;
-}
-
-.age-tooltip {
-  @apply absolute bottom-full mb-1 px-2 py-1 text-[10px] text-white bg-neutral-700 rounded whitespace-nowrap;
-  @apply opacity-0 pointer-events-none transition-opacity duration-150 z-10;
-}
-
-.age-bar-wrapper:hover .age-tooltip {
-  @apply opacity-100;
-}
-
-.age-bar {
-  @apply w-full bg-blue-200 rounded-t;
-  transition: height 0.25s ease;
-}
-
-.age-you-label {
-  @apply text-[10px] font-bold text-green-600 leading-none mb-0.5;
-}
-
-.age-you-pin {
-  @apply flex flex-col items-center;
-}
-
-.age-you-dot {
-  @apply w-3 h-3 rounded-full bg-green-500;
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
-}
-
-.age-you-stick {
-  @apply w-0.5 bg-green-400 rounded-full;
-  height: 20px;
-}
-
-.sex-tooltip {
-  @apply absolute bottom-full mb-1 px-2 py-1 text-[10px] text-white bg-neutral-700 rounded whitespace-nowrap;
-  @apply opacity-0 pointer-events-none transition-opacity duration-150 z-10;
-}
-
-.group:hover .sex-tooltip {
-  @apply opacity-100;
-}
-
-.sex-bar-container {
-  @apply w-full flex items-end;
-  height: 56px;
-}
-
-.sex-bar {
-  @apply w-full;
-  transition: height 0.25s ease;
-}
 </style>
 

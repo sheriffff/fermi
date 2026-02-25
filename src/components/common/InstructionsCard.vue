@@ -60,13 +60,22 @@ const warningTimeText = computed(() => {
     <div class="card-elevated space-y-6">
       <div class="space-y-4">
         <div class="flex gap-4 items-start">
+          <span class="text-2xl">⚡</span>
+          <div>
+            <p class="font-semibold text-neutral-800">¿Tienes 10 minutitos?</p>
+            <p class="text-sm text-neutral-500">
+              Si ahora no los tienes, mejor vuelve otro día.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-4 items-start">
           <span class="text-2xl">⏱️</span>
           <div>
-            <p class="font-semibold text-neutral-800">Tienes {{ questionTimeText }} por pregunta</p>
+            <p class="font-semibold text-neutral-800">Son 8 preguntas, máximo {{ questionTimeText }} cada una</p>
             <p class="text-sm text-neutral-500">
-              Puedes pulsar el <span class="text-lg">⏱️</span> de arriba para ver/ocultar el tiempo.
+              Pulsa el <span class="text-lg">⏱️</span> de arriba para ver el tiempo.
               Te avisaré con un sonido cuando queden {{ warningTimeText }}.
-              Si no contestas a tiempo, pasarás automáticamente a la siguiente pregunta.
             </p>
           </div>
         </div>
@@ -74,10 +83,9 @@ const warningTimeText = computed(() => {
         <div class="flex gap-4 items-start">
           <span class="text-2xl">🔢</span>
           <div>
-            <p class="font-semibold text-neutral-800">Escribe números grandes fácilmente</p>
+            <p class="font-semibold text-neutral-800">Números grandes</p>
             <p class="text-sm text-neutral-500">
-              Usa el botón <span class="font-mono bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded">×1000</span> para multiplicar rápidamente.
-              Hay otro botón <span class="font-mono bg-secondary-100 text-secondary-600 px-1.5 py-0.5 rounded">/1000</span> para dividir rápidamente.
+              Usa, si quieres, los botones <span class="font-mono bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded">×1000</span> y <span class="font-mono bg-secondary-100 text-secondary-600 px-1.5 py-0.5 rounded">/1000</span>.
             </p>
           </div>
         </div>
