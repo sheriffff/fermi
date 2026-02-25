@@ -107,7 +107,7 @@ function handleFermiClick() {
       >
         <span class="text-4xl md:text-5xl inline-block group-hover:scale-110 transition-transform duration-300 mb-3">☝️</span>
         <h3 class="text-xl md:text-2xl font-bold mb-1">Quiero Participar</h3>
-        <p class="text-emerald-600 text-sm">Pon a prueba tu intuición (~15 min)</p>
+        <p class="text-emerald-600 text-sm">Pon a prueba tu capacidad de estimación (~10 min)</p>
       </RouterLink>
 
       <!-- Acciones secundarias -->
