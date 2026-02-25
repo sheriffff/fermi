@@ -237,20 +237,15 @@ ORDER BY r.user_id, r.question_n;
 -- =====================================================
 -- STORAGE: scribbles bucket
 -- =====================================================
--- Create bucket "scribbles" from Supabase dashboard (Storage → New bucket)
--- Set it as a non-public bucket.
---
--- Storage policies (run in SQL Editor):
---
--- Allow anonymous uploads:
--- CREATE POLICY "Allow anon scribble uploads"
--- ON storage.objects FOR INSERT TO anon
--- WITH CHECK (bucket_id = 'scribbles');
---
--- Allow authenticated reads:
--- CREATE POLICY "Allow auth scribble reads"
--- ON storage.objects FOR SELECT TO authenticated
--- USING (bucket_id = 'scribbles');
+-- Bucket "scribbles" created as non-public from Supabase dashboard.
+
+CREATE POLICY "Allow anon scribble uploads"
+ON storage.objects FOR INSERT TO anon
+WITH CHECK (bucket_id = 'scribbles');
+
+CREATE POLICY "Allow auth scribble reads"
+ON storage.objects FOR SELECT TO authenticated
+USING (bucket_id = 'scribbles');
 
 -- =====================================================
 -- END SCHEMA

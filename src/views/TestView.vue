@@ -632,17 +632,14 @@ async function finishTest() {
               ¡Gracias por participar!
             </h1>
 
-            <p class="text-neutral-600 mb-8 max-w-md mx-auto">
-              Tus respuestas han sido guardadas correctamente.
-              Tu contribución es muy valiosa para esta investigación.
-            </p>
-
-            <div v-if="qrDataUrl" class="mb-8 p-6 bg-neutral-50 rounded-2xl inline-block">
+            <div v-if="qrDataUrl" class="mb-8 p-6 rounded-2xl inline-block">
               <p class="text-neutral-700 font-medium mb-3">
-                ¿Hiciste garabatos? Escanea para subir fotos
+                ¿A ver tu hoja en sucio?
+              </p>
+              <p class="text-neutral-700 font-medium mb-3">
+                Échale una foto, haré un collage :)
               </p>
               <img :src="qrDataUrl" alt="QR para subir fotos" class="mx-auto" />
-              <p class="text-xs text-neutral-400 mt-2">Abre la cámara de tu móvil y apunta al QR</p>
             </div>
 
             <div>
