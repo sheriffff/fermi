@@ -46,26 +46,16 @@ function handleFermiClick() {
         <h1 class="text-4xl font-bold text-neutral-800 mb-4">
           🎯 Gymkana de <span @click.prevent="handleFermiClick" class="cursor-default select-none">Fermi 🎯</span>
         </h1>
-        <p class="text-xl text-neutral-600 leading-relaxed">
+        <p class="text-xl text-neutral-600 leading-relaxed mb-3">
           Explorando el arte de estimar
         </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div
-          class="card cursor-pointer text-center"
-          @click="showInfoModal = true"
-        >
-          <div class="text-2xl mb-1">🤔</div>
-          <span class="text-lg font-semibold text-neutral-700">¿De qué va esto?</span>
-        </div>
-
-        <div
-          class="card cursor-pointer text-center"
-          @click="showImageModal = true"
-        >
-          <div class="text-2xl mb-1">💡</div>
-          <span class="text-lg font-semibold text-neutral-700">¿Cómo empezó todo?</span>
+        <div class="flex justify-center gap-6 text-lg text-neutral-400">
+          <button @click="showInfoModal = true" class="hover:text-primary-600 transition-colors cursor-pointer">
+            🤔 ¿De qué va esto?
+          </button>
+          <button @click="showImageModal = true" class="hover:text-primary-600 transition-colors cursor-pointer">
+            💡 ¿Cómo empezó todo?
+          </button>
         </div>
       </div>
 
