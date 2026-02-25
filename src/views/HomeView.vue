@@ -49,7 +49,7 @@ function handleFermiClick() {
         <p class="text-xl text-neutral-600 leading-relaxed mb-3">
           Explorando el arte de estimar
         </p>
-        <div class="flex justify-center gap-4 text-sm">
+        <div class="flex justify-center gap-4 text-">
           <button @click="showInfoModal = true" class="text-neutral-500 hover:text-primary-600 underline underline-offset-2 decoration-neutral-300 hover:decoration-primary-600 transition-colors cursor-pointer">
             🤔 ¿De qué va esto?
           </button>
