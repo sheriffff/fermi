@@ -40,7 +40,6 @@ async function shareLink() {
 // Aviso de 30 segundos
 const showTimeWarning = ref(false)
 const warningPlayed = ref(false)
-const showTimer = ref(false)
 const timerShaking = ref(false)
 
 // ============================================
@@ -197,9 +196,6 @@ function playWarningSound() {
   }
 }
 
-function toggleTimer() {
-  showTimer.value = !showTimer.value
-}
 
 // ============================================
 // FORMATEADOR DE NÚMEROS
@@ -268,7 +264,6 @@ function startQuestions() {
   showTimeWarning.value = false
   warningPlayed.value = false
   timerShaking.value = false
-  showTimer.value = false
   resetTimer(QUESTION_TIME)
   startTimer()
 }
@@ -532,18 +527,13 @@ async function finishTest() {
             <span class="text-sm text-neutral-500 font-medium">
               Pregunta {{ questionNumber }} de {{ totalQuestions }}
             </span>
-            <button
-              @click="toggleTimer"
+            <span
               class="timer-toggle"
               :class="{ 'timer-shaking': timerShaking }"
             >
               <span class="timer-icon">⏱️</span>
-              <Transition name="fade">
-                <span v-if="showTimer || showTimeWarning" class="timer-value">
-                  {{ formattedTime }}
-                </span>
-              </Transition>
-            </button>
+              <span class="timer-value">{{ formattedTime }}</span>
+            </span>
           </div>
 
           <div class="progress-bar">
@@ -636,8 +626,8 @@ async function finishTest() {
 @reference "../assets/main.css";
 
 .timer-toggle {
-  @apply flex items-center gap-1 px-2 py-1 rounded-lg cursor-pointer;
-  @apply bg-neutral-100 hover:bg-neutral-200 transition-all duration-200;
+  @apply flex items-center gap-1 px-2 py-1 rounded-lg;
+  @apply bg-neutral-100 transition-all duration-200;
 }
 
 .timer-icon {

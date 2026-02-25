@@ -151,6 +151,13 @@ async function handleSubmit() {
           >
             Ver resultado
           </button>
+
+          <button
+            @click="getNewQuestion"
+            class="btn-outline btn-large w-full"
+          >
+            Paso, otra pregunta
+          </button>
         </div>
 
         <div v-else class="space-y-5">

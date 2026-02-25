@@ -62,9 +62,19 @@ const warningTimeText = computed(() => {
         <div class="flex gap-4 items-start">
           <span class="text-2xl">⚡</span>
           <div>
-            <p class="font-semibold text-neutral-800">¿Tienes 10 minutitos?</p>
+            <p class="font-semibold text-neutral-800">¿Tienes 10 minutos?</p>
             <p class="text-sm text-neutral-500">
-              Si ahora no los tienes, mejor vuelve otro día.
+              Si ahora no los tienes, mejor vuelve en otro momento.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-4 items-start">
+          <span class="text-2xl">8️⃣</span>
+          <div>
+            <p class="font-semibold text-neutral-800">Son 8 preguntas</p>
+            <p class="text-sm text-neutral-500">
+              Una vez respondas, no podrás volver a la pregunta anterior.
             </p>
           </div>
         </div>
@@ -72,9 +82,8 @@ const warningTimeText = computed(() => {
         <div class="flex gap-4 items-start">
           <span class="text-2xl">⏱️</span>
           <div>
-            <p class="font-semibold text-neutral-800">Son 8 preguntas, máximo {{ questionTimeText }} cada una</p>
+            <p class="font-semibold text-neutral-800">Máximo {{ questionTimeText }} por pregunta</p>
             <p class="text-sm text-neutral-500">
-              Pulsa el <span class="text-lg">⏱️</span> de arriba para ver el tiempo.
               Te avisaré con un sonido cuando queden {{ warningTimeText }}.
             </p>
           </div>
