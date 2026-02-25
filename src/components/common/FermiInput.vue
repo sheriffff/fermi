@@ -13,27 +13,29 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'submit'])
 
 const { formatNumber, cleanInput } = useNumberFormat()
 
 const inputRef = ref(null)
 
 function handleKeydown(event) {
-  // Permitir: backspace, delete, tab, escape, enter, arrows
-  const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    emit('submit')
+    return
+  }
 
-  // Permitir Ctrl/Cmd + A, C, V, X (select all, copy, paste, cut)
+  const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
+
   if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'v', 'x'].includes(event.key.toLowerCase())) {
     return
   }
 
-  // Si es una tecla permitida, dejarla pasar
   if (allowedKeys.includes(event.key)) {
     return
   }
 
-  // Solo permitir números (0-9)
   if (!/^[0-9]$/.test(event.key)) {
     event.preventDefault()
   }
@@ -134,7 +136,7 @@ defineExpose({
           inputmode="numeric"
           pattern="[0-9]*"
           class="input-large"
-          placeholder="Escribe tu estimación"
+          placeholder="Tu estimación"
           autocomplete="off"
           :disabled="disabled"
           maxlength="21"

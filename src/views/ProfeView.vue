@@ -20,7 +20,7 @@ function handleDownload() {
 </script>
 
 <template>
-  <div class="min-h-screen p-8">
+  <div class="min-h-screen p-4 sm:p-6 md:p-8">
     <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
       ← Volver al inicio
     </RouterLink>

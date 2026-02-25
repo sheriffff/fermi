@@ -397,7 +397,7 @@ async function finishTest() {
 </script>
 
 <template>
-  <div class="min-h-screen p-8">
+  <div class="min-h-screen p-4 sm:p-6 md:p-8">
     <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
       ← Volver al inicio
     </RouterLink>
@@ -423,8 +423,8 @@ async function finishTest() {
             <div class="card space-y-5">
               <h2 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider">Sobre ti</h2>
 
-              <div class="grid grid-cols-3 gap-4">
-                <div class="col-span-1">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="sm:col-span-1">
                   <label class="label">Edad</label>
                   <select v-model="metadata.edad" class="select" required>
                     <option value="" disabled>—</option>
@@ -438,7 +438,7 @@ async function finishTest() {
                   </select>
                 </div>
 
-                <div class="col-span-2">
+                <div class="sm:col-span-2">
                   <label class="label">Sexo <span class="font-normal text-neutral-400">(opcional)</span></label>
                   <div class="flex gap-2">
                     <button
@@ -457,7 +457,7 @@ async function finishTest() {
                 </div>
               </div>
 
-              <div v-if="histBins.length > 0 || sexTotal > 0" class="grid grid-cols-2 gap-4">
+              <div v-if="histBins.length > 0 || sexTotal > 0" class="hidden md:grid grid-cols-2 gap-4">
                 <div v-if="histBins.length > 0">
                   <div class="age-histogram">
                     <div
@@ -481,7 +481,7 @@ async function finishTest() {
                       </div>
                     </div>
                   </div>
-                  <p class="text-[10px] text-neutral-400 text-center mt-1">Distribución de Edades</p>
+                  <p class="text-[10px] text-neutral-400 text-center mt-1">Distribución de edades de los participantes</p>
                 </div>
 
                 <div v-if="sexTotal > 0" class="flex items-end gap-2">
@@ -661,7 +661,7 @@ async function finishTest() {
                 </p>
               </div>
 
-              <FermiInput ref="fermiInputRef" v-model="currentAnswer" />
+              <FermiInput ref="fermiInputRef" v-model="currentAnswer" @submit="isAnswerComplete && handleSubmitAnswer()" />
 
               <div class="mt-8">
                 <button

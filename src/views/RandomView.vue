@@ -100,7 +100,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen p-8">
+  <div class="min-h-screen p-4 sm:p-6 md:p-8">
     <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
       ← Volver al inicio
     </RouterLink>
@@ -129,6 +129,7 @@ async function handleSubmit() {
           <FermiInput
             ref="fermiInputRef"
             v-model="currentAnswer"
+            @submit="isAnswerComplete && handleSubmit()"
           />
 
           <button
@@ -141,7 +142,7 @@ async function handleSubmit() {
         </div>
 
         <div v-else class="space-y-5">
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="bg-neutral-50 rounded-2xl p-5 text-center">
               <p class="text-sm text-neutral-500 mb-2">Tu estimación</p>
               <p class="text-2xl font-bold text-neutral-800">
@@ -211,10 +212,10 @@ async function handleSubmit() {
           @click.self="showLogErrorModal = false"
         >
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-          <div class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 transform">
+          <div class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-8 transform">
             <button
               @click="showLogErrorModal = false"
-              class="absolute -top-3 -right-3 bg-white rounded-full p-2 shadow-lg text-neutral-400 hover:text-neutral-600 transition-colors"
+              class="absolute top-3 right-3 bg-neutral-100 rounded-full p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-200 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

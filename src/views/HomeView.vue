@@ -39,7 +39,7 @@ function handleFermiClick() {
 </script>
 
 <template>
-  <div class="min-h-screen flex justify-center p-8 pt-16">
+  <div class="min-h-screen flex justify-center p-4 pt-12 sm:p-6 sm:pt-14 md:p-8 md:pt-16">
     <div class="max-w-4xl w-full">
       <!-- Logo / Título -->
       <div class="text-center mb-12">
@@ -69,10 +69,10 @@ function handleFermiClick() {
             @click.self="showInfoModal = false"
           >
             <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-            <div class="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 transform">
+            <div class="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-8 transform">
               <button
                 @click="showInfoModal = false"
-                class="absolute -top-3 -right-3 bg-white rounded-full p-2 shadow-lg text-neutral-400 hover:text-neutral-600 transition-colors"
+                class="absolute top-3 right-3 bg-neutral-100 rounded-full p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-200 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
