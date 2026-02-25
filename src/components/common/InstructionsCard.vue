@@ -77,7 +77,7 @@ const warningTimeText = computed(() => {
             <p class="font-semibold text-neutral-800">Escribe números grandes fácilmente</p>
             <p class="text-sm text-neutral-500">
               Usa el botón <span class="font-mono bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded">×1000</span> para multiplicar rápidamente.
-              Hay otro botón <span class="font-mono bg-secondary-100 text-secondary-600 px-1.5 py-0.5 rounded">÷1000</span> para dividir rápidamente.
+              Hay otro botón <span class="font-mono bg-secondary-100 text-secondary-600 px-1.5 py-0.5 rounded">/1000</span> para dividir rápidamente.
             </p>
           </div>
         </div>
@@ -95,7 +95,7 @@ const warningTimeText = computed(() => {
         <div class="flex gap-4 items-start">
           <span class="text-2xl">🎯</span>
           <div>
-            <p class="font-semibold text-neutral-800">Esto no es un exámen.</p>
+            <p class="font-semibold text-neutral-800">Esto no es un examen.</p>
             <p class="text-sm text-neutral-500">
               Y es anónimo. No busques información. Disfruta!
             </p>

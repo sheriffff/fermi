@@ -156,6 +156,15 @@ export async function getOnlineAges() {
   return data.map(r => r.age)
 }
 
+export async function getOnlineDemographics() {
+  const { data, error } = await supabase
+    .from('users_online')
+    .select('age, sex')
+
+  if (error) throw error
+  return data
+}
+
 export async function exportTable(table) {
   const { data, error } = await supabase
     .from(table)

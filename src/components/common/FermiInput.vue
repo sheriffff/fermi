@@ -141,7 +141,7 @@ defineExpose({
         />
 
         <div class="text-center">
-          <span class="number-display">
+          <span class="number-display" aria-live="polite">
             {{ formattedAnswer }}
           </span>
         </div>
@@ -160,7 +160,7 @@ defineExpose({
           :disabled="disabled || !canDivide"
           class="divide-btn"
         >
-          ÷1000
+          /1000
         </button>
       </div>
 
@@ -180,7 +180,7 @@ defineExpose({
 }
 
 .fermi-layout {
-  @apply flex items-start gap-3;
+  @apply flex flex-col sm:flex-row items-stretch sm:items-start gap-3;
 }
 
 .fermi-center {
@@ -188,13 +188,13 @@ defineExpose({
 }
 
 .fermi-buttons {
-  @apply flex flex-col gap-2 flex-shrink-0;
-  width: 70px;
+  @apply flex flex-row sm:flex-col gap-2 flex-shrink-0;
+  @apply w-full sm:w-[70px];
 }
 
 .multiply-btn,
 .divide-btn {
-  @apply w-full py-2 rounded-lg font-semibold text-sm;
+  @apply flex-1 sm:flex-none w-full py-2 rounded-lg font-semibold text-sm;
   @apply bg-primary-500 text-white;
   @apply hover:bg-primary-600;
   @apply disabled:opacity-40 disabled:cursor-not-allowed;

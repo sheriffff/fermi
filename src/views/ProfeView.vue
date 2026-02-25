@@ -1,13 +1,21 @@
 <script setup>
+import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { logDownload } from '@/lib/supabase'
 
+const downloadState = ref('idle') // 'idle' | 'downloading' | 'done'
+
 function handleDownload() {
+  downloadState.value = 'downloading'
   const link = document.createElement('a')
   link.href = '/profe_instrucciones_y_tests.pdf'
   link.download = 'profe_instrucciones_y_tests.pdf'
   link.click()
   logDownload().catch(() => {})
+  setTimeout(() => {
+    downloadState.value = 'done'
+    setTimeout(() => { downloadState.value = 'idle' }, 3000)
+  }, 800)
 }
 </script>
 
@@ -42,9 +50,16 @@ function handleDownload() {
 
         <button
           @click="handleDownload"
-          class="btn-primary btn-large w-full"
+          class="btn-large w-full transition-all duration-300"
+          :class="{
+            'btn-primary': downloadState !== 'done',
+            'bg-emerald-500 text-white rounded-2xl font-medium': downloadState === 'done'
+          }"
+          :disabled="downloadState === 'downloading'"
         >
-          Descargar PDF
+          <span v-if="downloadState === 'idle'">Descargar PDF</span>
+          <span v-else-if="downloadState === 'downloading'">Descargando...</span>
+          <span v-else>Descargado ✓</span>
         </button>
       </div>
     </div>

@@ -43,8 +43,8 @@ function handleFermiClick() {
     <div class="max-w-4xl w-full">
       <!-- Logo / Título -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-neutral-800 mb-4">
-          🎯 Gymkana de <span @click.prevent="handleFermiClick" class="cursor-default select-none">Fermi 🎯</span>
+        <h1 class="text-2xl sm:text-4xl font-bold text-neutral-800 mb-4">
+          <span aria-hidden="true">🎯 </span>Gymkana de <span @click.prevent="handleFermiClick" class="cursor-default select-none">Fermi</span><span aria-hidden="true"> 🎯</span>
         </h1>
         <p class="text-xl text-neutral-600 leading-relaxed mb-3">
           Explorando el arte de estimar

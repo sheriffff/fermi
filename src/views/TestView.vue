@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router'
 import QRCode from 'qrcode'
 import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
-import { createUserOnline, saveResponsesOnline, getOnlineAges } from '@/lib/supabase'
+import { createUserOnline, saveResponsesOnline, getOnlineDemographics } from '@/lib/supabase'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import FermiInput from '@/components/common/FermiInput.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
@@ -60,11 +60,15 @@ const edadOptions = Array.from({ length: 96 }, (_, i) => i + 4)
 
 const histBins = ref([])
 const histMax = ref(1)
+const sexCounts = ref({ masculino: 0, femenino: 0, otro: 0, sin: 0 })
+const sexTotal = ref(0)
 
-async function loadAgeHistogram() {
+async function loadDemographics() {
   try {
-    const ages = await getOnlineAges()
-    if (ages.length === 0) return
+    const rows = await getOnlineDemographics()
+    if (rows.length === 0) return
+
+    const ages = rows.map(r => r.age)
     const bins = []
     for (let start = 4; start < 100; start += 5) {
       const end = Math.min(start + 4, 99)
@@ -73,6 +77,16 @@ async function loadAgeHistogram() {
     }
     histBins.value = bins
     histMax.value = Math.max(...bins.map(b => b.count), 1)
+
+    const sc = { masculino: 0, femenino: 0, otro: 0, sin: 0 }
+    for (const r of rows) {
+      if (r.sex === 'masculino') sc.masculino++
+      else if (r.sex === 'femenino') sc.femenino++
+      else if (r.sex === 'otro') sc.otro++
+      else sc.sin++
+    }
+    sexCounts.value = sc
+    sexTotal.value = rows.length
   } catch (e) {
     // silently fail
   }
@@ -100,7 +114,7 @@ const primerasPreguntasPorModelo = ref({})
 
 // Cargar las primeras preguntas de cada modelo al montar
 onMounted(async () => {
-  loadAgeHistogram()
+  loadDemographics()
 
   const tests = await getAvailableTests()
   modeloOptions.value = tests
@@ -403,16 +417,17 @@ async function finishTest() {
           </div>
 
           <!-- Formulario -->
-          <div class="card">
-            <form @submit.prevent="startTest" class="space-y-6">
+          <form @submit.prevent="startTest" class="space-y-4">
 
-              <!-- Edad y Sexo en 2 columnas -->
-              <div class="grid grid-cols-2 gap-4">
-                <!-- Columna 1: Edad -->
-                <div>
+            <!-- Sobre ti -->
+            <div class="card space-y-5">
+              <h2 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider">Sobre ti</h2>
+
+              <div class="grid grid-cols-3 gap-4">
+                <div class="col-span-1">
                   <label class="label">Edad</label>
                   <select v-model="metadata.edad" class="select" required>
-                    <option value="" disabled>Selecciona tu edad</option>
+                    <option value="" disabled>—</option>
                     <option
                       v-for="edad in edadOptions"
                       :key="edad"
@@ -421,8 +436,30 @@ async function finishTest() {
                       {{ edad }}
                     </option>
                   </select>
-                  <div v-if="metadata.edad && histBins.length > 0" class="mt-2">
-                    <div class="age-histogram">
+                </div>
+
+                <div class="col-span-2">
+                  <label class="label">Sexo <span class="font-normal text-neutral-400">(opcional)</span></label>
+                  <div class="flex gap-2">
+                    <button
+                      v-for="option in sexoOptions"
+                      :key="option.value"
+                      type="button"
+                      @click="metadata.sexo = metadata.sexo === option.value ? '' : option.value"
+                      class="flex-1 py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 cursor-pointer"
+                      :class="metadata.sexo === option.value
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-neutral-200 text-neutral-600 hover:border-neutral-300'"
+                    >
+                      {{ option.label }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="histBins.length > 0 || sexTotal > 0" class="grid grid-cols-2 gap-4">
+                <div v-if="histBins.length > 0">
+                  <div class="age-histogram">
                     <div
                       v-for="(bin, i) in histBins"
                       :key="bin.start"
@@ -433,7 +470,7 @@ async function finishTest() {
                       <div
                         v-if="selectedBinIndex() !== i"
                         class="age-bar"
-                        :style="{ height: (bin.count / histMax) * 70 + '%' }"
+                        :style="{ height: Math.max((bin.count / histMax) * 70, 4) + '%' }"
                       ></div>
                       <div
                         v-else
@@ -443,132 +480,137 @@ async function finishTest() {
                         <div class="age-you-stick"></div>
                       </div>
                     </div>
-                    </div>
-                    <p class="text-[10px] text-neutral-400 text-center mt-1 italic">Distribución de edades de los participantes hasta ahora</p>
                   </div>
+                  <p class="text-[10px] text-neutral-400 text-center mt-1">Distribución de Edades</p>
                 </div>
 
-                <!-- Columna 2: Sexo -->
-                <div>
-                  <label class="label">Sexo (opcional)</label>
-                  <select v-model="metadata.sexo" class="select">
-                    <option value="">Selecciona</option>
-                    <option
-                      v-for="option in sexoOptions"
-                      :key="option.value"
-                      :value="option.value"
-                    >
-                      {{ option.label }}
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Pi vs E - ancho completo -->
-              <div>
-                <label class="label">¿Qué número es más grande?</label>
-                <p class="text-xs text-neutral-400 mb-3 italic">
-                  Esta pregunta me ayuda a calibrar tu familiaridad con las matemáticas. No es perfecta, pero da igual.
-                </p>
-                <div class="flex gap-4">
-                  <label
-                    v-for="option in piVsEOptions"
-                    :key="option.value"
-                    class="flex items-center gap-2 cursor-pointer"
+                <div v-if="sexTotal > 0" class="flex items-end gap-2">
+                  <div
+                    v-for="bar in [
+                      { label: 'M', count: sexCounts.masculino, color: 'bg-blue-300' },
+                      { label: 'F', count: sexCounts.femenino, color: 'bg-pink-300' },
+                      { label: 'Otro', count: sexCounts.otro, color: 'bg-purple-300' }
+                    ]"
+                    :key="bar.label"
+                    class="flex-1 flex flex-col items-center gap-1 group relative"
                   >
-                    <input
-                      type="radio"
-                      v-model="metadata.piVsE"
-                      :value="option.value"
-                      class="w-4 h-4 text-primary-500"
-                      required
-                    />
-                    <span class="text-neutral-700">{{ option.label }}</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- ID - selector 1/3, texto ancho completo -->
-              <div>
-                <div class="w-1/3">
-                  <label class="label">Alias</label>
-                  <input
-                    v-model="metadata.codigoPersonal"
-                    type="text"
-                    class="input"
-                    placeholder="Einstein42"
-                    maxlength="20"
-                  />
-                </div>
-                <p class="text-xs text-neutral-400 mt-2 italic">
-                  Opcional. Te sirve para encontrarte en las listas de resultados y compararte con la población.
-                </p>
-              </div>
-
-              <!-- Segunda vez -->
-              <div class="border-t border-neutral-100 pt-4">
-                <label class="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    v-model="metadata.segundaVez"
-                    class="w-5 h-5 rounded text-primary-500"
-                  />
-                  <span class="text-neutral-700">
-                    Ya hice el test antes
-                  </span>
-                </label>
-                <p class="text-xs text-neutral-400 mt-1 ml-8 italic">
-                  Hay 4 modelos. Puedes jugar más veces. No repitas.
-                </p>
-
-                <!-- Selector de modelos ya hechos -->
-                <Transition name="fade">
-                  <div v-if="metadata.segundaVez" class="mt-4 pl-8 space-y-3">
-                    <label class="label">Marca cuáles hiciste ya:</label>
-
-                    <div class="space-y-2">
-                      <label
-                        v-for="modelo in modeloOptions"
-                        :key="modelo"
-                        class="flex items-start gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer hover:bg-neutral-50"
-                        :class="[
-                          metadata.modelosYaHechos.includes(modelo)
-                            ? 'border-primary-500 bg-primary-50'
-                            : 'border-neutral-200'
-                        ]"
-                      >
-                        <input
-                          type="checkbox"
-                          :checked="metadata.modelosYaHechos.includes(modelo)"
-                          @change="toggleModeloYaHecho(modelo)"
-                          class="w-5 h-5 rounded text-primary-500 mt-0.5"
-                        />
-                        <span class="flex-1">
-                          <span class="font-mono font-bold text-neutral-800 block">Modelo {{ modelo }}</span>
-                          <span class="text-xs text-neutral-500 mt-1 italic block">
-                            La P1 decía: "{{ primerasPreguntasPorModelo[modelo] }}"
-                          </span>
-                        </span>
-                      </label>
+                    <div class="sex-tooltip">{{ bar.label }} · {{ bar.count }} pers.</div>
+                    <div class="sex-bar-container">
+                      <div
+                        class="sex-bar rounded-t"
+                        :class="bar.color"
+                        :style="{ height: Math.max((bar.count / Math.max(sexCounts.masculino, sexCounts.femenino, sexCounts.otro, 1)) * 100, 4) + '%' }"
+                      ></div>
                     </div>
+                    <span class="text-[10px] text-neutral-500 font-medium">{{ bar.label }}</span>
                   </div>
-                </Transition>
+                  <div class="sr-only">Distribución de sexo de los participantes</div>
+                </div>
               </div>
 
-              <div v-if="error" class="p-4 bg-red-50 text-red-700 rounded-xl text-sm">
-                {{ error }}
+              <div>
+                <label class="label">Alias <span class="font-normal text-neutral-400">(opcional)</span></label>
+                <input
+                  v-model="metadata.codigoPersonal"
+                  type="text"
+                  class="input"
+                  placeholder="Einstein42"
+                  maxlength="20"
+                />
+                <p class="text-xs text-neutral-400 mt-1.5 italic">
+                  Para encontrarte en las listas de resultados.
+                </p>
               </div>
+            </div>
 
-              <button
-                type="submit"
-                class="btn-primary btn-large w-full"
-                :disabled="!isMetadataValid || isLoading"
-              >
-                <span v-if="isLoading">...</span>
-                <span v-else>Ver Instrucciones →</span>
-              </button>
-            </form>
-          </div>
+            <!-- Pregunta calibración -->
+            <div class="card space-y-3">
+              <h2 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider">Pregunta rápida</h2>
+              <label class="label !mb-0">¿Qué número es más grande?</label>
+              <div class="flex flex-wrap gap-2">
+                <label
+                  v-for="option in piVsEOptions"
+                  :key="option.value"
+                  class="flex-1 min-w-[100px] cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    v-model="metadata.piVsE"
+                    :value="option.value"
+                    class="sr-only peer"
+                    required
+                  />
+                  <div class="text-center py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
+                    {{ option.label }}
+                  </div>
+                </label>
+              </div>
+              <p class="text-xs text-neutral-400 italic">
+                Me ayuda a calibrar tu familiaridad con las mates.
+              </p>
+            </div>
+
+            <!-- Segunda vez -->
+            <div class="card space-y-3">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  v-model="metadata.segundaVez"
+                  class="w-5 h-5 rounded text-primary-500"
+                />
+                <span class="text-neutral-700 font-medium">
+                  Ya hice el test antes
+                </span>
+              </label>
+              <p class="text-xs text-neutral-400 ml-8 italic">
+                Hay 4 modelos. Puedes jugar más veces.
+              </p>
+
+              <Transition name="fade">
+                <div v-if="metadata.segundaVez" class="ml-8 space-y-3 pt-1">
+                  <label class="label">Marca cuáles hiciste ya:</label>
+                  <div class="space-y-2">
+                    <label
+                      v-for="modelo in modeloOptions"
+                      :key="modelo"
+                      class="flex items-start gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer hover:bg-neutral-50"
+                      :class="[
+                        metadata.modelosYaHechos.includes(modelo)
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-neutral-200'
+                      ]"
+                    >
+                      <input
+                        type="checkbox"
+                        :checked="metadata.modelosYaHechos.includes(modelo)"
+                        @change="toggleModeloYaHecho(modelo)"
+                        class="w-5 h-5 rounded text-primary-500 mt-0.5"
+                      />
+                      <span class="flex-1">
+                        <span class="font-mono font-bold text-neutral-800 block">Modelo {{ modelo }}</span>
+                        <span class="text-xs text-neutral-500 mt-1 italic block">
+                          La P1 decía: "{{ primerasPreguntasPorModelo[modelo] }}"
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </Transition>
+            </div>
+
+            <div v-if="error" class="p-4 bg-red-50 text-red-700 rounded-xl text-sm">
+              {{ error }}
+            </div>
+
+            <button
+              type="submit"
+              class="btn-primary btn-large w-full"
+              :disabled="!isMetadataValid || isLoading"
+            >
+              <span v-if="isLoading">Cargando...</span>
+              <span v-else>Ver Instrucciones →</span>
+            </button>
+          </form>
         </div>
 
         <div v-else-if="currentStep === 'instructions'" key="instructions">
@@ -756,6 +798,25 @@ async function finishTest() {
 .age-you-stick {
   @apply w-0.5 bg-green-400 rounded-full;
   height: 20px;
+}
+
+.sex-tooltip {
+  @apply absolute bottom-full mb-1 px-2 py-1 text-[10px] text-white bg-neutral-700 rounded whitespace-nowrap;
+  @apply opacity-0 pointer-events-none transition-opacity duration-150 z-10;
+}
+
+.group:hover .sex-tooltip {
+  @apply opacity-100;
+}
+
+.sex-bar-container {
+  @apply w-full flex items-end;
+  height: 56px;
+}
+
+.sex-bar {
+  @apply w-full;
+  transition: height 0.25s ease;
 }
 </style>
 
