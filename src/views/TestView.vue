@@ -23,6 +23,19 @@ const isLoading = ref(false)
 const error = ref(null)
 const savedUserId = ref(null)
 const qrDataUrl = ref(null)
+const canShare = !!navigator.share
+
+async function shareLink() {
+  try {
+    await navigator.share({
+      title: '¡Juguemos a Estimar!',
+      text: 'Acabo de hacer un test de estimación de cantidades. ¿Te atreves?',
+      url: window.location.origin + '/test'
+    })
+  } catch (e) {
+    // user cancelled share
+  }
+}
 
 // Aviso de 30 segundos
 const showTimeWarning = ref(false)
@@ -352,14 +365,15 @@ async function finishTest() {
     currentStep.value = 'finished'
   }
 
-  if (savedUserId.value) {
-    try {
-      const uploadUrl = `${window.location.origin}/upload/${savedUserId.value}`
-      qrDataUrl.value = await QRCode.toDataURL(uploadUrl, { width: 200, margin: 2 })
-    } catch (e) {
-      console.error('Error generando QR:', e)
-    }
-  }
+  // TODO: QR generation - UploadView ruta no está disponible en Vercel
+  // if (savedUserId.value) {
+  //   try {
+  //     const uploadUrl = `${window.location.origin}/upload/${savedUserId.value}`
+  //     qrDataUrl.value = await QRCode.toDataURL(uploadUrl, { width: 200, margin: 2 })
+  //   } catch (e) {
+  //     console.error('Error generando QR:', e)
+  //   }
+  // }
 }
 </script>
 
@@ -632,7 +646,12 @@ async function finishTest() {
               ¡Gracias por participar!
             </h1>
 
-            <div v-if="qrDataUrl" class="mb-8 p-6 rounded-2xl inline-block">
+            <p class="text-neutral-600 mb-8">
+              Tus respuestas me ayudan a entender mejor qué tal estimamos cantidades
+            </p>
+
+            <!-- TODO: QR disabled - UploadView ruta no está disponible en Vercel -->
+            <!-- <div v-if="qrDataUrl" class="mb-8 p-6 rounded-2xl inline-block">
               <p class="text-neutral-700 font-medium mb-3">
                 ¿A ver tu hoja en sucio?
               </p>
@@ -640,10 +659,17 @@ async function finishTest() {
                 Échale una foto, haré un collage :)
               </p>
               <img :src="qrDataUrl" alt="QR para subir fotos" class="mx-auto" />
-            </div>
+            </div> -->
 
-            <div>
-              <RouterLink to="/" class="btn-primary btn-large">
+            <div class="flex flex-col items-center gap-3">
+              <button
+                v-if="canShare"
+                @click="shareLink"
+                class="btn-primary btn-large w-full max-w-xs"
+              >
+                Compartir con un amigo 📤
+              </button>
+              <RouterLink to="/" class="btn-primary btn-large w-full max-w-xs">
                 Volver al inicio
               </RouterLink>
             </div>
