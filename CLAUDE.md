@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Fermi Tests TFM** - A Vue 3 web application for conducting Fermi estimation problem studies as part of a master's thesis research on numerical estimation abilities in secondary students and adults. Deployed at https://estima-esto.vercel.app
+**Fermi Tests TFM** - A Vue 3 web application for conducting Fermi estimation problem studies as part of a master's thesis research on numerical estimation abilities in secondary students and adults. Deployed at https://fermi.gosheriff.es
 
 The application serves two main user groups:
 1. **Teachers**: Download printable test PDFs (models A/B/C/D) from `/profe`
