@@ -30,7 +30,7 @@ async function shareLink() {
     await navigator.share({
       title: '¡Juguemos a Estimar!',
       text: 'Acabo de hacer un test de estimación de cantidades. ¿Te atreves?',
-      url: window.location.origin + '/test'
+      url: window.location.origin
     })
   } catch (e) {
     // user cancelled share
@@ -165,6 +165,11 @@ const progressPercent = computed(() => {
 
 // Respuesta actual del input
 const currentAnswer = ref('')
+const fermiInputRef = ref(null)
+
+function focusInput() {
+  fermiInputRef.value?.inputRef?.focus()
+}
 
 const isAnswerComplete = computed(() => {
   return cleanInput(currentAnswer.value) !== ''
@@ -602,7 +607,7 @@ async function finishTest() {
           </div>
 
 
-          <Transition name="slide" mode="out-in">
+          <Transition name="slide" mode="out-in" @after-enter="focusInput">
             <div :key="currentQuestionIndex" class="card-elevated">
 
               <div class="mb-8">
@@ -614,7 +619,7 @@ async function finishTest() {
                 </p>
               </div>
 
-              <FermiInput v-model="currentAnswer" />
+              <FermiInput ref="fermiInputRef" v-model="currentAnswer" />
 
               <div class="mt-8">
                 <button
