@@ -67,7 +67,7 @@ async function handleSubmit() {
     <div class="max-w-2xl mx-auto">
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-neutral-800">
-          Estima:
+          Estima 🧐
         </h1>
       </div>
 

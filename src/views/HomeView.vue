@@ -73,19 +73,22 @@ function handlePorClick() {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <h2 class="text-2xl font-bold text-neutral-800 mb-4">¿De qué va esto?</h2>
-              <p class="text-neutral-600 leading-relaxed mb-3">
-                ¿Cuántos bebés nacen en Europa en un año?
+              <h2 class="text-2xl font-bold text-neutral-800 mb-4">¿De qué va esto? 🤔</h2>
+              <p class="text-neutral-600 leading-relaxed mb-2">
+                — ¿Cuántos McDonald's hay en el mundo?
               </p>
-              <p class="text-neutral-600 leading-relaxed mb-3">
-                ¿Cuántos litros de agua se consumen en España al día?
+              <p class="text-neutral-600 leading-relaxed mb-2">
+                — ¿Cuántos granos de arroz entran en una botella de vino?
               </p>
-              <p class="text-neutral-600 leading-relaxed mb-3">
-                Este tipo de problemas de estimación, son conocidas como <a href="https://es.wikipedia.org/wiki/Problema_de_Fermi" target="_blank" class="text-primary-600 hover:underline">Problemas de Fermi</a>.
+              <p class="text-neutral-600 leading-relaxed mb-7">
+                — ¿Cuánta leche produce una vaca en su vida?
+              </p>
+              <p class="text-neutral-600 leading-relaxed mb-7">
+                Este tipo de problemas de estimación son conocidos como <a href="https://es.wikipedia.org/wiki/Problema_de_Fermi" target="_blank" class="text-primary-600 hover:underline">Problemas de Fermi</a>, uno de los pocos grandes físicos teóricos y a la vez experimentales de la historia.
               </p>
               <p class="text-neutral-600 leading-relaxed">
-                Esta aplicación web sirve de apoyo para un estudio sobre la capacidad de estimación de los adolescentes para mi
-                Trabajo Fin de Máster en el Máster de Educación Secundaria.
+                Esta aplicación web la hice para que tú juegues a estimar cantidades. Y forma parte de un proyecto más grande,
+                mi TFM del Máster del Profesorado, donde investigo sobre la capacidad de estimación de los adolescentes.
               </p>
             </div>
           </div>
@@ -106,7 +109,7 @@ function handlePorClick() {
             Quiero Participar
           </h3>
           <p class="text-neutral-500 text-sm">
-            Haz un test online (~15 minutos)
+            Haz el test online (~15 minutos)
           </p>
         </RouterLink>
 
@@ -141,6 +144,22 @@ function handlePorClick() {
             Prueba!
           </p>
         </RouterLink>
+
+        <!-- Botón Resultados (disabled) -->
+        <div
+          class="card-elevated text-center opacity-50 cursor-not-allowed"
+        >
+          <div class="mb-4">
+            <span class="text-5xl inline-block grayscale">📊</span>
+          </div>
+          <h3 class="text-xl font-semibold text-neutral-800 mb-2">
+            Resultados
+          </h3>
+          <p class="text-neutral-500 text-sm">
+            ¿Qué tal estimamos los adolescentes y los adultos?
+          </p>
+          <span class="inline-block mt-2 text-xs text-neutral-900 font-semibold bg-neutral-100 px-2 py-1 rounded-full">~15 mayo 2026</span>
+        </div>
 
       </div>
 
