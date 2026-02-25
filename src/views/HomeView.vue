@@ -49,11 +49,11 @@ function handleFermiClick() {
         <p class="text-xl text-neutral-600 leading-relaxed mb-3">
           Explorando el arte de estimar
         </p>
-        <div class="flex justify-center gap-6 text-lg text-neutral-400">
-          <button @click="showInfoModal = true" class="hover:text-primary-600 transition-colors cursor-pointer">
+        <div class="flex justify-center gap-4 text-sm">
+          <button @click="showInfoModal = true" class="text-neutral-500 hover:text-primary-600 underline underline-offset-2 decoration-neutral-300 hover:decoration-primary-600 transition-colors cursor-pointer">
             🤔 ¿De qué va esto?
           </button>
-          <button @click="showImageModal = true" class="hover:text-primary-600 transition-colors cursor-pointer">
+          <button @click="showImageModal = true" class="text-neutral-500 hover:text-primary-600 underline underline-offset-2 decoration-neutral-300 hover:decoration-primary-600 transition-colors cursor-pointer">
             💡 ¿Cómo empezó todo?
           </button>
         </div>
@@ -100,72 +100,48 @@ function handleFermiClick() {
         </Transition>
       </Teleport>
 
-      <!-- Botones principales -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Botón Adultos -->
-        <RouterLink
-          to="/test"
-          class="card-elevated group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
-        >
-          <div class="mb-4">
-            <span class="text-5xl group-hover:scale-110 transition-transform duration-300 inline-block">☝️</span>
-          </div>
-          <h3 class="text-xl font-semibold text-neutral-800 mb-2">
-            Quiero Participar
-          </h3>
-          <p class="text-neutral-500 text-sm">
-            Haz el test online (~15 minutos)
-          </p>
-        </RouterLink>
+      <!-- CTA Principal -->
+      <RouterLink
+        to="/test"
+        class="block mb-6 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded-2xl p-6 md:p-8 text-center shadow-lg hover:shadow-xl transition-all duration-300 group border border-emerald-200"
+      >
+        <span class="text-4xl md:text-5xl inline-block group-hover:scale-110 transition-transform duration-300 mb-3">☝️</span>
+        <h3 class="text-xl md:text-2xl font-bold mb-1">Quiero Participar</h3>
+        <p class="text-emerald-600 text-sm">Pon a prueba tu intuición (~15 min)</p>
+      </RouterLink>
 
-        <!-- Botón Profesor -->
+      <!-- Acciones secundarias -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <RouterLink
           to="/profe"
           class="card-elevated group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
         >
-          <div class="mb-4">
-            <span class="text-5xl group-hover:scale-110 transition-transform duration-300 inline-block">👩‍🏫</span>
+          <div class="mb-3">
+            <span class="text-4xl group-hover:scale-110 transition-transform duration-300 inline-block">👩‍🏫</span>
           </div>
-          <h3 class="text-xl font-semibold text-neutral-800 mb-2">
-            Soy Profesor
-          </h3>
-          <p class="text-neutral-500 text-sm">
-            Descarga los materiales para pasar los tests en tu aula
-          </p>
+          <h3 class="text-lg font-semibold text-neutral-800 mb-1">Soy Profesor</h3>
+          <p class="text-neutral-500 text-xs">Descarga los tests para tu aula</p>
         </RouterLink>
 
-        <!-- Botón Pregunta Aleatoria -->
         <RouterLink
           to="/random"
           class="card-elevated group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
         >
-          <div class="mb-4">
-            <span class="text-5xl group-hover:scale-110 transition-transform duration-300 inline-block">🎲</span>
+          <div class="mb-3">
+            <span class="text-4xl group-hover:scale-110 transition-transform duration-300 inline-block">🎲</span>
           </div>
-          <h3 class="text-xl font-semibold text-neutral-800 mb-2">
-            Pregunta Aleatoria
-          </h3>
-          <p class="text-neutral-500 text-sm">
-            Prueba!
-          </p>
+          <h3 class="text-lg font-semibold text-neutral-800 mb-1">Pregunta Aleatoria</h3>
+          <p class="text-neutral-500 text-xs">Una pregunta rápida para probar</p>
         </RouterLink>
 
-        <!-- Botón Resultados (disabled) -->
-        <div
-          class="card-elevated text-center opacity-50 cursor-not-allowed"
-        >
-          <div class="mb-4">
-            <span class="text-5xl inline-block grayscale">📊</span>
+        <div class="card-elevated text-center opacity-50 cursor-not-allowed">
+          <div class="mb-3">
+            <span class="text-4xl inline-block grayscale">📊</span>
           </div>
-          <h3 class="text-xl font-semibold text-neutral-800 mb-2">
-            Resultados
-          </h3>
-          <p class="text-neutral-500 text-sm">
-            ¿Qué tal estimamos los adolescentes y los adultos?
-          </p>
-          <span class="inline-block mt-2 text-xs text-neutral-900 font-semibold bg-neutral-100 px-2 py-1 rounded-full">~15 mayo 2026</span>
+          <h3 class="text-lg font-semibold text-neutral-800 mb-1">Resultados</h3>
+          <p class="text-neutral-500 text-xs">¿Qué tal estimamos?</p>
+          <span class="inline-block mt-2 text-xs text-neutral-900 font-semibold bg-neutral-100 px-2 py-1 rounded-full">~mayo 2026</span>
         </div>
-
       </div>
 
       <div class="text-center mt-12 text-sm text-neutral-500">
