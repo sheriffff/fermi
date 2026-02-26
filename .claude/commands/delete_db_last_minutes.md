@@ -18,6 +18,7 @@ Use the Supabase REST API with these details:
 - Use PostgREST filter: `created_at=gte.{ISO timestamp for now minus N minutes}`
 - Method: DELETE
 
-Calculate the cutoff timestamp using: `date -u -d "$ARGUMENTS minutes ago" +%Y-%m-%dT%H:%M:%S%z`
+Calculate the cutoff timestamp using: `date -u -d "$ARGUMENTS minutes ago" +%Y-%m-%dT%H:%M:%SZ`
+IMPORTANT: Use `Z` suffix (not `%z`) to avoid the `+` sign being decoded as a space by PostgREST.
 
 After running, report how many tables were cleaned and the cutoff time used.

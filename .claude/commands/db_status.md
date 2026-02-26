@@ -1,6 +1,6 @@
 Show row count and latest created_at for key tables.
 
-Query the Supabase REST API for tables: users_online, responses_play_random, feedback, logs_download.
+Query the Supabase REST API for all tables
 
 API details:
 - Base URL: read VITE_SUPABASE_URL from /home/sheriff/Documents/coding/fermi/.env
