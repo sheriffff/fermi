@@ -47,21 +47,14 @@ const timerShaking = ref(false)
 // ============================================
 const metadata = ref({
   edad: '40',
-  sexo: '',
   codigoPersonal: '',
   piVsE: '',
   segundaVez: false,
-  modelosYaHechos: [] // Array de modelos que ya hizo
+  modelosYaHechos: []
 })
 
 // Generar opciones de edad desde 4 hasta 99
 const edadOptions = Array.from({ length: 96 }, (_, i) => i + 4)
-
-const sexoOptions = [
-  { value: 'masculino', label: 'Masculino' },
-  { value: 'femenino', label: 'Femenino' },
-  { value: 'otro', label: 'Otro' }
-]
 
 const piVsEOptions = [
   { value: 'pi', label: 'π (pi)' },
@@ -100,9 +93,7 @@ function toggleModeloYaHecho(modelo) {
 
 const isMetadataValid = computed(() => {
   const m = metadata.value
-  // Edad y pi/e son obligatorios
   const basicValid = m.edad && m.piVsE
-  // Si es segunda vez, debe haber marcado al menos un modelo ya hecho
   if (m.segundaVez) {
     return basicValid && m.modelosYaHechos.length > 0
   }
@@ -312,7 +303,6 @@ async function finishTest() {
   try {
     const userId = await createUserOnline({
       age: parseInt(metadata.value.edad),
-      sex: metadata.value.sexo,
       piVsE: metadata.value.piVsE,
       whichTestsBefore: metadata.value.modelosYaHechos.join(''),
       userAlias: metadata.value.codigoPersonal,
@@ -370,12 +360,9 @@ async function finishTest() {
           <!-- Formulario -->
           <form @submit.prevent="startTest" class="space-y-4">
 
-            <!-- Sobre ti -->
             <div class="card space-y-5">
-              <h2 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider">Sobre ti</h2>
-
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="sm:col-span-1">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
                   <label class="label">Edad</label>
                   <select v-model="metadata.edad" class="select" required>
                     <option value="" disabled>—</option>
@@ -388,66 +375,45 @@ async function finishTest() {
                     </option>
                   </select>
                 </div>
-
-                <div class="sm:col-span-2">
-                  <label class="label">Sexo <span class="font-normal text-neutral-400">(opcional)</span></label>
-                  <div class="flex gap-2">
-                    <button
-                      v-for="option in sexoOptions"
-                      :key="option.value"
-                      type="button"
-                      @click="metadata.sexo = metadata.sexo === option.value ? '' : option.value"
-                      class="flex-1 py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 cursor-pointer"
-                      :class="metadata.sexo === option.value
-                        ? 'border-primary-500 bg-primary-50 text-primary-700'
-                        : 'border-neutral-200 text-neutral-600 hover:border-neutral-300'"
-                    >
-                      {{ option.label }}
-                    </button>
-                  </div>
+                <div>
+                  <label class="label">Alias <span class="font-normal text-neutral-400">(opcional)</span></label>
+                  <input
+                    v-model="metadata.codigoPersonal"
+                    type="text"
+                    class="input"
+                    placeholder="Einstein42"
+                    maxlength="20"
+                  />
+                  <p class="text-sm text-neutral-400 mt-1.5 italic">
+                    Por si quieres encontrarte más tarde en la tabla de resultados.
+                  </p>
                 </div>
               </div>
 
-              <div>
-                <label class="label">Alias <span class="font-normal text-neutral-400">(opcional)</span></label>
-                <input
-                  v-model="metadata.codigoPersonal"
-                  type="text"
-                  class="input max-w-[200px]"
-                  placeholder="Einstein42"
-                  maxlength="20"
-                />
-                <p class="text-xs text-neutral-400 mt-1.5 italic">
-                  Para encontrarte en las listas de resultados.
+              <div class="space-y-3">
+                <label class="label !mb-0">¿Qué número es más grande?</label>
+                <div class="flex flex-wrap gap-2">
+                  <label
+                    v-for="option in piVsEOptions"
+                    :key="option.value"
+                    class="flex-1 min-w-[100px] cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      v-model="metadata.piVsE"
+                      :value="option.value"
+                      class="sr-only peer"
+                      required
+                    />
+                    <div class="text-center py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
+                      {{ option.label }}
+                    </div>
+                  </label>
+                </div>
+                <p class="text-sm text-neutral-400 italic">
+                  Esta pregunta me ayuda a calibrar tu familiaridad con las matemáticas. No es perfecta, pero da igual.
                 </p>
               </div>
-            </div>
-
-            <!-- Pregunta calibración -->
-            <div class="card space-y-3">
-              <h2 class="text-sm font-semibold text-neutral-400 uppercase tracking-wider">Pregunta rápida</h2>
-              <label class="label !mb-0">¿Qué número es más grande?</label>
-              <div class="flex flex-wrap gap-2">
-                <label
-                  v-for="option in piVsEOptions"
-                  :key="option.value"
-                  class="flex-1 min-w-[100px] cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    v-model="metadata.piVsE"
-                    :value="option.value"
-                    class="sr-only peer"
-                    required
-                  />
-                  <div class="text-center py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
-                    {{ option.label }}
-                  </div>
-                </label>
-              </div>
-              <p class="text-xs text-neutral-400 italic">
-                Me ayuda a calibrar tu familiaridad con las matemáticas.
-              </p>
             </div>
 
             <!-- Segunda vez -->
@@ -462,7 +428,7 @@ async function finishTest() {
                   Ya hice el test antes
                 </span>
               </label>
-              <p class="text-xs text-neutral-400 ml-8 italic">
+              <p class="text-sm text-neutral-400 ml-8 italic">
                 Hay 4 modelos. Puedes jugar más veces.
               </p>
 
