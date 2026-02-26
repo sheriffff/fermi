@@ -110,6 +110,16 @@ const warningTimeText = computed(() => {
         </div>
 
         <div class="flex gap-4 items-start">
+          <span class="text-2xl">🧮</span>
+          <div>
+            <p class="font-semibold text-neutral-800">Puedes usar calculadora</p>
+            <p class="text-sm text-neutral-500">
+              La de tu casa o esta <a href="https://calculator-1.com/es/calculadora/" target="_blank" rel="noopener" class="text-primary-500 hover:text-primary-600 underline underline-offset-2">online</a>.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-4 items-start">
           <span class="text-2xl">🎯</span>
           <div>
             <p class="font-semibold text-neutral-800">Esto no es un examen.</p>
