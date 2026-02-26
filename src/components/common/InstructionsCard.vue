@@ -134,7 +134,7 @@ const warningTimeText = computed(() => {
         @click="emit('start')"
         class="btn-primary btn-large w-full"
       >
-        ¡Entendido, empezamos! 🚀
+        Vamos!
       </button>
     </div>
   </div>

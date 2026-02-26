@@ -191,7 +191,29 @@ function playWarningSound() {
 // ============================================
 // FORMATEADOR DE NÚMEROS
 // ============================================
-const { formatNumber, cleanInput } = useNumberFormat()
+const { formatNumber, formatRange, cleanInput } = useNumberFormat()
+
+const showResults = ref(false)
+
+const resultsData = computed(() => {
+  return preguntas.value.map((q, i) => {
+    const key = `p${i + 1}`
+    const answer = respuestas.value[key]
+    const hasP = q.p05 != null && q.p95 != null
+    let logErr = null
+    let inRange = false
+    if (answer != null && answer > 0 && hasP) {
+      if (answer >= q.p05 && answer <= q.p95) {
+        inRange = true
+        logErr = 0
+      } else {
+        const bound = answer < q.p05 ? q.p05 : q.p95
+        logErr = Math.abs(Math.log10(answer / bound))
+      }
+    }
+    return { num: i + 1, texto: q.texto, answer, p05: q.p05, p95: q.p95, hasP, logErr, inRange }
+  })
+})
 
 const formattedAnswer = computed(() => {
   const cleaned = cleanInput(currentAnswer.value)
@@ -558,18 +580,14 @@ async function finishTest() {
               Tus respuestas me ayudan a entender mejor qué tal estimamos cantidades
             </p>
 
-            <!-- TODO: QR disabled - UploadView ruta no está disponible en Vercel -->
-            <!-- <div v-if="qrDataUrl" class="mb-8 p-6 rounded-2xl inline-block">
-              <p class="text-neutral-700 font-medium mb-3">
-                ¿A ver tu hoja en sucio?
-              </p>
-              <p class="text-neutral-700 font-medium mb-3">
-                Échale una foto, haré un collage :)
-              </p>
-              <img :src="qrDataUrl" alt="QR para subir fotos" class="mx-auto" />
-            </div> -->
-
             <div class="flex flex-col items-center gap-3">
+              <button
+                v-if="!showResults"
+                @click="showResults = true"
+                class="btn-outline btn-large w-full max-w-xs"
+              >
+                Ver respuestas correctas
+              </button>
               <button
                 v-if="canShare"
                 @click="shareLink"
@@ -582,6 +600,42 @@ async function finishTest() {
               </RouterLink>
             </div>
           </div>
+
+          <Transition name="fade">
+            <div v-if="showResults" class="mt-6 text-left">
+              <div class="space-y-3">
+                <div
+                  v-for="r in resultsData"
+                  :key="r.num"
+                  class="card"
+                >
+                  <p class="text-neutral-700 mb-3">
+                    <span class="text-neutral-400 font-mono mr-1">{{ r.num }}.</span>
+                    {{ r.texto }}
+                  </p>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div
+                      class="rounded-xl px-3 py-2 text-center"
+                      :class="r.inRange ? 'bg-emerald-50' : 'bg-neutral-50'"
+                    >
+                      <p class="text-xs mb-0.5" :class="r.inRange ? 'text-emerald-500' : 'text-neutral-400'">Tu respuesta</p>
+                      <p class="font-mono font-medium" :class="r.inRange ? 'text-emerald-800' : 'text-neutral-800'">
+                        {{ r.answer != null ? formatNumber(r.answer) : '—' }}<span v-if="r.inRange"> ⭐</span>
+                      </p>
+                    </div>
+                    <div class="bg-neutral-50 rounded-xl px-3 py-2 text-center">
+                      <p class="text-xs text-neutral-400 mb-0.5">Respuesta correcta</p>
+                      <p class="font-medium text-neutral-800">
+                        <template v-if="r.hasP">{{ formatRange(r.p05, r.p95) }}</template>
+                        <template v-else>—</template>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Transition>
+
         </div>
       </Transition>
     </div>
