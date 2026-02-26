@@ -9,31 +9,34 @@ async function loadExcel() {
   const blob = await response.blob()
 
   const questionsRaw = await readXlsxFile(blob, { sheet: 'questions' })
+  const headers = questionsRaw[0]
+  const col = name => headers.indexOf(name)
   const questions = questionsRaw
     .slice(1)
-    .filter(row => row[7])
+    .filter(row => row[col('question')])
     .map(row => {
-      const p05 = row[4] != null ? Number(row[4]) : null
-      const p95 = row[5] != null ? Number(row[5]) : null
+      const p05 = row[col('p05')] != null ? Number(row[col('p05')]) : null
+      const p95 = row[col('p95')] != null ? Number(row[col('p95')]) : null
       const hasRange = p05 != null && p95 != null && !isNaN(p05) && !isNaN(p95)
       return {
-        id: row[0],
-        texto: row[7],
+        id: row[col('id_question')],
+        texto: row[col('question')],
         p05: hasRange ? p05 : null,
         p95: hasRange ? p95 : null
       }
     })
 
   const testsRaw = await readXlsxFile(blob, { sheet: 'tests' })
-  const testsData = testsRaw.slice(1)
+  const tHeaders = testsRaw[0]
+  const tCol = name => tHeaders.indexOf(name)
   const tests = {}
 
-  for (const row of testsData) {
-    const testId = row[0]
+  for (const row of testsRaw.slice(1)) {
+    const testId = row[tCol('test')]
     if (!tests[testId]) {
       tests[testId] = []
     }
-    tests[testId].push(row[1])
+    tests[testId].push(row[tCol('id_question')])
   }
 
   questionsCache = { questions, tests }
@@ -81,7 +84,9 @@ export async function getAvailableTests() {
 }
 
 export async function getRandomPlayQuestion() {
-  const { questions } = await loadExcel()
-  const randomIndex = Math.floor(Math.random() * questions.length)
-  return questions[randomIndex]
+  const { questions, tests } = await loadExcel()
+  const testIds = new Set(Object.values(tests).flat())
+  const playQuestions = questions.filter(q => !testIds.has(q.id))
+  const randomIndex = Math.floor(Math.random() * playQuestions.length)
+  return playQuestions[randomIndex]
 }

@@ -131,8 +131,21 @@ export function useNumberFormat() {
     return Math.abs(mag1 - mag2)
   }
 
+  function formatRange(min, max) {
+    if (min === max) return formatNumber(min)
+    const fMin = formatNumber(min)
+    const fMax = formatNumber(max)
+    const partsMin = fMin.split(' ')
+    const partsMax = fMax.split(' ')
+    if (partsMin.length > 1 && partsMin.slice(1).join(' ') === partsMax.slice(1).join(' ')) {
+      return `${partsMin[0]} – ${fMax}`
+    }
+    return `${fMin} – ${fMax}`
+  }
+
   return {
     formatNumber,
+    formatRange,
     formatWithSeparators,
     fromScientificNotation,
     toScientificNotation,

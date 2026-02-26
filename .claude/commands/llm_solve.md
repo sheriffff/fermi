@@ -1,1 +1,3 @@
-Run `python orchestrator.py $ARGUMENTS` from the `utils/llm_solver/` directory to solve Fermi questions by ID and write results to the Excel. Arguments are question IDs as individual numbers or ranges (e.g., `1 2 3` or `12-32`).
+Run up to 6 agents in parallel, and each can run `python orchestrator.py $ARGUMENTS` from the `utils/llm_solver/` directory to solve Fermi questions by ID and write results to the Excel. Arguments are question IDs as individual numbers or ranges (e.g., `1 2 3` or `12-32`).
+
+You decide the arguments of each run. Only edit the excel file after all agents bring back their results, to avoid conflicts. You can run multiple agents with different question ID ranges to speed up the process.

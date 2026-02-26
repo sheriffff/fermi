@@ -14,7 +14,7 @@ const isLoading = ref(true)
 const fermiInputRef = ref(null)
 const showLogErrorModal = ref(false)
 
-const { formatNumber, cleanInput } = useNumberFormat()
+const { formatNumber, formatRange, cleanInput } = useNumberFormat()
 const { start: startTimer, stop: stopTimer, reset: resetTimer, getElapsedTime } = useTimer(9999)
 
 const hasRange = computed(() => {
@@ -171,8 +171,7 @@ async function handleSubmit() {
             <div v-if="hasRange" class="bg-neutral-50 rounded-2xl p-5 text-center">
               <p class="text-sm text-neutral-500 mb-2">Respuesta correcta</p>
               <p class="text-2xl font-bold text-neutral-800">
-                <template v-if="correctRange.min === correctRange.max">{{ formatNumber(correctRange.min) }}</template>
-                <template v-else>{{ formatNumber(correctRange.min) }} – {{ formatNumber(correctRange.max) }}</template>
+                {{ formatRange(correctRange.min, correctRange.max) }}
               </p>
             </div>
           </div>
@@ -203,7 +202,7 @@ async function handleSubmit() {
                 :class="isInRange ? 'border-emerald-200' : 'border-amber-200'"
               >
                 <p class="text-sm text-neutral-600">
-                  Error logarítmico: <span class="font-bold text-neutral-800">{{ logError !== null ? logError.toFixed(2) : '—' }}</span>
+                  Error logarítmico: <span class="font-bold text-neutral-800">{{ logError !== null ? logError.toFixed(1) : '—' }}</span>
                 </p>
                 <button
                   @click="showLogErrorModal = true"
