@@ -1,0 +1,1 @@
+Run `python orchestrator.py $ARGUMENTS` from the `utils/llm_solver/` directory to solve Fermi questions by ID and write results to the Excel. Arguments are question IDs as individual numbers or ranges (e.g., `1 2 3` or `12-32`).
