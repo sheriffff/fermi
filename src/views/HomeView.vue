@@ -2,6 +2,7 @@
 import { RouterLink } from 'vue-router'
 import { ref } from 'vue'
 import ImageModal from '@/components/common/ImageModal.vue'
+import FeedbackModal from '@/components/common/FeedbackModal.vue'
 
 import { useRouter } from 'vue-router'
 import { setDbEnabled } from '@/lib/supabase'
@@ -9,6 +10,7 @@ import { setDbEnabled } from '@/lib/supabase'
 const router = useRouter()
 const showImageModal = ref(false)
 const showInfoModal = ref(false)
+const showFeedbackModal = ref(false)
 
 const porClicks = ref(0)
 let porTimer = null
@@ -60,6 +62,7 @@ function handleFermiClick() {
       </div>
 
       <ImageModal :show="showImageModal" @close="showImageModal = false" />
+      <FeedbackModal :show="showFeedbackModal" @close="showFeedbackModal = false" />
 
       <Teleport to="body">
         <Transition name="modal">
@@ -103,9 +106,9 @@ function handleFermiClick() {
       <!-- CTA Principal -->
       <RouterLink
         to="/test"
-        class="block mb-6 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded-2xl p-6 md:p-8 text-center shadow-lg hover:shadow-xl transition-all duration-300 group border border-emerald-200"
+        class="block mb-5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded-2xl p-4 md:p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 group border border-emerald-200"
       >
-        <span class="text-4xl md:text-5xl inline-block group-hover:scale-110 transition-transform duration-300 mb-3">☝️</span>
+        <span class="text-3xl md:text-4xl inline-block group-hover:scale-110 transition-transform duration-300 mb-2">☝️</span>
         <h3 class="text-xl md:text-2xl font-bold mb-1">Quiero Participar</h3>
         <p class="text-emerald-600 text-sm">Pon a prueba tu capacidad de estimación (~10 min)</p>
       </RouterLink>
@@ -114,37 +117,43 @@ function handleFermiClick() {
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <RouterLink
           to="/profe"
-          class="card-elevated group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
+          class="flex flex-col items-center justify-center bg-white rounded-3xl shadow-lg border border-neutral-100 p-4 md:p-5 group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
         >
-          <div class="mb-3">
-            <span class="text-4xl group-hover:scale-110 transition-transform duration-300 inline-block">👩‍🏫</span>
+          <div class="mb-2">
+            <span class="text-3xl group-hover:scale-110 transition-transform duration-300 inline-block">👩‍🏫</span>
           </div>
           <h3 class="text-lg font-semibold text-neutral-800 mb-1">Soy Profesor</h3>
-          <p class="text-neutral-500 text-xs">Descarga los tests para tu aula</p>
+          <p class="text-neutral-500 text-sm">Descarga los tests para tu aula</p>
         </RouterLink>
 
         <RouterLink
           to="/random"
-          class="card-elevated group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
+          class="flex flex-col items-center justify-center bg-white rounded-3xl shadow-lg border border-neutral-100 p-4 md:p-5 group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
         >
-          <div class="mb-3">
-            <span class="text-4xl group-hover:scale-110 transition-transform duration-300 inline-block">🎲</span>
+          <div class="mb-2">
+            <span class="text-3xl group-hover:scale-110 transition-transform duration-300 inline-block">🎲</span>
           </div>
           <h3 class="text-lg font-semibold text-neutral-800 mb-1">Pregunta Aleatoria</h3>
-          <p class="text-neutral-500 text-xs">Prueba!</p>
+          <p class="text-neutral-500 text-sm">Prueba!</p>
         </RouterLink>
 
-        <div class="card-elevated text-center opacity-50 cursor-not-allowed">
-          <div class="mb-3">
-            <span class="text-4xl inline-block grayscale">📊</span>
+        <div class="flex flex-col items-center justify-center bg-white rounded-3xl shadow-lg border border-neutral-100 p-4 md:p-5 text-center opacity-50 cursor-not-allowed">
+          <div class="mb-2">
+            <span class="text-3xl inline-block grayscale">📊</span>
           </div>
           <h3 class="text-lg font-semibold text-neutral-800 mb-1">Resultados</h3>
-          <p class="text-neutral-500 text-xs">¿Qué tal estimamos?</p>
-          <span class="inline-block mt-2 text-xs text-neutral-900 font-semibold bg-neutral-100 px-2 py-1 rounded-full">~mayo 2026</span>
+          <p class="text-neutral-500 text-sm">¿Qué tal estimamos?</p>
+          <span class="inline-block mt-1 text-xs text-neutral-900 font-semibold bg-neutral-100 px-2 py-1 rounded-full">~mayo 2026</span>
         </div>
       </div>
 
-      <div class="text-center mt-12 text-sm text-neutral-500">
+      <div class="text-center mt-8">
+        <button @click="showFeedbackModal = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 bg-white text-neutral-600 text-sm font-medium shadow-sm hover:shadow-md hover:border-primary-300 hover:text-primary-600 transition-all cursor-pointer">
+          📣 Dame tu opinión
+        </button>
+      </div>
+
+      <div class="text-center mt-4 text-sm text-neutral-500">
         <span @click.prevent="handlePorClick" class="cursor-default select-none">por</span> <a href="https://www.linkedin.com/in/sheriff-data" target="_blank" class="text-primary-600 hover:underline">Manuel López Sheriff</a>
       </div>
     </div>

@@ -247,6 +247,28 @@ CREATE POLICY "Allow auth scribble reads"
 ON storage.objects FOR SELECT TO authenticated
 USING (bucket_id = 'scribbles');
 
+-- -----------------------------------------------------
+-- 7. TABLE: feedback
+-- Visitor feedback from the home page
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS feedback (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    name TEXT,
+    message TEXT NOT NULL
+);
+
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow feedback inserts" ON feedback
+    FOR INSERT TO anon WITH CHECK (true);
+
+CREATE POLICY "Allow read feedback" ON feedback
+    FOR SELECT TO anon USING (true);
+
+CREATE POLICY "Allow delete feedback" ON feedback
+    FOR DELETE TO anon USING (true);
+
 -- =====================================================
 -- END SCHEMA
 -- =====================================================

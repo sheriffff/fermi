@@ -164,6 +164,15 @@ export async function getOnlineDemographics() {
   return data
 }
 
+export async function saveFeedback({ name, message }) {
+  if (!dbEnabled) return
+  const { error } = await supabase
+    .from('feedback')
+    .insert({ name: name || null, message })
+
+  if (error) throw error
+}
+
 export async function exportTable(table) {
   const { data, error } = await supabase
     .from(table)
