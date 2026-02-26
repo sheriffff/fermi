@@ -11,13 +11,18 @@ async function loadExcel() {
   const questionsRaw = await readXlsxFile(blob, { sheet: 'questions' })
   const questions = questionsRaw
     .slice(1)
-    .filter(row => row[3])
-    .map(row => ({
-      id: row[2],
-      category: row[0],
-      level: row[1],
-      texto: row[3]
-    }))
+    .filter(row => row[7])
+    .map(row => {
+      const p05 = row[4] != null ? Number(row[4]) : null
+      const p95 = row[5] != null ? Number(row[5]) : null
+      const hasRange = p05 != null && p95 != null && !isNaN(p05) && !isNaN(p95)
+      return {
+        id: row[0],
+        texto: row[7],
+        p05: hasRange ? p05 : null,
+        p95: hasRange ? p95 : null
+      }
+    })
 
   const testsRaw = await readXlsxFile(blob, { sheet: 'tests' })
   const testsData = testsRaw.slice(1)
@@ -75,41 +80,8 @@ export async function getAvailableTests() {
   return Object.keys(tests).sort()
 }
 
-let playQuestionsCache = null
-
-async function loadPlayQuestions() {
-  if (playQuestionsCache) return playQuestionsCache
-
-  const response = await fetch('/questions.xlsx')
-  const blob = await response.blob()
-
-  const raw = await readXlsxFile(blob, { sheet: 'other_questions' })
-  const headers = raw[0].map(h => h ? h.toString().trim().toLowerCase() : '')
-  const colId = headers.indexOf('id_question')
-  const colP05 = headers.indexOf('p05')
-  const colP95 = headers.indexOf('p95')
-  const colQuestion = headers.indexOf('question')
-
-  playQuestionsCache = raw
-    .slice(1)
-    .filter(row => row[colQuestion !== -1 ? colQuestion : 1])
-    .map(row => {
-      const p05 = colP05 !== -1 && row[colP05] != null ? Number(row[colP05]) : null
-      const p95 = colP95 !== -1 && row[colP95] != null ? Number(row[colP95]) : null
-      const hasRange = p05 != null && p95 != null && !isNaN(p05) && !isNaN(p95)
-      return {
-        id: parseInt(row[colId !== -1 ? colId : 0]),
-        texto: row[colQuestion !== -1 ? colQuestion : 1],
-        p05: hasRange ? p05 : null,
-        p95: hasRange ? p95 : null
-      }
-    })
-
-  return playQuestionsCache
-}
-
 export async function getRandomPlayQuestion() {
-  const questions = await loadPlayQuestions()
+  const { questions } = await loadExcel()
   const randomIndex = Math.floor(Math.random() * questions.length)
   return questions[randomIndex]
 }

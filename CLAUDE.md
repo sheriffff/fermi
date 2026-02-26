@@ -44,16 +44,14 @@ VITE_WIP=false                 # true in prod to show WIP banner
 
 ### Data Flow Architecture
 
-**Questions System**: Questions are loaded from `/public/questions.xlsx` at runtime using `read-excel-file` library. The Excel file has four sheets:
-- `categories`: Reference list of category names
-- `questions`: All questions with columns `category, level, id, question`
-- `tests`: Maps test models to questions with columns `test, id_question` (FK → questions.id)
-- `other_questions`: Extra questions for the /random play mode with columns `id_question, question`
+**Questions System**: Questions are loaded from `/public/questions.xlsx` at runtime using `read-excel-file` library. The Excel file has two sheets:
+- `questions`: All questions with columns `id_question, min, max, q_min_max, p05, p95, q_p05_p95, question`
+- `tests`: Maps test models to questions with columns `test, id_question` (FK → questions.id_question)
 
 The `src/lib/questions.js` module caches the parsed Excel data and provides functions:
 - `getAllQuestions()` - Returns all available questions
 - `getTestQuestions(testId)` - Returns questions for specific test model
-- `getRandomQuestion()` - Returns random question
+- `getRandomPlayQuestion()` - Returns random question (used by /random play mode)
 
 **Database Structure** (Supabase tables):
 - `logs_download` - PDF download tracking (id, created_at)
