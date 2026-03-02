@@ -22,8 +22,8 @@ def load_test_questions(test_id):
 
     questions = {}
     for i in range(2, questions_sheet.max_row + 1):
-        q_id = questions_sheet.cell(i, 3).value
-        text = questions_sheet.cell(i, 4).value
+        q_id = questions_sheet.cell(i, 1).value
+        text = questions_sheet.cell(i, 5).value
         if q_id is not None and text:
             questions[q_id] = text
 
@@ -260,7 +260,7 @@ def generate_pdf(test_id):
     y = draw_separator_lines(y)
     y -= 0.45 * cm
     c.setFont("Helvetica", 11)
-    c.drawString(margin_left, y, "Puedes usar calculadora y hacer operaciones en esta misma hoja.")
+    c.drawString(margin_left, y, "Puedes hacer cuentas en sucio en esta hoja. Puedes usar calculadora.")
     y -= 0.8 * cm
     y = render_questions_page(y, 0, 4, page=1)  # 4 questions on page 1 (compact)
     draw_footer(1)
