@@ -8,6 +8,8 @@ supabase/.temp/
 backups/
 codigos_qr
 
+__pycache__
+
 # Logs
 .vscode
 logs
