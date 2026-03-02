@@ -181,3 +181,69 @@ export async function exportTable(table) {
   if (error) throw error
   return data
 }
+
+export async function getTableCount(table) {
+  const { count, error } = await supabase
+    .from(table)
+    .select('*', { count: 'exact', head: true })
+
+  if (error) throw error
+  return count
+}
+
+export async function getTableLatest(table) {
+  const { data, error } = await supabase
+    .from(table)
+    .select('created_at')
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  if (error) throw error
+  return data?.[0]?.created_at || null
+}
+
+export async function getResponsesByModel() {
+  const tables = ['responses_online', 'responses_paper']
+  const counts = { A: 0, B: 0, C: 0, D: 0 }
+
+  for (const table of tables) {
+    for (const model of ['A', 'B', 'C', 'D']) {
+      const { count, error } = await supabase
+        .from(table)
+        .select('*', { count: 'exact', head: true })
+        .eq('test_model', model)
+
+      if (error) throw error
+      counts[model] += count
+    }
+  }
+  return counts
+}
+
+export async function getActivityByDay(days = 14) {
+  const since = new Date()
+  since.setDate(since.getDate() - days)
+  const sinceISO = since.toISOString()
+
+  const { data, error } = await supabase
+    .from('users_online')
+    .select('created_at')
+    .gte('created_at', sinceISO)
+    .order('created_at', { ascending: true })
+
+  if (error) throw error
+
+  const byDay = {}
+  for (let i = 0; i < days; i++) {
+    const d = new Date()
+    d.setDate(d.getDate() - (days - 1 - i))
+    byDay[d.toISOString().split('T')[0]] = 0
+  }
+
+  for (const row of data || []) {
+    const day = row.created_at.split('T')[0]
+    if (byDay[day] !== undefined) byDay[day]++
+  }
+
+  return Object.entries(byDay).map(([date, count]) => ({ date, count }))
+}

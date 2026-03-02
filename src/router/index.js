@@ -23,8 +23,24 @@ const routes = [
   },
   {
     path: '/admin',
-    name: 'admin',
-    component: () => import('@/views/AdminView.vue')
+    component: () => import('@/views/AdminView.vue'),
+    children: [
+      {
+        path: 'datos',
+        name: 'admin-datos',
+        component: () => import('@/views/AdminDataEntryView.vue')
+      },
+      {
+        path: 'metricas',
+        name: 'admin-metricas',
+        component: () => import('@/views/AdminMetricsView.vue')
+      },
+      {
+        path: 'exportar',
+        name: 'admin-exportar',
+        component: () => import('@/views/AdminExportView.vue')
+      }
+    ]
   },
   {
     path: '/upload/:userId',
