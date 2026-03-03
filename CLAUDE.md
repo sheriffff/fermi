@@ -31,7 +31,6 @@ python build_full_pdf.py                # Generate complete PDF with all models
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
 VITE_LOG_TO_DDBB=true          # set to 'false' to skip all DB writes in dev
-VITE_WIP=false                 # true in prod to show WIP banner
 ```
 
 ## Architecture
