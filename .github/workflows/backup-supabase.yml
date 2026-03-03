@@ -1,0 +1,50 @@
+name: Backup Supabase
+
+on:
+  schedule:
+    - cron: '0 * * * *' # every hour
+  workflow_dispatch: # manual trigger from GitHub UI
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download tables as CSV
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+        run: |
+          mkdir -p backups
+          TABLES="logs_download users_online responses_online users_paper responses_paper responses_play_random feedback"
+          for TABLE in $TABLES; do
+            HTTP_CODE=$(curl -s -w "%{http_code}" \
+              -H "Accept: text/csv" \
+              -H "apikey: $SUPABASE_API_KEY" \
+              -H "Authorization: Bearer $SUPABASE_API_KEY" \
+              "$SUPABASE_URL/rest/v1/$TABLE?limit=100000" \
+              -o "backups/$TABLE.csv")
+            ROWS=$(($(wc -l < "backups/$TABLE.csv") - 1))
+            echo "$TABLE: $ROWS rows (HTTP $HTTP_CODE)"
+            if [ "$HTTP_CODE" != "200" ]; then
+              echo "::error::Failed to download $TABLE (HTTP $HTTP_CODE)"
+              cat "backups/$TABLE.csv"
+              exit 1
+            fi
+          done
+
+      - name: Push to backup repo
+        env:
+          BACKUP_TOKEN: ${{ secrets.BACKUP_REPO_TOKEN }}
+        run: |
+          git clone https://x-access-token:${BACKUP_TOKEN}@github.com/sheriffff/fermi-backups.git repo
+          cp backups/*.csv repo/
+          cd repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to backup"
+          else
+            git commit -m "backup: $(date -u +%Y-%m-%d)"
+            git push
+          fi
