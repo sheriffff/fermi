@@ -45,6 +45,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to backup"
           else
-            git commit -m "backup: $(date -u +%Y-%m-%d)"
+            git commit -m "backup: $(date -u +%Y-%m-%d_%H:%M)"
             git push
           fi
