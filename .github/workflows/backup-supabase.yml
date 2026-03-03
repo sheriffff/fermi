@@ -36,7 +36,7 @@ jobs:
         env:
           BACKUP_TOKEN: ${{ secrets.BACKUP_REPO_TOKEN }}
         run: |
-          git clone https://x-access-token:${BACKUP_TOKEN}@github.com/sheriffff/fermi-backups.git repo
+          git clone https://x-access-token:${BACKUP_TOKEN}@github.com/sheriffff/fermi-backup.git repo
           cp backups/*.csv repo/
           cd repo
           git config user.name "github-actions[bot]"
