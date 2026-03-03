@@ -130,12 +130,15 @@ export async function savePlayResponse({ idPlayQuestion, response, time }) {
   if (error) throw error
 }
 
+const ALLOWED_SCRIBBLE_EXT = ['jpg', 'jpeg', 'png', 'webp', 'gif']
+
 export async function uploadScribble(userId, file) {
   if (!dbEnabled) return 'fake-path'
   const MAX_SIZE = 5 * 1024 * 1024
   if (file.size > MAX_SIZE) throw new Error('El archivo supera 5MB')
 
-  const ext = file.name.split('.').pop() || 'jpg'
+  const ext = (file.name.split('.').pop() || '').toLowerCase()
+  if (!ALLOWED_SCRIBBLE_EXT.includes(ext)) throw new Error('Solo se permiten imágenes (jpg, png, webp, gif)')
   const path = `${userId}/${Date.now()}.${ext}`
 
   const { error } = await supabase.storage

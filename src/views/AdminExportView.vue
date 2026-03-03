@@ -15,14 +15,15 @@ async function exportCSV(tabla) {
       headers.join(','),
       ...data.map(row =>
         headers.map(h => {
-          const val = row[h]
-          if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
+          let val = row[h]
+          if (val == null) return ''
+          if (typeof val === 'object') val = JSON.stringify(val)
+          val = String(val)
+          if (/^[=+\-@\t\r]/.test(val)) val = `'${val}`
+          if (val.includes(',') || val.includes('"') || val.includes('\n')) {
             return `"${val.replace(/"/g, '""')}"`
           }
-          if (typeof val === 'object') {
-            return `"${JSON.stringify(val).replace(/"/g, '""')}"`
-          }
-          return val ?? ''
+          return val
         }).join(',')
       )
     ]
