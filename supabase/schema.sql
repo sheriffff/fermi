@@ -241,8 +241,8 @@ CREATE POLICY "Allow anon scribble uploads"
 ON storage.objects FOR INSERT TO anon
 WITH CHECK (bucket_id = 'scribbles');
 
-CREATE POLICY "Allow auth scribble reads"
-ON storage.objects FOR SELECT TO authenticated
+CREATE POLICY "Allow anon scribble reads"
+ON storage.objects FOR SELECT TO anon
 USING (bucket_id = 'scribbles');
 
 -- -----------------------------------------------------

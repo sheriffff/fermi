@@ -118,7 +118,7 @@ async function submit() {
       <div class="text-5xl mb-4">📸</div>
 
       <h2 class="text-2xl font-bold text-neutral-800 mb-2">
-        📸 Fotografía tu hoja en sucio!
+        Fotografía tu hoja en sucio!
       </h2>
       <p class="text-neutral-500 text-sm mb-6 max-w-sm mx-auto">
         Me gustaría hacer una especie de collage con las hojas en sucio de tod@s nosotr@s. ¿Te animas a hacerle una foto a los cálculos que has hecho?
