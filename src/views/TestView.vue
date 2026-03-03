@@ -6,10 +6,14 @@ import { useNumberFormat } from '@/composables/useNumberFormat'
 import { createUserOnline, saveResponsesOnline } from '@/lib/supabase'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import FermiInput from '@/components/common/FermiInput.vue'
+import MobileKeypad from '@/components/common/MobileKeypad.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
 import FeedbackModal from '@/components/common/FeedbackModal.vue'
 import LogErrorModal from '@/components/common/LogErrorModal.vue'
 import ScribbleUpload from '@/components/adultos/ScribbleUpload.vue'
+import { useMobile } from '@/composables/useMobile'
+
+const { isMobile } = useMobile()
 
 // ============================================
 // CONFIGURACIÓN DE TIEMPOS
@@ -54,7 +58,7 @@ async function shareLink() {
   try {
     await navigator.share({
       title: '¡Juguemos a Estimar!',
-      text: 'Acabo de hacer un test de estimación de cantidades. ¿Te atreves?',
+      text: 'Acabo de hacer un test de estimación de cantidades muy entretenido. ¿Te animas?',
       url: window.location.origin
     })
   } catch (e) {
@@ -156,6 +160,7 @@ const currentAnswer = ref('')
 const fermiInputRef = ref(null)
 
 function focusInput() {
+  if (isMobile.value) return
   fermiInputRef.value?.inputRef?.focus()
 }
 
@@ -524,7 +529,7 @@ async function finishTest() {
           />
         </div>
 
-        <div v-else-if="currentStep === 'test'" key="test" class="space-y-6">
+        <div v-else-if="currentStep === 'test'" key="test" class="space-y-6" :class="{ 'pb-[280px]': isMobile }">
 
           <div class="flex items-center justify-between mb-4">
             <span class="text-sm text-neutral-500 font-medium">
@@ -559,9 +564,15 @@ async function finishTest() {
                 </p>
               </div>
 
-              <FermiInput ref="fermiInputRef" v-model="currentAnswer" @submit="isAnswerComplete && handleSubmitAnswer()" />
+              <FermiInput
+                ref="fermiInputRef"
+                v-model="currentAnswer"
+                @submit="isAnswerComplete && handleSubmitAnswer()"
+                :suppress-keyboard="isMobile"
+                :hide-buttons="isMobile"
+              />
 
-              <div class="mt-8">
+              <div v-if="!isMobile" class="mt-8">
                 <button
                   @click="handleSubmitAnswer"
                   class="btn-primary btn-large w-full"
@@ -577,6 +588,14 @@ async function finishTest() {
               </div>
             </div>
           </Transition>
+
+          <MobileKeypad
+            v-if="isMobile"
+            :fermi-input="fermiInputRef"
+            :submit-disabled="!isAnswerComplete"
+            :is-last-question="questionNumber === totalQuestions"
+            @submit="handleSubmitAnswer"
+          />
         </div>
 
         <div v-else-if="currentStep === 'finished'" key="finished" class="text-center">
@@ -597,7 +616,7 @@ async function finishTest() {
                 📝 Ver respuestas correctas
               </button>
               <button
-                v-if="savedUserId && !showUpload"
+                v-if="savedUserId"
                 @click="showUpload = true"
                 class="btn-outline btn-large w-full max-w-xs"
               >
@@ -620,14 +639,31 @@ async function finishTest() {
             </button>
           </div>
 
-          <Transition name="fade">
-            <div v-if="showUpload" class="mt-6">
-              <ScribbleUpload
-                :user-id="savedUserId"
-                @back="showUpload = false"
-              />
-            </div>
-          </Transition>
+          <Teleport to="body">
+            <Transition name="modal">
+              <div
+                v-if="showUpload"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                @click.self="showUpload = false"
+              >
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+                <div class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8">
+                  <button
+                    @click="showUpload = false"
+                    class="absolute top-3 right-3 bg-neutral-100 rounded-full p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-200 transition-colors z-10"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  <ScribbleUpload
+                    :user-id="savedUserId"
+                    @back="showUpload = false"
+                  />
+                </div>
+              </div>
+            </Transition>
+          </Teleport>
 
           <Transition name="fade">
             <div v-if="showResults" class="mt-6 text-left">
@@ -709,6 +745,27 @@ async function finishTest() {
   0%, 100% { transform: translateX(0) scale(1.25); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-2px) scale(1.25); }
   20%, 40%, 60%, 80% { transform: translateX(2px) scale(1.25); }
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-active .relative,
+.modal-leave-active .relative {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .relative,
+.modal-leave-to .relative {
+  transform: scale(0.9) translateY(20px);
+  opacity: 0;
 }
 
 </style>

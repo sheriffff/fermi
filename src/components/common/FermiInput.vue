@@ -10,6 +10,14 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  suppressKeyboard: {
+    type: Boolean,
+    default: false
+  },
+  hideButtons: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -116,8 +124,30 @@ const canDivide = computed(() => {
   }
 })
 
+function appendChar(char) {
+  if (props.disabled) return
+  const current = props.modelValue || ''
+  const cleaned = current.replace(/\D/g, '')
+  if (cleaned.length >= 21) return
+  emit('update:modelValue', cleaned + char)
+}
+
+function deleteChar() {
+  if (props.disabled) return
+  const current = props.modelValue || ''
+  const cleaned = current.replace(/\D/g, '')
+  if (!cleaned) return
+  emit('update:modelValue', cleaned.slice(0, -1))
+}
+
 defineExpose({
-  inputRef
+  inputRef,
+  appendChar,
+  deleteChar,
+  multiplyByThousand,
+  divideByThousand,
+  canMultiply,
+  canDivide
 })
 </script>
 
@@ -133,7 +163,7 @@ defineExpose({
           @keydown="handleKeydown"
           @paste="handlePaste"
           type="text"
-          inputmode="numeric"
+          :inputmode="suppressKeyboard ? 'none' : 'numeric'"
           pattern="[0-9]*"
           class="input-large"
           placeholder="Tu estimación"
@@ -149,7 +179,7 @@ defineExpose({
         </div>
       </div>
 
-      <div class="fermi-buttons">
+      <div v-if="!hideButtons" class="fermi-buttons">
         <button
           @click="multiplyByThousand"
           :disabled="disabled || !canMultiply"

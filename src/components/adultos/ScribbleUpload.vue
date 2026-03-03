@@ -114,7 +114,7 @@ async function submit() {
 
 <template>
   <div class="text-center">
-    <div class="card-elevated py-10">
+    <div class="py-4">
       <div class="text-5xl mb-4">📸</div>
 
       <h2 class="text-2xl font-bold text-neutral-800 mb-2">
