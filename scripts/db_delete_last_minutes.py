@@ -28,7 +28,17 @@ def main():
 
     print(f"Deleting rows created after {cutoff} (last {minutes} min)\n")
 
+    warn = False
     for table in tables:
+        count_resp = requests.get(
+            f"{BASE}/{table}",
+            params={"created_at": f"gte.{cutoff}", "select": "id", "limit": "0"},
+            headers={**HEADERS, "Prefer": "count=exact"},
+        )
+        count_resp.raise_for_status()
+        cr = count_resp.headers.get("content-range", "")
+        expected = int(cr.split("/")[-1]) if "/" in cr and cr.split("/")[-1].isdigit() else 0
+
         resp = requests.delete(
             f"{BASE}/{table}",
             params={"created_at": f"gte.{cutoff}"},
@@ -36,8 +46,18 @@ def main():
         )
         resp.raise_for_status()
         deleted = len(resp.json())
-        status = f"{deleted} deleted" if deleted else "—"
+
+        if deleted:
+            status = f"{deleted} deleted"
+        elif expected:
+            status = f"⚠ {expected} found but 0 deleted (RLS blocked)"
+            warn = True
+        else:
+            status = "—"
         print(f"  {table:25s} {status}")
+
+    if warn:
+        print("\n  ⚠ Some deletes were blocked by RLS. Set SUPABASE_SERVICE_ROLE_KEY in .env to bypass.")
 
     print("\nDone.")
 

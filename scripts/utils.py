@@ -9,7 +9,8 @@ ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
 
 BASE = os.environ["VITE_SUPABASE_URL"].rstrip("/") + "/rest/v1"
-KEY = os.environ["VITE_SUPABASE_PUBLISHABLE_KEY"]
+_ANON_KEY = os.environ["VITE_SUPABASE_PUBLISHABLE_KEY"]
+KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or _ANON_KEY
 HEADERS = {"apikey": KEY, "Authorization": f"Bearer {KEY}"}
 SCHEMA_PATH = ROOT / "supabase" / "schema.sql"
 

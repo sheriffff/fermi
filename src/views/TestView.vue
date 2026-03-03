@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import QRCode from 'qrcode'
 import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
 import { createUserOnline, saveResponsesOnline } from '@/lib/supabase'
@@ -10,6 +9,7 @@ import FermiInput from '@/components/common/FermiInput.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
 import FeedbackModal from '@/components/common/FeedbackModal.vue'
 import LogErrorModal from '@/components/common/LogErrorModal.vue'
+import ScribbleUpload from '@/components/adultos/ScribbleUpload.vue'
 
 // ============================================
 // CONFIGURACIÓN DE TIEMPOS
@@ -20,11 +20,10 @@ const WARNING_TIME = 30
 // ============================================
 // ESTADO DEL FLUJO
 // ============================================
-const currentStep = ref('metadata') // 'metadata' | 'instructions' | 'test' | 'finished'
+const currentStep = ref('metadata') // 'metadata' | 'instructions' | 'test' | 'upload' | 'finished'
 const isLoading = ref(false)
 const error = ref(null)
 const savedUserId = ref(null)
-const qrDataUrl = ref(null)
 const canShare = !!navigator.share
 const showFeedbackModal = ref(false)
 const showLogErrorModal = ref(false)
@@ -372,18 +371,8 @@ async function finishTest() {
     console.error('Error guardando respuestas:', e)
   } finally {
     isLoading.value = false
-    currentStep.value = 'finished'
+    currentStep.value = savedUserId.value ? 'upload' : 'finished'
   }
-
-  // TODO: QR generation - UploadView ruta no está disponible en Vercel
-  // if (savedUserId.value) {
-  //   try {
-  //     const uploadUrl = `${window.location.origin}/upload/${savedUserId.value}`
-  //     qrDataUrl.value = await QRCode.toDataURL(uploadUrl, { width: 200, margin: 2 })
-  //   } catch (e) {
-  //     console.error('Error generando QR:', e)
-  //   }
-  // }
 }
 </script>
 
@@ -589,9 +578,14 @@ async function finishTest() {
           </Transition>
         </div>
 
-        <!-- ============================================ -->
-        <!-- PANTALLA 3: FINALIZADO -->
-        <!-- ============================================ -->
+        <div v-else-if="currentStep === 'upload'" key="upload">
+          <ScribbleUpload
+            :user-id="savedUserId"
+            @done="currentStep = 'finished'"
+            @skip="currentStep = 'finished'"
+          />
+        </div>
+
         <div v-else-if="currentStep === 'finished'" key="finished" class="text-center">
 
           <div class="card-elevated py-12">

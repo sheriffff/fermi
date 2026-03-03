@@ -12,6 +12,33 @@ const uploading = ref(false)
 const done = ref(false)
 const error = ref(null)
 
+function compressImage(file, maxWidth = 1200, quality = 0.8) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      URL.revokeObjectURL(img.src)
+      const canvas = document.createElement('canvas')
+      let { width, height } = img
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width)
+        width = maxWidth
+      }
+      canvas.width = width
+      canvas.height = height
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+      canvas.toBlob(
+        (blob) => {
+          const name = file.name.replace(/\.[^.]+$/, '.jpg')
+          resolve(new File([blob], name, { type: 'image/jpeg' }))
+        },
+        'image/jpeg',
+        quality
+      )
+    }
+    img.src = URL.createObjectURL(file)
+  })
+}
+
 function handleFileInput(event) {
   const files = event.target.files
   if (!files.length) return
@@ -38,7 +65,8 @@ async function submit() {
 
   try {
     for (const photo of photos.value) {
-      await uploadScribble(userId, photo.file)
+      const compressed = await compressImage(photo.file)
+      await uploadScribble(userId, compressed)
     }
     done.value = true
   } catch (e) {

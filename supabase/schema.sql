@@ -151,8 +151,6 @@ CREATE POLICY "Allow delete online responses" ON responses_online
 
 CREATE POLICY "Allow read play responses" ON responses_play_random
     FOR SELECT TO anon USING (true);
-CREATE POLICY "Allow delete play responses" ON responses_play_random
-    FOR DELETE TO anon USING (true);
 
 CREATE POLICY "Allow insert paper users" ON users_paper
     FOR INSERT TO anon WITH CHECK (true);
@@ -246,6 +244,30 @@ WITH CHECK (bucket_id = 'scribbles');
 CREATE POLICY "Allow auth scribble reads"
 ON storage.objects FOR SELECT TO authenticated
 USING (bucket_id = 'scribbles');
+
+-- -----------------------------------------------------
+-- TABLE: scribbles
+-- Links online users to their uploaded calculation photos
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS scribbles (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users_online(id) ON DELETE CASCADE,
+    storage_path TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_scribbles_user ON scribbles(user_id);
+
+ALTER TABLE scribbles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow scribble record inserts" ON scribbles
+    FOR INSERT TO anon WITH CHECK (true);
+
+CREATE POLICY "Allow read scribbles" ON scribbles
+    FOR SELECT TO anon USING (true);
+
+CREATE POLICY "Allow delete scribbles" ON scribbles
+    FOR DELETE TO anon USING (true);
 
 -- -----------------------------------------------------
 -- 7. TABLE: feedback

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Show row count and latest created_at for key Supabase tables."""
 
+from datetime import date
+
 import requests
 from utils import BASE, HEADERS, get_tables
 
@@ -29,7 +31,11 @@ def main():
         )
         latest_resp.raise_for_status()
         data = latest_resp.json()
-        latest = data[0]["created_at"][:19].replace("T", " ") if data else "—"
+        if data:
+            ts = data[0]["created_at"][:19].replace("T", " ")
+            latest = "TODAY " + ts[11:] if ts[:10] == str(date.today()) else ts
+        else:
+            latest = "—"
 
         rows.append((table, count, latest))
 
