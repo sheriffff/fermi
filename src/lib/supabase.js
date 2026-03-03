@@ -173,7 +173,10 @@ export async function saveFeedback({ name, message }) {
   if (error) throw error
 }
 
+const EXPORTABLE_TABLES = ['logs_download', 'users_online', 'responses_online', 'users_paper', 'responses_paper', 'responses_play_random', 'feedback', 'view_responses_online', 'view_responses_paper']
+
 export async function exportTable(table) {
+  if (!EXPORTABLE_TABLES.includes(table)) throw new Error(`Table not exportable: ${table}`)
   const { data, error } = await supabase
     .from(table)
     .select('*')
