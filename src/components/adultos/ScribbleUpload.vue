@@ -15,6 +15,7 @@ const uploading = ref(false)
 const error = ref(null)
 const qrDataUrl = ref(null)
 const uploadedUrls = ref([])
+const mobileUploaded = ref(false)
 
 const isMobile = /mobi|android|iphone|ipod|phone|tablet|ipad/i.test(navigator.userAgent)
 
@@ -100,7 +101,8 @@ async function submit() {
       await uploadScribble(props.userId, compressed)
     }
     photos.value = []
-    await fetchUploaded()
+    if (isMobile) mobileUploaded.value = true
+    else await fetchUploaded()
   } catch (e) {
     console.error('Error subiendo foto:', e)
     error.value = 'Error al subir las fotos. Inténtalo de nuevo.'
@@ -116,51 +118,57 @@ async function submit() {
       <div class="text-5xl mb-4">📸</div>
 
       <h2 class="text-2xl font-bold text-neutral-800 mb-2">
-        ¿Puedes hacernos una foto de tus cálculos?
+        📸 Fotografía tu hoja en sucio!
       </h2>
       <p class="text-neutral-500 text-sm mb-6 max-w-sm mx-auto">
         Me gustaría hacer una especie de collage con las hojas en sucio de tod@s nosotr@s. ¿Te animas a hacerle una foto a los cálculos que has hecho?
       </p>
 
       <template v-if="isMobile">
-        <div v-if="photos.length < MAX_PHOTOS" class="mb-6 max-w-xs mx-auto">
-          <label class="block w-full py-4 border-2 border-dashed border-neutral-300 rounded-xl text-center cursor-pointer hover:border-primary-500 transition-colors">
-            <span class="text-neutral-600 text-lg">📷 Hacer foto</span>
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              class="hidden"
-              @change="handleFileInput"
-            />
-          </label>
+        <div v-if="mobileUploaded" class="mb-4">
+          <p class="text-green-600 font-medium">Fotos recibidas, gracias!</p>
         </div>
 
-        <div v-if="photos.length" class="grid grid-cols-3 gap-3 mb-6 max-w-xs mx-auto">
-          <div v-for="(photo, i) in photos" :key="i" class="relative">
-            <img :src="photo.url" class="w-full aspect-square object-cover rounded-lg" />
-            <button
-              @click="removePhoto(i)"
-              class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
-            >✕</button>
+        <template v-else>
+          <div v-if="photos.length < MAX_PHOTOS" class="mb-6 max-w-xs mx-auto">
+            <label class="block w-full py-4 border-2 border-dashed border-neutral-300 rounded-xl text-center cursor-pointer hover:border-primary-500 transition-colors">
+              <span class="text-neutral-600 text-lg">📷 Hacer foto</span>
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                class="hidden"
+                @change="handleFileInput"
+              />
+            </label>
           </div>
-        </div>
 
-        <div v-if="error" class="p-3 bg-red-50 text-red-700 rounded-xl text-sm mb-4 max-w-xs mx-auto">
-          {{ error }}
-        </div>
+          <div v-if="photos.length" class="grid grid-cols-3 gap-3 mb-6 max-w-xs mx-auto">
+            <div v-for="(photo, i) in photos" :key="i" class="relative">
+              <img :src="photo.url" class="w-full aspect-square object-cover rounded-lg" />
+              <button
+                @click="removePhoto(i)"
+                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
+              >✕</button>
+            </div>
+          </div>
 
-        <div class="flex flex-col items-center gap-3 max-w-xs mx-auto">
-          <button
-            v-if="photos.length"
-            @click="submit"
-            :disabled="uploading"
-            class="btn-primary btn-large w-full"
-          >
-            <span v-if="uploading">Subiendo...</span>
-            <span v-else>Enviar {{ photos.length }} foto{{ photos.length > 1 ? 's' : '' }}</span>
-          </button>
-        </div>
+          <div v-if="error" class="p-3 bg-red-50 text-red-700 rounded-xl text-sm mb-4 max-w-xs mx-auto">
+            {{ error }}
+          </div>
+
+          <div class="flex flex-col items-center gap-3 max-w-xs mx-auto">
+            <button
+              v-if="photos.length"
+              @click="submit"
+              :disabled="uploading"
+              class="btn-primary btn-large w-full"
+            >
+              <span v-if="uploading">Subiendo...</span>
+              <span v-else>Enviar {{ photos.length }} foto{{ photos.length > 1 ? 's' : '' }}</span>
+            </button>
+          </div>
+        </template>
       </template>
 
       <template v-else>
@@ -182,13 +190,6 @@ async function submit() {
         </div>
       </template>
 
-      <button
-        @click="$emit('back')"
-        :disabled="uploading"
-        class="mt-6 text-neutral-400 hover:text-neutral-600 text-sm transition-colors"
-      >
-        ← Atrás
-      </button>
     </div>
   </div>
 </template>

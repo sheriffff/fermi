@@ -588,31 +588,27 @@ async function finishTest() {
               ¡Gracias por participar!
             </h1>
 
-            <p class="text-neutral-600 mb-8">
-              Tus respuestas me ayudan a entender mejor qué tal estimamos cantidades
-            </p>
-
             <div class="flex flex-col items-center gap-3">
               <button
                 v-if="!showResults"
                 @click="showResults = true"
                 class="btn-outline btn-large w-full max-w-xs"
               >
-                Ver respuestas correctas
+                📝 Ver respuestas correctas
               </button>
               <button
                 v-if="savedUserId && !showUpload"
                 @click="showUpload = true"
                 class="btn-outline btn-large w-full max-w-xs"
               >
-                📸 Sube tu hoja en sucio
+                📸 Fotografía tu hoja en sucio!
               </button>
               <button
                 v-if="canShare"
                 @click="shareLink"
                 class="btn-primary btn-large w-full max-w-xs"
               >
-                Compartir con un amigo 📤
+                📤 Comparte con un amigo
               </button>
               <RouterLink to="/" class="btn-primary btn-large w-full max-w-xs">
                 Volver al inicio

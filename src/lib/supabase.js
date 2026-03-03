@@ -162,10 +162,13 @@ export async function getScribbleUrls(userId) {
     .select('storage_path')
     .eq('user_id', userId)
   if (error) throw error
-  return data.map(row => {
-    const { data: urlData } = supabase.storage.from('scribbles').getPublicUrl(row.storage_path)
-    return urlData.publicUrl
-  })
+  if (!data.length) return []
+  const paths = data.map(row => row.storage_path)
+  const { data: signed, error: signError } = await supabase.storage
+    .from('scribbles')
+    .createSignedUrls(paths, 3600)
+  if (signError) throw signError
+  return signed.map(s => s.signedUrl)
 }
 
 export async function getOnlineAges() {

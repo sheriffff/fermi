@@ -90,7 +90,7 @@ async function submit() {
 
       <div v-else>
         <h1 class="text-2xl font-bold text-neutral-800 mb-2 text-center">
-          Sube fotos de tus garabatos
+          Sube fotos de tu hoja en sucio
         </h1>
         <p class="text-neutral-500 text-sm text-center mb-6">
           Puedes subir hasta {{ MAX_PHOTOS }} fotos
