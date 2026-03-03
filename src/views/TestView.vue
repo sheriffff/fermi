@@ -20,13 +20,14 @@ const WARNING_TIME = 30
 // ============================================
 // ESTADO DEL FLUJO
 // ============================================
-const currentStep = ref('metadata') // 'metadata' | 'instructions' | 'test' | 'upload' | 'finished'
+const currentStep = ref('metadata') // 'metadata' | 'instructions' | 'test' | 'finished'
 const isLoading = ref(false)
 const error = ref(null)
 const savedUserId = ref(null)
 const canShare = !!navigator.share
 const showFeedbackModal = ref(false)
 const showLogErrorModal = ref(false)
+const showUpload = ref(false)
 
 function logErrBg(r) {
   if (r.inRange) return 'bg-emerald-50'
@@ -371,7 +372,7 @@ async function finishTest() {
     console.error('Error guardando respuestas:', e)
   } finally {
     isLoading.value = false
-    currentStep.value = savedUserId.value ? 'upload' : 'finished'
+    currentStep.value = 'finished'
   }
 }
 </script>
@@ -578,14 +579,6 @@ async function finishTest() {
           </Transition>
         </div>
 
-        <div v-else-if="currentStep === 'upload'" key="upload">
-          <ScribbleUpload
-            :user-id="savedUserId"
-            @done="currentStep = 'finished'"
-            @skip="currentStep = 'finished'"
-          />
-        </div>
-
         <div v-else-if="currentStep === 'finished'" key="finished" class="text-center">
 
           <div class="card-elevated py-12">
@@ -608,6 +601,13 @@ async function finishTest() {
                 Ver respuestas correctas
               </button>
               <button
+                v-if="savedUserId && !showUpload"
+                @click="showUpload = true"
+                class="btn-outline btn-large w-full max-w-xs"
+              >
+                📸 Sube tu hoja en sucio
+              </button>
+              <button
                 v-if="canShare"
                 @click="shareLink"
                 class="btn-primary btn-large w-full max-w-xs"
@@ -623,6 +623,15 @@ async function finishTest() {
               📣 Dame tu opinión
             </button>
           </div>
+
+          <Transition name="fade">
+            <div v-if="showUpload" class="mt-6">
+              <ScribbleUpload
+                :user-id="savedUserId"
+                @back="showUpload = false"
+              />
+            </div>
+          </Transition>
 
           <Transition name="fade">
             <div v-if="showResults" class="mt-6 text-left">

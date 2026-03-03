@@ -1,21 +1,31 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import QRCode from 'qrcode'
-import { uploadScribble } from '@/lib/supabase'
+import { uploadScribble, getScribbleUrls } from '@/lib/supabase'
 
 const props = defineProps({
   userId: { type: String, required: true }
 })
 
-const emit = defineEmits(['done', 'skip'])
+const emit = defineEmits(['back'])
 
 const MAX_PHOTOS = 3
 const photos = ref([])
 const uploading = ref(false)
 const error = ref(null)
 const qrDataUrl = ref(null)
+const uploadedUrls = ref([])
 
 const isMobile = /mobi|android|iphone|ipod|phone|tablet|ipad/i.test(navigator.userAgent)
+
+let pollInterval = null
+
+async function fetchUploaded() {
+  try {
+    const urls = await getScribbleUrls(props.userId)
+    if (urls.length) uploadedUrls.value = urls
+  } catch {}
+}
 
 onMounted(async () => {
   if (!isMobile) {
@@ -25,7 +35,13 @@ onMounted(async () => {
     } catch (e) {
       console.error('Error generando QR:', e)
     }
+    await fetchUploaded()
+    pollInterval = setInterval(fetchUploaded, 4000)
   }
+})
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval)
 })
 
 function compressImage(file, maxWidth = 1200, quality = 0.8) {
@@ -83,7 +99,8 @@ async function submit() {
       const compressed = await compressImage(photo.file)
       await uploadScribble(props.userId, compressed)
     }
-    emit('done')
+    photos.value = []
+    await fetchUploaded()
   } catch (e) {
     console.error('Error subiendo foto:', e)
     error.value = 'Error al subir las fotos. Inténtalo de nuevo.'
@@ -102,64 +119,76 @@ async function submit() {
         ¿Puedes hacernos una foto de tus cálculos?
       </h2>
       <p class="text-neutral-500 text-sm mb-6 max-w-sm mx-auto">
-        Si has usado papel para hacer cuentas, una foto nos ayuda mucho en la investigación.
+        Me gustaría hacer una especie de collage con las hojas en sucio de tod@s nosotr@s. ¿Te animas a hacerle una foto a los cálculos que has hecho?
       </p>
 
-      <div v-if="qrDataUrl && !photos.length" class="mb-6">
-        <p class="text-sm text-neutral-500 mb-3">Escanea con tu móvil para sacar una foto:</p>
-        <img :src="qrDataUrl" alt="QR" class="mx-auto w-48 h-48 rounded-xl" />
-        <div class="flex items-center gap-3 my-5 max-w-xs mx-auto">
-          <div class="flex-1 h-px bg-neutral-200"></div>
-          <span class="text-xs text-neutral-400">o sube desde aquí</span>
-          <div class="flex-1 h-px bg-neutral-200"></div>
+      <template v-if="isMobile">
+        <div v-if="photos.length < MAX_PHOTOS" class="mb-6 max-w-xs mx-auto">
+          <label class="block w-full py-4 border-2 border-dashed border-neutral-300 rounded-xl text-center cursor-pointer hover:border-primary-500 transition-colors">
+            <span class="text-neutral-600 text-lg">📷 Hacer foto</span>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              class="hidden"
+              @change="handleFileInput"
+            />
+          </label>
         </div>
-      </div>
 
-      <div v-if="photos.length < MAX_PHOTOS" class="mb-6 max-w-xs mx-auto">
-        <label class="block w-full py-4 border-2 border-dashed border-neutral-300 rounded-xl text-center cursor-pointer hover:border-primary-500 transition-colors">
-          <span class="text-neutral-600 text-lg">📷 {{ isMobile ? 'Hacer foto' : 'Subir imagen' }}</span>
-          <input
-            type="file"
-            accept="image/*"
-            :capture="isMobile ? 'environment' : undefined"
-            class="hidden"
-            @change="handleFileInput"
-          />
-        </label>
-      </div>
+        <div v-if="photos.length" class="grid grid-cols-3 gap-3 mb-6 max-w-xs mx-auto">
+          <div v-for="(photo, i) in photos" :key="i" class="relative">
+            <img :src="photo.url" class="w-full aspect-square object-cover rounded-lg" />
+            <button
+              @click="removePhoto(i)"
+              class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
+            >✕</button>
+          </div>
+        </div>
 
-      <div v-if="photos.length" class="grid grid-cols-3 gap-3 mb-6 max-w-xs mx-auto">
-        <div v-for="(photo, i) in photos" :key="i" class="relative">
-          <img :src="photo.url" class="w-full aspect-square object-cover rounded-lg" />
+        <div v-if="error" class="p-3 bg-red-50 text-red-700 rounded-xl text-sm mb-4 max-w-xs mx-auto">
+          {{ error }}
+        </div>
+
+        <div class="flex flex-col items-center gap-3 max-w-xs mx-auto">
           <button
-            @click="removePhoto(i)"
-            class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
-          >✕</button>
+            v-if="photos.length"
+            @click="submit"
+            :disabled="uploading"
+            class="btn-primary btn-large w-full"
+          >
+            <span v-if="uploading">Subiendo...</span>
+            <span v-else>Enviar {{ photos.length }} foto{{ photos.length > 1 ? 's' : '' }}</span>
+          </button>
         </div>
-      </div>
+      </template>
 
-      <div v-if="error" class="p-3 bg-red-50 text-red-700 rounded-xl text-sm mb-4 max-w-xs mx-auto">
-        {{ error }}
-      </div>
+      <template v-else>
+        <div v-if="qrDataUrl && !uploadedUrls.length" class="mb-6">
+          <p class="text-sm text-neutral-500 mb-3">Escanea con tu móvil para sacar una foto:</p>
+          <img :src="qrDataUrl" alt="QR" class="mx-auto w-48 h-48 rounded-xl" />
+        </div>
 
-      <div class="flex flex-col items-center gap-3 max-w-xs mx-auto">
-        <button
-          v-if="photos.length"
-          @click="submit"
-          :disabled="uploading"
-          class="btn-primary btn-large w-full"
-        >
-          <span v-if="uploading">Subiendo...</span>
-          <span v-else>Enviar {{ photos.length }} foto{{ photos.length > 1 ? 's' : '' }}</span>
-        </button>
-        <button
-          @click="$emit('skip')"
-          :disabled="uploading"
-          class="text-neutral-400 hover:text-neutral-600 text-sm transition-colors"
-        >
-          Saltar, no tengo papel
-        </button>
-      </div>
+        <div v-if="uploadedUrls.length" class="mb-6">
+          <p class="text-sm text-green-600 font-medium mb-3">📸 Fotos recibidas</p>
+          <div class="grid grid-cols-3 gap-3 max-w-xs mx-auto">
+            <img
+              v-for="(url, i) in uploadedUrls"
+              :key="i"
+              :src="url"
+              class="w-full aspect-square object-cover rounded-lg"
+            />
+          </div>
+        </div>
+      </template>
+
+      <button
+        @click="$emit('back')"
+        :disabled="uploading"
+        class="mt-6 text-neutral-400 hover:text-neutral-600 text-sm transition-colors"
+      >
+        ← Atrás
+      </button>
     </div>
   </div>
 </template>

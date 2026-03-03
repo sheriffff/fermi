@@ -8,7 +8,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
 
-BASE = os.environ["VITE_SUPABASE_URL"].rstrip("/") + "/rest/v1"
+_SUPABASE_URL = os.environ["VITE_SUPABASE_URL"].rstrip("/")
+BASE = _SUPABASE_URL + "/rest/v1"
+STORAGE_BASE = _SUPABASE_URL + "/storage/v1"
 _ANON_KEY = os.environ["VITE_SUPABASE_PUBLISHABLE_KEY"]
 KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or _ANON_KEY
 HEADERS = {"apikey": KEY, "Authorization": f"Bearer {KEY}"}

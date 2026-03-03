@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Delete all database entries from the last N minutes."""
+"""Delete all database entries and storage objects from the last N minutes."""
 
 import sys
 from datetime import datetime, timedelta, timezone
 
 import requests
-from utils import BASE, HEADERS, get_tables_delete_order
+from utils import BASE, HEADERS, STORAGE_BASE, get_tables_delete_order
 
 MAX_MINUTES = 60
 
@@ -27,6 +27,14 @@ def main():
     tables = get_tables_delete_order()
 
     print(f"Deleting rows created after {cutoff} (last {minutes} min)\n")
+
+    scribbles_resp = requests.get(
+        f"{BASE}/scribbles",
+        params={"created_at": f"gte.{cutoff}", "select": "storage_path"},
+        headers=HEADERS,
+    )
+    scribbles_resp.raise_for_status()
+    scribble_paths = [r["storage_path"] for r in scribbles_resp.json() if r.get("storage_path")]
 
     warn = False
     for table in tables:
@@ -55,6 +63,17 @@ def main():
         else:
             status = "—"
         print(f"  {table:25s} {status}")
+
+    if scribble_paths:
+        del_resp = requests.delete(
+            f"{STORAGE_BASE}/object/scribbles",
+            headers={**HEADERS, "Content-Type": "application/json"},
+            json={"prefixes": scribble_paths},
+        )
+        del_resp.raise_for_status()
+        print(f"\n  Storage 'scribbles':    {len(scribble_paths)} files deleted")
+    else:
+        print(f"\n  Storage 'scribbles':    —")
 
     if warn:
         print("\n  ⚠ Some deletes were blocked by RLS. Set SUPABASE_SERVICE_ROLE_KEY in .env to bypass.")

@@ -156,6 +156,18 @@ export async function uploadScribble(userId, file) {
   return path
 }
 
+export async function getScribbleUrls(userId) {
+  const { data, error } = await supabase
+    .from('scribbles')
+    .select('storage_path')
+    .eq('user_id', userId)
+  if (error) throw error
+  return data.map(row => {
+    const { data: urlData } = supabase.storage.from('scribbles').getPublicUrl(row.storage_path)
+    return urlData.publicUrl
+  })
+}
+
 export async function getOnlineAges() {
   const { data, error } = await supabase
     .from('users_online')

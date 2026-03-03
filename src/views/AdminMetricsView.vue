@@ -10,7 +10,8 @@ const groups = [
     title: 'Online',
     tables: [
       { key: 'users_online', label: 'Test' },
-      { key: 'responses_play_random', label: 'Pregunta Aleatoria' }
+      { key: 'responses_play_random', label: 'Pregunta Aleatoria' },
+      { key: 'scribbles', label: 'Uploaded Images' }
     ]
   },
   {
