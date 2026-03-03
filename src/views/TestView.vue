@@ -8,12 +8,14 @@ import { createUserOnline, saveResponsesOnline } from '@/lib/supabase'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import FermiInput from '@/components/common/FermiInput.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
+import FeedbackModal from '@/components/common/FeedbackModal.vue'
+import LogErrorModal from '@/components/common/LogErrorModal.vue'
 
 // ============================================
 // CONFIGURACIÓN DE TIEMPOS
 // ============================================
-const QUESTION_TIME = 120 // Segundos por pregunta (2 minutos)
-const WARNING_TIME = 30  // Segundos antes del final para avisar
+const QUESTION_TIME = 150
+const WARNING_TIME = 30
 
 // ============================================
 // ESTADO DEL FLUJO
@@ -24,6 +26,29 @@ const error = ref(null)
 const savedUserId = ref(null)
 const qrDataUrl = ref(null)
 const canShare = !!navigator.share
+const showFeedbackModal = ref(false)
+const showLogErrorModal = ref(false)
+
+function logErrBg(r) {
+  if (r.inRange) return 'bg-emerald-50'
+  if (r.logErr === null) return 'bg-neutral-50'
+  if (r.logErr < 1) return 'bg-amber-50'
+  return 'bg-red-50'
+}
+
+function logErrLabel(r) {
+  if (r.inRange) return 'text-emerald-500'
+  if (r.logErr === null) return 'text-neutral-400'
+  if (r.logErr < 1) return 'text-amber-500'
+  return 'text-red-500'
+}
+
+function logErrValueClass(r) {
+  if (r.inRange) return 'text-emerald-800'
+  if (r.logErr === null) return 'text-neutral-800'
+  if (r.logErr < 1) return 'text-amber-800'
+  return 'text-red-800'
+}
 
 async function shareLink() {
   try {
@@ -599,6 +624,10 @@ async function finishTest() {
                 Volver al inicio
               </RouterLink>
             </div>
+
+            <button v-if="!showResults" @click="showFeedbackModal = true" class="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 bg-white text-neutral-600 text-sm font-medium shadow-sm hover:shadow-md hover:border-primary-300 hover:text-primary-600 transition-all cursor-pointer">
+              📣 Dame tu opinión
+            </button>
           </div>
 
           <Transition name="fade">
@@ -616,10 +645,10 @@ async function finishTest() {
                   <div class="grid grid-cols-2 gap-3">
                     <div
                       class="rounded-xl px-3 py-2 text-center"
-                      :class="r.inRange ? 'bg-emerald-50' : 'bg-neutral-50'"
+                      :class="logErrBg(r)"
                     >
-                      <p class="text-xs mb-0.5" :class="r.inRange ? 'text-emerald-500' : 'text-neutral-400'">Tu respuesta</p>
-                      <p class="font-mono font-medium" :class="r.inRange ? 'text-emerald-800' : 'text-neutral-800'">
+                      <p class="text-xs mb-0.5" :class="logErrLabel(r)">Tu respuesta</p>
+                      <p class="font-mono font-medium" :class="logErrValueClass(r)">
                         {{ r.answer != null ? formatNumber(r.answer) : '—' }}<span v-if="r.inRange"> ⭐</span>
                       </p>
                     </div>
@@ -635,6 +664,16 @@ async function finishTest() {
               </div>
             </div>
           </Transition>
+
+          <LogErrorModal :show="showLogErrorModal" @close="showLogErrorModal = false" />
+
+          <div class="mt-8">
+            <button @click="showFeedbackModal = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 bg-white text-neutral-600 text-sm font-medium shadow-sm hover:shadow-md hover:border-primary-300 hover:text-primary-600 transition-all cursor-pointer">
+              📣 Dame tu opinión
+            </button>
+          </div>
+
+          <FeedbackModal :show="showFeedbackModal" @close="showFeedbackModal = false" />
 
         </div>
       </Transition>

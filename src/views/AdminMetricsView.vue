@@ -7,35 +7,28 @@ const error = ref('')
 
 const groups = [
   {
+    title: 'Online',
+    tables: [
+      { key: 'users_online', label: 'Test' },
+      { key: 'responses_play_random', label: 'Pregunta Aleatoria' }
+    ]
+  },
+  {
     title: 'Profes',
     tables: [
       { key: 'logs_download', label: 'Descargas PDF' }
     ]
   },
   {
-    title: 'Online',
+    title: 'Feedback',
     tables: [
-      { key: 'users_online', label: 'Usuarios' },
-      { key: 'responses_online', label: 'Respuestas' }
-    ]
-  },
-  {
-    title: 'Jugar',
-    tables: [
-      { key: 'responses_play_random', label: 'Partidas random' }
+      { key: 'feedback', label: 'Mensajes' }
     ]
   },
   {
     title: 'Papel',
     tables: [
-      { key: 'users_paper', label: 'Alumnos' },
-      { key: 'responses_paper', label: 'Respuestas' }
-    ]
-  },
-  {
-    title: 'Feedback',
-    tables: [
-      { key: 'feedback', label: 'Mensajes' }
+      { key: 'users_paper', label: 'Alumnos' }
     ]
   }
 ]
@@ -86,7 +79,7 @@ onMounted(async () => {
     </div>
 
     <div v-else>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
         <div v-for="group in groups" :key="group.title">
           <h3 class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">{{ group.title }}</h3>
           <div class="space-y-3">
