@@ -2,7 +2,8 @@
 const props = defineProps({
   fermiInput: { type: Object, default: null },
   submitDisabled: { type: Boolean, default: true },
-  isLastQuestion: { type: Boolean, default: false }
+  isLastQuestion: { type: Boolean, default: false },
+  submitLabel: { type: String, default: '' }
 })
 
 const emit = defineEmits(['submit'])
@@ -71,7 +72,7 @@ function divide() {
         :disabled="submitDisabled"
         class="key-submit"
       >
-        {{ isLastQuestion ? 'Finalizar' : 'Siguiente' }}
+        {{ submitLabel || (isLastQuestion ? 'Finalizar' : 'Siguiente') }}
       </button>
     </div>
   </div>

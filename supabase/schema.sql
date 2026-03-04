@@ -291,6 +291,27 @@ CREATE POLICY "Allow read feedback" ON feedback
 CREATE POLICY "Allow delete feedback" ON feedback
     FOR DELETE TO anon USING (true);
 
+-- -----------------------------------------------------
+-- 8. TABLE: email_subscriptions
+-- Email notifications for results publication
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS email_subscriptions (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    email TEXT NOT NULL
+);
+
+ALTER TABLE email_subscriptions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow email subscription inserts" ON email_subscriptions
+    FOR INSERT TO anon WITH CHECK (true);
+
+CREATE POLICY "Allow read email subscriptions" ON email_subscriptions
+    FOR SELECT TO anon USING (true);
+
+CREATE POLICY "Allow delete email subscriptions" ON email_subscriptions
+    FOR DELETE TO anon USING (true);
+
 -- =====================================================
 -- END SCHEMA
 -- =====================================================

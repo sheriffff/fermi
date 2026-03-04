@@ -10,7 +10,8 @@ const props = defineProps({
   modelValue: { type: String, default: '' },
   submitLabel: { type: String, default: 'Enviar' },
   submitDisabled: { type: Boolean, default: true },
-  isLastQuestion: { type: Boolean, default: false }
+  isLastQuestion: { type: Boolean, default: false },
+  mobileSubmitLabel: { type: String, default: '' }
 })
 
 const emit = defineEmits(['submit', 'update:modelValue'])
@@ -62,6 +63,7 @@ defineExpose({ fermiInputRef, focusInput })
         :fermi-input="fermiInputRef"
         :submit-disabled="submitDisabled"
         :is-last-question="isLastQuestion"
+        :submit-label="mobileSubmitLabel"
         @submit="emit('submit')"
       />
     </Teleport>

@@ -14,6 +14,7 @@ const { isMobile } = useMobile()
 const currentQuestion = ref(null)
 const currentAnswer = ref('')
 const showResult = ref(false)
+const skipped = ref(false)
 const isLoading = ref(true)
 const questionCardRef = ref(null)
 const showLogErrorModal = ref(false)
@@ -88,9 +89,16 @@ async function getNewQuestion() {
   currentQuestion.value = await getRandomPlayQuestion()
   currentAnswer.value = ''
   showResult.value = false
+  skipped.value = false
   isLoading.value = false
   resetTimer(9999)
   startTimer()
+}
+
+function handleSkip() {
+  stopTimer()
+  skipped.value = true
+  showResult.value = true
 }
 
 onMounted(() => {
@@ -141,21 +149,22 @@ async function handleSubmit() {
             :question-text="currentQuestion?.texto ?? ''"
             v-model="currentAnswer"
             submit-label="Ver resultado"
+            mobile-submit-label="Enviar"
             :submit-disabled="!isAnswerComplete"
             @submit="handleSubmit"
           />
 
           <button
-            @click="getNewQuestion"
+            @click="handleSkip"
             class="btn-outline btn-large w-full"
           >
-            Paso, otra pregunta
+            Paso, ver resultado
           </button>
         </div>
 
         <div v-else class="space-y-5">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="bg-neutral-50 rounded-2xl p-5 text-center">
+            <div v-if="!skipped" class="bg-neutral-50 rounded-2xl p-5 text-center">
               <p class="text-sm text-neutral-500 mb-2">Tu estimación</p>
               <p class="text-2xl font-bold text-neutral-800">
                 {{ formattedAnswer }}
@@ -169,7 +178,7 @@ async function handleSubmit() {
             </div>
           </div>
 
-          <template v-if="hasRange">
+          <template v-if="hasRange && !skipped">
             <div
               class="rounded-2xl p-6 text-center"
               :class="isInRange ? 'bg-emerald-50 border border-emerald-200' : 'bg-amber-50 border border-amber-200'"

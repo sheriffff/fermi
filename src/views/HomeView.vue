@@ -3,6 +3,7 @@ import { RouterLink } from 'vue-router'
 import { ref } from 'vue'
 import ImageModal from '@/components/common/ImageModal.vue'
 import FeedbackModal from '@/components/common/FeedbackModal.vue'
+import ResultsModal from '@/components/common/ResultsModal.vue'
 
 import { useRouter } from 'vue-router'
 import { setDbEnabled } from '@/lib/supabase'
@@ -11,6 +12,7 @@ const router = useRouter()
 const showImageModal = ref(false)
 const showInfoModal = ref(false)
 const showFeedbackModal = ref(false)
+const showResultsModal = ref(false)
 
 const porClicks = ref(0)
 let porTimer = null
@@ -63,6 +65,7 @@ function handleFermiClick() {
 
       <ImageModal :show="showImageModal" @close="showImageModal = false" />
       <FeedbackModal :show="showFeedbackModal" @close="showFeedbackModal = false" />
+      <ResultsModal :show="showResultsModal" @close="showResultsModal = false" />
 
       <Teleport to="body">
         <Transition name="modal">
@@ -137,14 +140,16 @@ function handleFermiClick() {
           <p class="text-neutral-500 text-sm">Prueba!</p>
         </RouterLink>
 
-        <div class="flex flex-col items-center justify-center bg-white rounded-3xl shadow-lg border border-neutral-100 p-4 md:p-5 text-center opacity-50 cursor-not-allowed">
+        <button
+          @click="showResultsModal = true"
+          class="flex flex-col items-center justify-center bg-white rounded-3xl shadow-lg border border-neutral-100 p-4 md:p-5 group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
+        >
           <div class="mb-2">
-            <span class="text-3xl inline-block grayscale">📊</span>
+            <span class="text-3xl group-hover:scale-110 transition-transform duration-300 inline-block">📊</span>
           </div>
           <h3 class="text-lg font-semibold text-neutral-800 mb-1">Resultados</h3>
           <p class="text-neutral-500 text-sm">¿Qué tal estimamos?</p>
-          <span class="inline-block mt-1 text-xs text-neutral-900 font-semibold bg-neutral-100 px-2 py-1 rounded-full">~mayo 2026</span>
-        </div>
+        </button>
       </div>
 
       <div class="text-center mt-8">

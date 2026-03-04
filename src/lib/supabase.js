@@ -198,6 +198,15 @@ export async function saveFeedback({ name, message }) {
   if (error) throw error
 }
 
+export async function saveResultsEmail(email) {
+  if (!dbEnabled) return
+  const { error } = await supabase
+    .from('email_subscriptions')
+    .insert({ email })
+
+  if (error) throw error
+}
+
 const EXPORTABLE_TABLES = ['logs_download', 'users_online', 'responses_online', 'users_paper', 'responses_paper', 'responses_play_random', 'feedback', 'scribbles', 'view_responses_online', 'view_responses_paper']
 
 export async function exportTable(table) {
