@@ -151,18 +151,16 @@ async function handleSubmit() {
             submit-label="Ver resultado"
             mobile-submit-label="Enviar"
             :submit-disabled="!isAnswerComplete"
+            show-skip
             @submit="handleSubmit"
+            @skip="handleSkip"
           />
-
-          <button
-            @click="handleSkip"
-            class="btn-outline btn-large w-full"
-          >
-            Paso, ver resultado
-          </button>
         </div>
 
         <div v-else class="space-y-5">
+          <h2 class="text-xl font-medium text-neutral-800 leading-relaxed">
+            {{ currentQuestion?.texto }}
+          </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div v-if="!skipped" class="bg-neutral-50 rounded-2xl p-5 text-center">
               <p class="text-sm text-neutral-500 mb-2">Tu estimación</p>

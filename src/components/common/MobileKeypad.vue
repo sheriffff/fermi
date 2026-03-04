@@ -3,10 +3,12 @@ const props = defineProps({
   fermiInput: { type: Object, default: null },
   submitDisabled: { type: Boolean, default: true },
   isLastQuestion: { type: Boolean, default: false },
-  submitLabel: { type: String, default: '' }
+  submitLabel: { type: String, default: '' },
+  showSkip: { type: Boolean, default: false },
+  skipLabel: { type: String, default: 'Pasapalabra' }
 })
 
-const emit = defineEmits(['submit'])
+const emit = defineEmits(['submit', 'skip'])
 
 function press(char) {
   props.fermiInput?.appendChar(char)
@@ -74,6 +76,13 @@ function divide() {
       >
         {{ submitLabel || (isLastQuestion ? 'Finalizar' : 'Siguiente') }}
       </button>
+      <button
+        v-if="showSkip"
+        @click="emit('skip')"
+        class="key-skip"
+      >
+        {{ skipLabel }}
+      </button>
     </div>
   </div>
 </template>
@@ -132,5 +141,9 @@ function divide() {
 
 .key-submit:disabled {
   @apply bg-neutral-300;
+}
+
+.key-skip {
+  @apply w-full py-3 text-sm font-semibold text-neutral-500 active:bg-neutral-100 transition-colors;
 }
 </style>

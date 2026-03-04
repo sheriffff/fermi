@@ -11,10 +11,12 @@ const props = defineProps({
   submitLabel: { type: String, default: 'Enviar' },
   submitDisabled: { type: Boolean, default: true },
   isLastQuestion: { type: Boolean, default: false },
-  mobileSubmitLabel: { type: String, default: '' }
+  mobileSubmitLabel: { type: String, default: '' },
+  showSkip: { type: Boolean, default: false },
+  skipLabel: { type: String, default: 'Pasapalabra' }
 })
 
-const emit = defineEmits(['submit', 'update:modelValue'])
+const emit = defineEmits(['submit', 'update:modelValue', 'skip'])
 
 const { isMobile } = useMobile()
 const fermiInputRef = ref(null)
@@ -47,13 +49,20 @@ defineExpose({ fermiInputRef, focusInput })
       :hide-buttons="isMobile"
     />
 
-    <div v-if="!isMobile" class="mt-8">
+    <div v-if="!isMobile" class="mt-8 space-y-3">
       <button
         @click="emit('submit')"
         class="btn-primary btn-large w-full"
         :disabled="submitDisabled"
       >
         {{ submitLabel }}
+      </button>
+      <button
+        v-if="showSkip"
+        @click="emit('skip')"
+        class="btn-outline btn-large w-full"
+      >
+        {{ skipLabel }}
       </button>
     </div>
 
@@ -64,7 +73,10 @@ defineExpose({ fermiInputRef, focusInput })
         :submit-disabled="submitDisabled"
         :is-last-question="isLastQuestion"
         :submit-label="mobileSubmitLabel"
+        :show-skip="showSkip"
+        :skip-label="skipLabel"
         @submit="emit('submit')"
+        @skip="emit('skip')"
       />
     </Teleport>
   </div>
