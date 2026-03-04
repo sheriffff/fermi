@@ -11,7 +11,7 @@ const groups = [
     tables: [
       { key: 'users_online', label: 'Test' },
       { key: 'responses_play_random', label: 'Pregunta Aleatoria' },
-      { key: 'scribbles', label: 'Uploaded Images' }
+      { key: 'scribbles', label: 'Imágenes Subidas' }
     ]
   },
   {
