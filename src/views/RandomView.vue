@@ -161,7 +161,7 @@ async function handleSubmit() {
           <h2 class="text-xl font-medium text-neutral-800 leading-relaxed">
             {{ currentQuestion?.texto }}
           </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid gap-4" :class="skipped ? 'grid-cols-1 max-w-xs mx-auto' : 'grid-cols-1 sm:grid-cols-2'">
             <div v-if="!skipped" class="bg-neutral-50 rounded-2xl p-5 text-center">
               <p class="text-sm text-neutral-500 mb-2">Tu estimación</p>
               <p class="text-2xl font-bold text-neutral-800">
