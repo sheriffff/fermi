@@ -5,8 +5,7 @@ import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
 import { createUserOnline, saveResponsesOnline } from '@/lib/supabase'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
-import FermiInput from '@/components/common/FermiInput.vue'
-import MobileKeypad from '@/components/common/MobileKeypad.vue'
+import QuestionCard from '@/components/common/QuestionCard.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
 import FeedbackModal from '@/components/common/FeedbackModal.vue'
 import LogErrorModal from '@/components/common/LogErrorModal.vue'
@@ -157,11 +156,10 @@ const progressPercent = computed(() => {
 
 // Respuesta actual del input
 const currentAnswer = ref('')
-const fermiInputRef = ref(null)
+const questionCardRef = ref(null)
 
 function focusInput() {
-  if (isMobile.value) return
-  fermiInputRef.value?.inputRef?.focus()
+  questionCardRef.value?.focusInput()
 }
 
 const isAnswerComplete = computed(() => {
@@ -554,48 +552,18 @@ async function finishTest() {
 
           <Transition name="slide" mode="out-in" @after-enter="focusInput">
             <div :key="currentQuestionIndex" class="card-elevated">
-
-              <div class="mb-8">
-                <h2 class="text-xl font-medium text-neutral-800 leading-relaxed">
-                  {{ currentQuestion?.texto }}
-                </h2>
-                <p v-if="currentQuestion?.unidad" class="text-sm text-neutral-400 mt-2">
-                  Responde en: {{ currentQuestion.unidad }}
-                </p>
-              </div>
-
-              <FermiInput
-                ref="fermiInputRef"
+              <QuestionCard
+                ref="questionCardRef"
+                :question-text="currentQuestion?.texto ?? ''"
+                :unit-text="currentQuestion?.unidad ?? ''"
                 v-model="currentAnswer"
-                @submit="isAnswerComplete && handleSubmitAnswer()"
-                :suppress-keyboard="isMobile"
-                :hide-buttons="isMobile"
+                :submit-label="questionNumber === totalQuestions ? 'Finalizar Test' : 'Siguiente Pregunta →'"
+                :submit-disabled="!isAnswerComplete"
+                :is-last-question="questionNumber === totalQuestions"
+                @submit="handleSubmitAnswer"
               />
-
-              <div v-if="!isMobile" class="mt-8">
-                <button
-                  @click="handleSubmitAnswer"
-                  class="btn-primary btn-large w-full"
-                  :disabled="!isAnswerComplete"
-                >
-                  <span v-if="questionNumber === totalQuestions">
-                    Finalizar Test
-                  </span>
-                  <span v-else>
-                    Siguiente Pregunta →
-                  </span>
-                </button>
-              </div>
             </div>
           </Transition>
-
-          <MobileKeypad
-            v-if="isMobile"
-            :fermi-input="fermiInputRef"
-            :submit-disabled="!isAnswerComplete"
-            :is-last-question="questionNumber === totalQuestions"
-            @submit="handleSubmitAnswer"
-          />
         </div>
 
         <div v-else-if="currentStep === 'finished'" key="finished" class="text-center">

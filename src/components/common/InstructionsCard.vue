@@ -64,7 +64,7 @@ const warningTimeText = computed(() => {
           <div>
             <p class="font-semibold text-neutral-800">¿Tienes 10 minutos?</p>
             <p class="text-sm text-neutral-500">
-              Si ahora no los tienes, mejor vuelve en otro momento. Pero vuelve, porfa!
+              Si ahora no los tienes, mejor vuelve en otro momento. Pero vuelve, porfavor!
             </p>
           </div>
         </div>
@@ -114,7 +114,7 @@ const warningTimeText = computed(() => {
           <div>
             <p class="font-semibold text-neutral-800">Puedes usar calculadora</p>
             <p class="text-sm text-neutral-500">
-              La de tu casa o esta <a href="https://calculator-1.com/es/calculadora/" target="_blank" rel="noopener" class="text-primary-500 hover:text-primary-600 underline underline-offset-2">online</a>.
+              Una tuya o una online o la del móvil. Aunque no es obligatorio.
             </p>
           </div>
         </div>

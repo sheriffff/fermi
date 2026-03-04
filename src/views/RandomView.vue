@@ -5,14 +5,17 @@ import { useNumberFormat } from '@/composables/useNumberFormat'
 import { useTimer } from '@/composables/useTimer'
 import { getRandomPlayQuestion } from '@/lib/questions'
 import { savePlayResponse } from '@/lib/supabase'
-import FermiInput from '@/components/common/FermiInput.vue'
+import QuestionCard from '@/components/common/QuestionCard.vue'
 import LogErrorModal from '@/components/common/LogErrorModal.vue'
+import { useMobile } from '@/composables/useMobile'
+
+const { isMobile } = useMobile()
 
 const currentQuestion = ref(null)
 const currentAnswer = ref('')
 const showResult = ref(false)
 const isLoading = ref(true)
-const fermiInputRef = ref(null)
+const questionCardRef = ref(null)
 const showLogErrorModal = ref(false)
 
 const { formatNumber, formatRange, cleanInput } = useNumberFormat()
@@ -113,7 +116,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen p-4 sm:p-6 md:p-8">
+  <div class="min-h-screen p-4 sm:p-6 md:p-8" :class="{ 'pb-[280px]': isMobile }">
     <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
       ← Volver al inicio
     </RouterLink>
@@ -132,26 +135,15 @@ async function handleSubmit() {
         </div>
 
         <template v-else>
-        <div class="mb-8">
-          <h2 class="text-xl font-medium text-neutral-800 leading-relaxed">
-            {{ currentQuestion?.texto }}
-          </h2>
-        </div>
-
         <div v-if="!showResult" class="space-y-6">
-          <FermiInput
-            ref="fermiInputRef"
+          <QuestionCard
+            ref="questionCardRef"
+            :question-text="currentQuestion?.texto ?? ''"
             v-model="currentAnswer"
-            @submit="isAnswerComplete && handleSubmit()"
+            submit-label="Ver resultado"
+            :submit-disabled="!isAnswerComplete"
+            @submit="handleSubmit"
           />
-
-          <button
-            @click="handleSubmit"
-            class="btn-primary btn-large w-full"
-            :disabled="!isAnswerComplete"
-          >
-            Ver resultado
-          </button>
 
           <button
             @click="getNewQuestion"
