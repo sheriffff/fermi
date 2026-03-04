@@ -30,6 +30,19 @@ function divide() {
 
 <template>
   <div class="keypad-wrapper">
+    <div class="keypad-ops">
+      <button
+        @click="divide"
+        :disabled="!fermiInput?.canDivide"
+        class="key-op"
+      >/1000</button>
+      <button
+        @click="multiply"
+        :disabled="!fermiInput?.canMultiply"
+        class="key-op key-op-multiply"
+      >x1000</button>
+    </div>
+
     <div class="keypad-grid">
       <button @click="press('1')" class="key">1</button>
       <button @click="press('2')" class="key">2</button>
@@ -50,19 +63,6 @@ function divide() {
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l7-7 11 0 0 14-11 0z" />
         </svg>
       </button>
-    </div>
-
-    <div class="keypad-ops">
-      <button
-        @click="divide"
-        :disabled="!fermiInput?.canDivide"
-        class="key-op"
-      >/1000</button>
-      <button
-        @click="multiply"
-        :disabled="!fermiInput?.canMultiply"
-        class="key-op key-op-multiply"
-      >x1000</button>
     </div>
 
     <div class="keypad-submit-row">
@@ -86,7 +86,7 @@ function divide() {
 }
 
 .keypad-grid {
-  @apply grid grid-cols-3 gap-px bg-neutral-200 mx-px mt-px;
+  @apply grid grid-cols-3 gap-px bg-neutral-200 mx-px;
 }
 
 .key {
@@ -102,7 +102,7 @@ function divide() {
 }
 
 .keypad-ops {
-  @apply grid grid-cols-2 gap-px bg-neutral-200 mx-px;
+  @apply grid grid-cols-2 gap-px bg-neutral-200 mx-px mt-px;
 }
 
 .key-op {
@@ -126,7 +126,7 @@ function divide() {
 }
 
 .key-submit {
-  @apply w-full bg-primary-500 py-3 text-sm font-bold text-white active:bg-primary-600 transition-colors;
+  @apply w-full bg-primary-500 py-4 text-base font-bold text-white active:bg-primary-600 transition-colors;
 }
 
 .key-submit:disabled {
