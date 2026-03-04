@@ -620,7 +620,7 @@ async function finishTest() {
                 @click="showUpload = true"
                 class="btn-outline btn-large w-full max-w-xs"
               >
-                📸 Fotografía tu hoja en sucio!
+                📸 A ver tu hoja en sucio!
               </button>
               <button
                 v-if="canShare"
@@ -629,14 +629,13 @@ async function finishTest() {
               >
                 📤 Comparte con un amigo
               </button>
-              <RouterLink to="/" class="btn-primary btn-large w-full max-w-xs">
-                Volver al inicio
-              </RouterLink>
+              <button
+                @click="showFeedbackModal = true"
+                class="btn-outline btn-large w-full max-w-xs"
+              >
+                📣 Dame tu opinión
+              </button>
             </div>
-
-            <button v-if="!showResults" @click="showFeedbackModal = true" class="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 bg-white text-neutral-600 text-sm font-medium shadow-sm hover:shadow-md hover:border-primary-300 hover:text-primary-600 transition-all cursor-pointer">
-              📣 Dame tu opinión
-            </button>
           </div>
 
           <Teleport to="body">
@@ -701,12 +700,6 @@ async function finishTest() {
           </Transition>
 
           <LogErrorModal :show="showLogErrorModal" @close="showLogErrorModal = false" />
-
-          <div class="mt-8">
-            <button @click="showFeedbackModal = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 bg-white text-neutral-600 text-sm font-medium shadow-sm hover:shadow-md hover:border-primary-300 hover:text-primary-600 transition-all cursor-pointer">
-              📣 Dame tu opinión
-            </button>
-          </div>
 
           <FeedbackModal :show="showFeedbackModal" @close="showFeedbackModal = false" />
 

@@ -15,6 +15,10 @@ function backspace() {
   props.fermiInput?.deleteChar()
 }
 
+function clear() {
+  props.fermiInput?.clearAll()
+}
+
 function multiply() {
   props.fermiInput?.multiplyByThousand()
 }
@@ -39,11 +43,7 @@ function divide() {
       <button @click="press('8')" class="key">8</button>
       <button @click="press('9')" class="key">9</button>
 
-      <button
-        @click="divide"
-        :disabled="!fermiInput?.canDivide"
-        class="key key-op"
-      >/1000</button>
+      <button @click="clear" class="key key-clear">C</button>
       <button @click="press('0')" class="key">0</button>
       <button @click="backspace" class="key key-del">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -52,12 +52,20 @@ function divide() {
       </button>
     </div>
 
-    <div class="keypad-bottom">
+    <div class="keypad-ops">
+      <button
+        @click="divide"
+        :disabled="!fermiInput?.canDivide"
+        class="key-op"
+      >/1000</button>
       <button
         @click="multiply"
         :disabled="!fermiInput?.canMultiply"
-        class="key-multiply"
+        class="key-op key-op-multiply"
       >x1000</button>
+    </div>
+
+    <div class="keypad-submit-row">
       <button
         @click="emit('submit')"
         :disabled="submitDisabled"
@@ -85,32 +93,40 @@ function divide() {
   @apply bg-white py-3 text-lg font-medium text-neutral-800 active:bg-neutral-100 transition-colors;
 }
 
-.key-op {
-  @apply text-sm font-semibold text-secondary-600;
-}
-
-.key-op:disabled {
-  @apply text-neutral-300;
+.key-clear {
+  @apply text-base font-semibold text-red-400;
 }
 
 .key-del {
   @apply text-neutral-500;
 }
 
-.keypad-bottom {
-  @apply grid grid-cols-2 gap-px bg-neutral-200 mx-px mb-px;
+.keypad-ops {
+  @apply grid grid-cols-2 gap-px bg-neutral-200 mx-px;
 }
 
-.key-multiply {
-  @apply bg-primary-50 py-3 text-sm font-semibold text-primary-600 active:bg-primary-100 transition-colors;
+.key-op {
+  @apply bg-white py-3 text-sm font-semibold text-secondary-600 active:bg-neutral-100 transition-colors;
 }
 
-.key-multiply:disabled {
-  @apply text-neutral-300 bg-white;
+.key-op:disabled {
+  @apply text-neutral-300;
+}
+
+.key-op-multiply {
+  @apply text-primary-600;
+}
+
+.key-op-multiply:disabled {
+  @apply text-neutral-300;
+}
+
+.keypad-submit-row {
+  @apply mt-2 mx-px mb-px;
 }
 
 .key-submit {
-  @apply bg-primary-500 py-3 text-sm font-bold text-white active:bg-primary-600 transition-colors;
+  @apply w-full bg-primary-500 py-3 text-sm font-bold text-white active:bg-primary-600 transition-colors;
 }
 
 .key-submit:disabled {

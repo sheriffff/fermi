@@ -140,10 +140,16 @@ function deleteChar() {
   emit('update:modelValue', cleaned.slice(0, -1))
 }
 
+function clearAll() {
+  if (props.disabled) return
+  emit('update:modelValue', '')
+}
+
 defineExpose({
   inputRef,
   appendChar,
   deleteChar,
+  clearAll,
   multiplyByThousand,
   divideByThousand,
   canMultiply,
