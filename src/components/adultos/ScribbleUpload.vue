@@ -178,7 +178,7 @@ async function submit() {
         </div>
 
         <div v-if="uploadedUrls.length" class="mb-6">
-          <p class="text-sm text-green-600 font-medium mb-3">📸 Fotos recibidas</p>
+          <p class="text-sm text-green-600 font-medium mb-3">{{ uploadedUrls.length }} foto{{ uploadedUrls.length > 1 ? 's' : '' }} recibida{{ uploadedUrls.length > 1 ? 's' : '' }}, gracias!</p>
           <div class="grid grid-cols-3 gap-3 max-w-xs mx-auto">
             <img
               v-for="(url, i) in uploadedUrls"
