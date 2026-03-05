@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { getTableCount, getTableLatest } from '@/lib/supabase'
 
 const loading = ref(true)
@@ -84,11 +85,11 @@ onMounted(async () => {
         <div v-for="group in groups" :key="group.title">
           <h3 class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">{{ group.title }}</h3>
           <div class="space-y-3">
-            <div v-for="t in group.tables" :key="t.key" class="card text-center">
+            <RouterLink v-for="t in group.tables" :key="t.key" :to="'/admin/metricas/' + t.key" class="card text-center block hover:ring-2 hover:ring-primary-300 transition-shadow cursor-pointer">
               <div class="text-3xl font-bold text-primary-500">{{ counts[t.key] ?? '-' }}</div>
               <div class="text-sm font-medium text-neutral-700 mt-1">{{ t.label }}</div>
               <div class="text-xs text-neutral-400 mt-1">{{ formatDate(latests[t.key]) }}</div>
-            </div>
+            </RouterLink>
           </div>
         </div>
       </div>

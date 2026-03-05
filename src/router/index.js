@@ -36,6 +36,11 @@ const routes = [
         component: () => import('@/views/AdminMetricsView.vue')
       },
       {
+        path: 'metricas/:tableKey',
+        name: 'admin-metric-detail',
+        component: () => import('@/views/AdminMetricDetailView.vue')
+      },
+      {
         path: 'exportar',
         name: 'admin-exportar',
         component: () => import('@/views/AdminExportView.vue')

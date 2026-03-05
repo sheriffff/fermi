@@ -43,9 +43,11 @@ VITE_LOG_TO_DDBB=true          # set to 'false' to skip all DB writes in dev
 
 ### Data Flow Architecture
 
-**Questions System**: Questions are loaded from `/public/questions.xlsx` at runtime using `read-excel-file` library. The Excel file has two sheets:
+**Questions System**: Questions are loaded from `/public/questions.xlsx` at runtime using `read-excel-file` library. The app reads two sheets:
 - `questions`: All questions with columns `id_question, min, max, q_min_max, p05, p95, q_p05_p95, question`
 - `tests`: Maps test models to questions with columns `test, id_question` (FK → questions.id_question)
+
+The Excel file also contains `categories` and `other_questions` sheets (not used by the app at runtime).
 
 The `src/lib/questions.js` module caches the parsed Excel data and provides functions:
 - `getAllQuestions()` - Returns all available questions
@@ -71,7 +73,7 @@ The `src/lib/questions.js` module caches the parsed Excel data and provides func
 
 ### Composables (Shared Logic)
 
-- `useTimer.js` - Countdown timer logic for test questions (180 seconds per question)
+- `useTimer.js` - Countdown timer logic for test questions (default 180s, but TestView uses 150s)
 - `useNumberFormat.js` - Formats large numbers with thousand separators for display
 
 ### Supabase Integration
@@ -108,7 +110,7 @@ src/components/
 
 ## Important Implementation Notes
 
-- **Timer Behavior**: Each question has 150-second countdown. Timer color changes to warning state at 30s remaining.
+- **Timer Behavior**: Each question has 150-second countdown (`QUESTION_TIME` in TestView.vue). Timer changes to warning at 30s and danger at 10s remaining.
 - **Test Models**: Four parallel test models (A, B, C, D) with different questions but equivalent difficulty distribution.
 - **Admin Entry Format**: Paper tests entered as scientific notation (base × 10^exponent) to handle wide range of Fermi estimates.
 - **No Backend API**: Application uses Supabase client-side SDK directly with RLS for security.
@@ -124,5 +126,5 @@ Requires Node.js `24.x` as specified in package.json engines.
 - `src/lib/questions.js` - Excel-based question loading and caching
 - `src/router/index.js` - Route definitions
 - `supabase/schema.sql` - Complete database schema with RLS policies and seed data
-- `public/questions.xlsx` - Question bank source (four sheets: categories, questions, tests, other_questions)
+- `public/questions.xlsx` - Question bank source (sheets: categories, questions, tests, other_questions)
 - `utils/pdf_generator/` - Python PDF generation tools for printable tests

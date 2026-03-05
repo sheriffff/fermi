@@ -257,6 +257,83 @@ export async function getResponsesByModel() {
   return counts
 }
 
+export async function getTableRecent(table, limit = 10, select = '*') {
+  const { data, error } = await supabase
+    .from(table)
+    .select(select)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) throw error
+  return data
+}
+
+export async function getTableCountsByDay(table, days = 7) {
+  const since = new Date()
+  since.setDate(since.getDate() - days)
+
+  const { data, error } = await supabase
+    .from(table)
+    .select('created_at')
+    .gte('created_at', since.toISOString())
+
+  if (error) throw error
+
+  const byDay = {}
+  for (let i = 0; i < days; i++) {
+    const d = new Date()
+    d.setDate(d.getDate() - (days - 1 - i))
+    byDay[d.toISOString().split('T')[0]] = 0
+  }
+
+  for (const row of data || []) {
+    const day = row.created_at.split('T')[0]
+    if (byDay[day] !== undefined) byDay[day]++
+  }
+
+  return Object.entries(byDay).map(([date, count]) => ({ date, count }))
+}
+
+export async function getTableCountsByWeek(table, sinceDate = '2025-03-01') {
+  const { data, error } = await supabase
+    .from(table)
+    .select('created_at')
+    .gte('created_at', sinceDate)
+
+  if (error) throw error
+
+  const byWeek = {}
+  for (const row of data || []) {
+    const d = new Date(row.created_at)
+    const jan1 = new Date(d.getFullYear(), 0, 1)
+    const week = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7)
+    const key = `${d.getFullYear()}-W${String(week).padStart(2, '0')}`
+    byWeek[key] = (byWeek[key] || 0) + 1
+  }
+
+  return Object.entries(byWeek)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([week, count]) => ({ week, count }))
+}
+
+export async function getAllScribbleUrls() {
+  const { data, error } = await supabase
+    .from('scribbles')
+    .select('storage_path, created_at')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  if (!data.length) return []
+
+  const paths = data.map(row => row.storage_path)
+  const { data: signed, error: signError } = await supabase.storage
+    .from('scribbles')
+    .createSignedUrls(paths, 3600)
+
+  if (signError) throw signError
+  return signed.map((s, i) => ({ url: s.signedUrl, created_at: data[i].created_at }))
+}
+
 export async function getActivityByDay(days = 14) {
   const since = new Date()
   since.setDate(since.getDate() - days)
