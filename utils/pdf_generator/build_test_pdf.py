@@ -251,7 +251,7 @@ def generate_pdf(test_id):
     y += 0.1 * cm
     intro_style = getSampleStyleSheet()['Normal']
     intro_style.fontName = "Helvetica"
-    intro_style.fontSize = 11
+    intro_style.fontSize = 13
     intro_style.leading = 14
     intro_style.alignment = TA_LEFT
     for text in [
@@ -261,7 +261,7 @@ def generate_pdf(test_id):
         p = Paragraph(text, intro_style)
         w, h = p.wrap(content_width, 1000)
         p.drawOn(c, margin_left, y - h)
-        y -= h + 0.1 * cm
+        y -= h + 0.3 * cm
     y -= 0.3 * cm
     y = render_questions_page(y, 0, 4, page=1)  # 4 questions on page 1 (compact)
     draw_footer(1)
