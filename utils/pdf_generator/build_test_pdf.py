@@ -158,23 +158,23 @@ def generate_pdf(test_id):
 
         c.setFont("Helvetica", 10)
         c.drawString(rx, ry, "Tipo de centro:")
-        ry -= 0.55 * cm
+        ry -= 0.65 * cm
         draw_checkbox(c, rx, ry - PDF.FORM_CHECKBOX_OFFSET_Y)
         c.drawString(rx + PDF.FORM_CHECKBOX_LABEL_SPACING, ry, "Público")
-        ry -= 0.5 * cm
+        ry -= 0.6 * cm
         draw_checkbox(c, rx, ry - PDF.FORM_CHECKBOX_OFFSET_Y)
         c.drawString(rx + PDF.FORM_CHECKBOX_LABEL_SPACING, ry, "Privado")
-        ry -= 0.5 * cm
+        ry -= 0.6 * cm
         draw_checkbox(c, rx, ry - PDF.FORM_CHECKBOX_OFFSET_Y)
         c.drawString(rx + PDF.FORM_CHECKBOX_LABEL_SPACING, ry, "Concertado")
         ry -= 1.2 * cm
 
         c.drawString(rx, ry, "¿Cómo te encuentras hoy?")
-        ry -= 0.55 * cm
+        ry -= 0.65 * cm
         for label in ["Mal", "Regular", "Bien", "Muy bien"]:
             draw_checkbox(c, rx, ry - PDF.FORM_CHECKBOX_OFFSET_Y)
             c.drawString(rx + PDF.FORM_CHECKBOX_LABEL_SPACING, ry, label)
-            ry -= 0.5 * cm
+            ry -= 0.6 * cm
 
         return y_pos
 
