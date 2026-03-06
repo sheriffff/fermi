@@ -178,12 +178,18 @@ def generate_pdf(test_id):
 
         return y_pos
 
-    def draw_separator_lines(y_pos):
-        c.setLineWidth(1)
-        for _ in range(3):
-            c.line(margin_left, y_pos, margin_right, y_pos)
-            y_pos -= 0.1 * cm
-        return y_pos
+    def draw_demographics_box(top_y, bottom_y):
+        padding_x = 0.35 * cm
+        padding_top = 1.05 * cm
+        padding_bottom = 0.15 * cm
+        gap = 0.08 * cm
+        x1 = margin_left - padding_x
+        x2 = margin_right + padding_x
+        y1 = bottom_y - padding_bottom
+        y2 = top_y + padding_top
+        c.setLineWidth(0.8)
+        c.rect(x1, y1, x2 - x1, y2 - y1)
+        c.rect(x1 - gap, y1 - gap, (x2 - x1) + 2 * gap, (y2 - y1) + 2 * gap)
 
     def split_question_text(question_num, question_text):
         """Split question into lines if too long, return list of (text, indent) tuples"""
@@ -252,16 +258,19 @@ def generate_pdf(test_id):
         """Draw footer with model and page number (e.g., A1, A2)"""
         c.setFont("Helvetica", 10)
         footer_text = f"{test_id}{page_num}"
-        c.drawRightString(width - 1 * cm, 1 * cm, footer_text)
+        c.drawString(1 * cm, 1 * cm, footer_text)
 
     y = height - PDF.MARGIN_TOP
     y = draw_header(y)
+    form_top_y = y
     y = draw_form_fields(y)
-    y = draw_separator_lines(y)
-    y -= 0.45 * cm
+    draw_demographics_box(form_top_y, y)
+    y -= 0.7 * cm
     c.setFont("Helvetica", 11)
-    c.drawString(margin_left, y, "Puedes hacer cuentas en sucio en esta hoja. Puedes usar calculadora.")
-    y -= 0.8 * cm
+    c.drawString(margin_left, y, "Hay muchas respuestas correctas. No busques el número exacto. Busca una buena aproximación.")
+    y -= 0.45 * cm
+    c.drawString(margin_left, y, "Puedes usar calculadora.")
+    y -= 0.6 * cm
     y = render_questions_page(y, 0, 4, page=1)  # 4 questions on page 1 (compact)
     draw_footer(1)
 
