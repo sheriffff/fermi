@@ -180,8 +180,8 @@ def generate_pdf(test_id):
 
     def draw_demographics_box(top_y, bottom_y):
         padding_x = 0.35 * cm
-        padding_top = 1.05 * cm
-        padding_bottom = 0.15 * cm
+        padding_top = 1.25 * cm
+        padding_bottom = 0.05 * cm
         gap = 0.08 * cm
         x1 = margin_left - padding_x
         x2 = margin_right + padding_x
