@@ -8,8 +8,12 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph
 from reportlab.lib.enums import TA_LEFT
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 from pdf_params import PDFParams as PDF
+
+pdfmetrics.registerFont(TTFont('DejaVu', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
 
 def load_test_questions(test_id):
     # Get project root (2 levels up from this script)
@@ -111,12 +115,12 @@ def generate_pdf(test_id):
         box_width = PDF.FORM_BOX_WIDTH
         start_y = y_pos
 
-        c.setFont("Helvetica", 10)
-        c.drawString(col1_x, y_pos, "Edad:")
+        c.setFont("DejaVu", 10)
+        c.drawString(col1_x, y_pos, "☺ Edad:")
         draw_text_box(c, col2_x, y_pos - PDF.FORM_BOX_OFFSET_Y, box_width)
         y_pos -= PDF.FORM_ROW_SPACING - 0.3 * cm
 
-        c.drawString(col1_x, y_pos, "Sexo:")
+        c.drawString(col1_x, y_pos, "⚥ Sexo:")
         masculino_x = col1_x + 2.6 * cm
         draw_checkbox(c, masculino_x, y_pos - PDF.FORM_CHECKBOX_OFFSET_Y)
         c.drawString(masculino_x + PDF.FORM_CHECKBOX_LABEL_SPACING, y_pos, "Masculino")
@@ -128,22 +132,22 @@ def generate_pdf(test_id):
         c.drawString(otro_x + PDF.FORM_CHECKBOX_LABEL_SPACING, y_pos, "Otro")
         y_pos -= PDF.FORM_CHECKBOX_ROW_SPACING + 0.6 * cm
 
-        c.drawString(col1_x, y_pos, "Hora del día:")
+        c.drawString(col1_x, y_pos, "☼ Hora del día:")
         draw_text_box(c, col2_x, y_pos - PDF.FORM_BOX_OFFSET_Y, box_width)
         y_pos -= PDF.FORM_ROW_SPACING
 
-        c.drawString(col1_x, y_pos, "Asignatura favorita:")
+        c.drawString(col1_x, y_pos, "★ Asignatura favorita:")
         draw_text_box(c, col2_x, y_pos - PDF.FORM_BOX_OFFSET_Y, box_width)
         y_pos -= PDF.FORM_ROW_SPACING - 0.2 * cm
 
-        c.drawString(col1_x, y_pos, "Nota de matemáticas en")
+        c.drawString(col1_x, y_pos, "∑ Nota de matemáticas en")
         y_pos -= 0.3 * cm
-        c.drawString(col1_x, y_pos, "la última evaluación:")
+        c.drawString(col1_x + 0.35 * cm, y_pos, "la última evaluación:")
         y_pos += 0.1 * cm
         draw_text_box(c, col2_x, y_pos - PDF.FORM_BOX_OFFSET_Y, box_width)
         y_pos -= PDF.FORM_ROW_SPACING - 0.3 * cm
 
-        c.drawString(col1_x, y_pos, "¿Cursas Física y/o Química?")
+        c.drawString(col1_x, y_pos, "ℏ ¿Cursas Física y/o Química?")
         si_x = col2_x
         draw_checkbox(c, si_x, y_pos - PDF.FORM_CHECKBOX_OFFSET_Y)
         c.drawString(si_x + PDF.FORM_CHECKBOX_LABEL_SPACING, y_pos, "Sí")
@@ -156,8 +160,8 @@ def generate_pdf(test_id):
         rx = margin_left + 12 * cm
         ry = start_y
 
-        c.setFont("Helvetica", 10)
-        c.drawString(rx, ry, "Tipo de centro:")
+        c.setFont("DejaVu", 10)
+        c.drawString(rx, ry, "☖ Tipo de centro:")
         ry -= 0.65 * cm
         draw_checkbox(c, rx, ry - PDF.FORM_CHECKBOX_OFFSET_Y)
         c.drawString(rx + PDF.FORM_CHECKBOX_LABEL_SPACING, ry, "Público")
@@ -171,7 +175,7 @@ def generate_pdf(test_id):
 
         c.drawString(rx, ry, "¿Cómo te encuentras hoy?")
         ry -= 0.65 * cm
-        for label in ["Mal", "Regular", "Bien", "Muy bien"]:
+        for label in ["◔ Mal", "◑ Regular", "◕ Bien", "● Muy bien"]:
             draw_checkbox(c, rx, ry - PDF.FORM_CHECKBOX_OFFSET_Y)
             c.drawString(rx + PDF.FORM_CHECKBOX_LABEL_SPACING, ry, label)
             ry -= 0.6 * cm
