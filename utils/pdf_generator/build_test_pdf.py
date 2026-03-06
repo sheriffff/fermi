@@ -248,14 +248,14 @@ def generate_pdf(test_id):
     form_top_y = y
     y = draw_form_fields(y)
     draw_demographics_box(top_y=form_top_y, bottom_y=y + 0.3 * cm)
-    y -= 0.4 * cm
+    y += 0.1 * cm
     intro_style = getSampleStyleSheet()['Normal']
     intro_style.fontName = "Helvetica"
     intro_style.fontSize = 11
     intro_style.leading = 14
     intro_style.alignment = TA_LEFT
     for text in [
-        "Hay muchas respuestas correctas: la clave es usar la lógica para dar una cifra con sentido que se acerque a la realidad.",
+        "Hay muchas respuestas correctas: la clave es usar la lógica para dar una cifra con sentido.",
         "Puedes hacer cuentas en sucio en esta hoja. Puedes usar calculadora.",
     ]:
         p = Paragraph(text, intro_style)
