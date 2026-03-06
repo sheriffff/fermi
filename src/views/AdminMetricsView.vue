@@ -46,6 +46,13 @@ function formatDate(iso) {
   return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
+function isToday(iso) {
+  if (!iso) return false
+  const d = new Date(iso)
+  const now = new Date()
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
+}
+
 onMounted(async () => {
   try {
     await Promise.all(allTables.map(async t => {
@@ -85,7 +92,7 @@ onMounted(async () => {
         <div v-for="group in groups" :key="group.title">
           <h3 class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">{{ group.title }}</h3>
           <div class="space-y-3">
-            <RouterLink v-for="t in group.tables" :key="t.key" :to="'/admin/metricas/' + t.key" class="card text-center block hover:ring-2 hover:ring-primary-300 transition-shadow cursor-pointer">
+            <RouterLink v-for="t in group.tables" :key="t.key" :to="'/admin/metricas/' + t.key" class="card text-center block hover:ring-2 hover:ring-primary-300 transition-shadow cursor-pointer" :class="{ '!bg-green-50': isToday(latests[t.key]) }">
               <div class="text-3xl font-bold text-primary-500">{{ counts[t.key] ?? '-' }}</div>
               <div class="text-sm font-medium text-neutral-700 mt-1">{{ t.label }}</div>
               <div class="text-xs text-neutral-400 mt-1">{{ formatDate(latests[t.key]) }}</div>
