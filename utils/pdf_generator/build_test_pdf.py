@@ -96,9 +96,9 @@ def generate_pdf(test_id):
         c.drawImage(str(emoji_path), emoji_right_x, emoji_y, width=emoji_size, height=emoji_size, preserveAspectRatio=True, anchor='sw', mask='auto')
 
         y_pos -= 0.5 * cm
-        c.setFont("Helvetica", 9)
+        c.setFont("Helvetica", 10)
         modelo_text = f"Modelo {test_id}"
-        modelo_width = c.stringWidth(modelo_text, "Helvetica", 9)
+        modelo_width = c.stringWidth(modelo_text, "Helvetica", 10)
         c.drawString((width - modelo_width) / 2, y_pos, modelo_text)
 
         y_pos -= 1.6 * cm
@@ -180,8 +180,8 @@ def generate_pdf(test_id):
 
     def draw_demographics_box(top_y, bottom_y):
         padding_x = 0.35 * cm
-        padding_top = 1.25 * cm
-        padding_bottom = 0.05 * cm
+        padding_top = 1.1 * cm
+        padding_bottom = -0.1 * cm
         gap = 0.08 * cm
         x1 = margin_left - padding_x
         x2 = margin_right + padding_x
@@ -227,16 +227,22 @@ def generate_pdf(test_id):
         return y_pos
 
     def render_question(y_pos, question_num, question_text, draw_separator=True, page=1):
-        """Render a complete question with answer box and optional separator"""
         y_pos = draw_question_text(y_pos, question_num, question_text)
         total_space = PDF.ANSWER_TOTAL_SPACE_PAGE1 if page == 1 else PDF.ANSWER_TOTAL_SPACE_PAGE2
         separator_y = y_pos - total_space
+        box_top_y = y_pos - 0.1 * cm
         box_bottom_y = separator_y + PDF.ANSWER_BOX_LINE_GAP
-        answer_box_width = (content_width - PDF.QUESTION_NUMBER_INDENT) / 3
+        box_height = box_top_y - box_bottom_y
+
+        answer_box_width = content_width / 3
         answer_box_x = margin_right - answer_box_width
+        answer_box_height = 1.3 * cm
+        answer_box_y = box_bottom_y
+
+        c.setLineWidth(0.5)
+        c.rect(answer_box_x, answer_box_y, answer_box_width, answer_box_height)
         c.setFont("Helvetica", 9)
-        c.drawString(answer_box_x, box_bottom_y + PDF.ANSWER_BOX_HEIGHT + 0.1 * cm, "Respuesta:")
-        c.rect(answer_box_x, box_bottom_y, answer_box_width, PDF.ANSWER_BOX_HEIGHT)
+        c.drawString(answer_box_x + 0.15 * cm, answer_box_y + answer_box_height - 0.35 * cm, "Tu respuesta:")
 
         if draw_separator:
             c.line(margin_left, separator_y, margin_right, separator_y)
@@ -264,13 +270,13 @@ def generate_pdf(test_id):
     y = draw_header(y)
     form_top_y = y
     y = draw_form_fields(y)
-    draw_demographics_box(form_top_y, y)
-    y -= 0.7 * cm
+    draw_demographics_box(top_y=form_top_y, bottom_y=y + 0.3 * cm)
+    y -= 0.4 * cm
     c.setFont("Helvetica", 11)
     c.drawString(margin_left, y, "Hay muchas respuestas correctas. No busques el número exacto. Busca una buena aproximación.")
-    y -= 0.45 * cm
-    c.drawString(margin_left, y, "Puedes usar calculadora.")
     y -= 0.6 * cm
+    c.drawString(margin_left, y, "Puedes hacer cuentas en sucio en esta hoja. Puedes usar calculadora.")
+    y -= 0.8 * cm
     y = render_questions_page(y, 0, 4, page=1)  # 4 questions on page 1 (compact)
     draw_footer(1)
 
