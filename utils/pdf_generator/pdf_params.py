@@ -4,7 +4,7 @@ from reportlab.lib.units import cm
 @dataclass
 class PDFParams:
     MARGIN_HORIZONTAL = 1.25 * cm
-    MARGIN_TOP = 2 * cm
+    MARGIN_TOP = 1.5 * cm
     MARGIN_BOTTOM = 3 * cm
 
     FORM_BOX_HEIGHT = 1 * cm
@@ -27,4 +27,4 @@ class PDFParams:
     ANSWER_BOX_LINE_GAP = 0.3 * cm
 
     ANSWER_TOTAL_SPACE_PAGE1 = 2.9 * cm
-    ANSWER_TOTAL_SPACE_PAGE2 = 5.2 * cm
+    ANSWER_TOTAL_SPACE_PAGE2 = 4.0 * cm
