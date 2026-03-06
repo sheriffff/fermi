@@ -191,40 +191,17 @@ def generate_pdf(test_id):
         c.rect(x1, y1, x2 - x1, y2 - y1)
         c.rect(x1 - gap, y1 - gap, (x2 - x1) + 2 * gap, (y2 - y1) + 2 * gap)
 
-    def split_question_text(question_num, question_text):
-        """Split question into lines if too long, return list of (text, indent) tuples"""
-        full_text = f"{question_num}. {question_text}"
-
-        if c.stringWidth(full_text, "Helvetica-Bold", 12) <= content_width:
-            return [(full_text, 0)]
-
-        # Build lines with proper indentation
-        words = question_text.split()
-        first_line = f"{question_num}. "
-        remaining = []
-
-        for word in words:
-            if c.stringWidth(first_line + word, "Helvetica-Bold", 12) <= content_width:
-                first_line += word + " "
-            else:
-                remaining.append(word)
-
-        lines = [(first_line.rstrip(), 0)]
-        if remaining:
-            lines.append((" ".join(remaining), PDF.QUESTION_NUMBER_INDENT))
-
-        return lines
-
     def draw_question_text(y_pos, question_num, question_text):
-        """Draw question text, wrapping to multiple lines if needed"""
-        c.setFont("Helvetica-Bold", 12)
-        lines = split_question_text(question_num, question_text)
-
-        for text, indent in lines:
-            c.drawString(margin_left + indent, y_pos, text)
-            y_pos -= 0.5 * cm
-
-        return y_pos
+        full_text = f"<b>{question_num}. {question_text}</b>"
+        style = getSampleStyleSheet()['Normal']
+        style.fontName = "Helvetica-Bold"
+        style.fontSize = 12
+        style.leading = 15
+        style.alignment = TA_LEFT
+        p = Paragraph(full_text, style)
+        w, h = p.wrap(content_width, 1000)
+        p.drawOn(c, margin_left, y_pos - h)
+        return y_pos - h - 0.1 * cm
 
     def render_question(y_pos, question_num, question_text, draw_separator=True, page=1):
         y_pos = draw_question_text(y_pos, question_num, question_text)
@@ -272,11 +249,20 @@ def generate_pdf(test_id):
     y = draw_form_fields(y)
     draw_demographics_box(top_y=form_top_y, bottom_y=y + 0.3 * cm)
     y -= 0.4 * cm
-    c.setFont("Helvetica", 11)
-    c.drawString(margin_left, y, "Hay muchas respuestas correctas. No busques el número exacto. Busca una buena aproximación.")
-    y -= 0.6 * cm
-    c.drawString(margin_left, y, "Puedes hacer cuentas en sucio en esta hoja. Puedes usar calculadora.")
-    y -= 0.8 * cm
+    intro_style = getSampleStyleSheet()['Normal']
+    intro_style.fontName = "Helvetica"
+    intro_style.fontSize = 11
+    intro_style.leading = 14
+    intro_style.alignment = TA_LEFT
+    for text in [
+        "Hay muchas respuestas correctas: la clave es usar la lógica para dar una cifra con sentido que se acerque a la realidad.",
+        "Puedes hacer cuentas en sucio en esta hoja. Puedes usar calculadora.",
+    ]:
+        p = Paragraph(text, intro_style)
+        w, h = p.wrap(content_width, 1000)
+        p.drawOn(c, margin_left, y - h)
+        y -= h + 0.1 * cm
+    y -= 0.3 * cm
     y = render_questions_page(y, 0, 4, page=1)  # 4 questions on page 1 (compact)
     draw_footer(1)
 
