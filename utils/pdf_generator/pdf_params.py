@@ -3,7 +3,7 @@ from reportlab.lib.units import cm
 
 @dataclass
 class PDFParams:
-    MARGIN_HORIZONTAL = 2.5 * cm
+    MARGIN_HORIZONTAL = 1.25 * cm
     MARGIN_TOP = 2 * cm
     MARGIN_BOTTOM = 3 * cm
 
