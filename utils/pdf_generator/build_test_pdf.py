@@ -236,7 +236,7 @@ def generate_pdf(test_id):
 
         answer_box_width = content_width / 3
         answer_box_x = margin_right - answer_box_width
-        answer_box_height = 1.3 * cm
+        answer_box_height = PDF.ANSWER_BOX_HEIGHT
         answer_box_y = box_bottom_y
 
         c.setLineWidth(0.5)
