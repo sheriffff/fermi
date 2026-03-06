@@ -148,7 +148,7 @@ def generate_pdf(test_id):
         y_pos -= PDF.FORM_ROW_SPACING - 0.3 * cm
 
         c.drawString(col1_x, y_pos, "ℏ ¿Cursas Física y/o Química?")
-        si_x = col2_x
+        si_x = col2_x + 0.6 * cm
         draw_checkbox(c, si_x, y_pos - PDF.FORM_CHECKBOX_OFFSET_Y)
         c.drawString(si_x + PDF.FORM_CHECKBOX_LABEL_SPACING, y_pos, "Sí")
         no_x = si_x + 2 * cm
