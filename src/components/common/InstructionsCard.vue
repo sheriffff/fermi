@@ -82,9 +82,10 @@ const warningTimeText = computed(() => {
         <div class="flex gap-4 items-start">
           <span class="text-2xl">⏱️</span>
           <div>
-            <p class="font-semibold text-neutral-800">Máximo {{ questionTimeText }} por pregunta</p>
+            <p class="font-semibold text-neutral-800">Hasta {{ questionTimeText }} por pregunta</p>
             <p class="text-sm text-neutral-500">
               Te avisaré con un sonido cuando queden {{ warningTimeText }}.
+              El reloj está oculto para no agobiarte, pero puedes verlo tocando el icono ⏱️ de arriba.
             </p>
           </div>
         </div>

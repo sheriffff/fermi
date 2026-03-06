@@ -17,7 +17,7 @@ const { isMobile } = useMobile()
 // ============================================
 // CONFIGURACIÓN DE TIEMPOS
 // ============================================
-const QUESTION_TIME = 150
+const QUESTION_TIME = 180
 const WARNING_TIME = 30
 
 // ============================================
@@ -31,6 +31,7 @@ const canShare = !!navigator.share
 const showFeedbackModal = ref(false)
 const showLogErrorModal = ref(false)
 const showUpload = ref(false)
+const timerVisible = ref(false)
 
 function logErrBg(r) {
   if (r.inRange) return 'bg-emerald-50'
@@ -186,6 +187,7 @@ watch(timeRemaining, (remaining) => {
     showTimeWarning.value = true
     warningPlayed.value = true
     timerShaking.value = true
+    timerVisible.value = true
     playWarningSound()
     setTimeout(() => {
       timerShaking.value = false
@@ -338,6 +340,7 @@ async function goToNextQuestion() {
     showTimeWarning.value = false
     warningPlayed.value = false
     timerShaking.value = false
+    timerVisible.value = false
 
     await nextTick()
     resetTimer(QUESTION_TIME)
@@ -534,11 +537,12 @@ async function finishTest() {
               Pregunta {{ questionNumber }} de {{ totalQuestions }}
             </span>
             <span
-              class="timer-toggle"
+              class="timer-toggle cursor-pointer select-none"
               :class="{ 'timer-shaking': timerShaking }"
+              @click="timerVisible = !timerVisible"
             >
               <span class="timer-icon">⏱️</span>
-              <span class="timer-value">{{ formattedTime }}</span>
+              <span v-if="timerVisible" class="timer-value">{{ formattedTime }}</span>
             </span>
           </div>
 
