@@ -32,3 +32,8 @@ export const testDifficulties = [
   { level: 'Difícil', color: 'orange' },
   { level: 'Muy difícil', color: 'red' },
 ]
+
+export function getDifficulty(d) {
+  if (d == null) return null
+  return testDifficulties[Math.min(Math.max(Math.ceil(d) - 1, 0), testDifficulties.length - 1)]
+}

@@ -8,7 +8,7 @@ import { savePlayResponse } from '@/lib/supabase'
 import QuestionCard from '@/components/common/QuestionCard.vue'
 import LogErrorModal from '@/components/common/LogErrorModal.vue'
 import { useMobile } from '@/composables/useMobile'
-import { colors, testDifficulties } from '@/config/difficulties.js'
+import { colors, getDifficulty } from '@/config/difficulties.js'
 
 const { isMobile } = useMobile()
 
@@ -111,11 +111,7 @@ const isAnswerComplete = computed(() => {
   return cleanInput(currentAnswer.value) !== ''
 })
 
-const currentDifficulty = computed(() => {
-  const d = currentQuestion.value?.difficulty
-  if (d == null) return null
-  return testDifficulties[Math.min(Math.max(Math.round(d) - 1, 0), testDifficulties.length - 1)]
-})
+const currentDifficulty = computed(() => getDifficulty(currentQuestion.value?.difficulty))
 
 function formatFactor(f) {
   if (f >= 100) return Math.round(f).toLocaleString('es-ES')

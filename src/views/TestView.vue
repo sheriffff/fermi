@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router'
 import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
 import { createUserOnline, saveResponsesOnline, saveResultsEmail } from '@/lib/supabase'
-import { colors, testDifficulties } from '@/config/difficulties.js'
+import { colors, getDifficulty } from '@/config/difficulties.js'
 import { APP_URL } from '@/config/app.js'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import QuestionCard from '@/components/common/QuestionCard.vue'
@@ -180,11 +180,7 @@ const progressPercent = computed(() => {
   return (currentQuestionIndex.value / totalQuestions.value) * 100
 })
 
-const currentDifficulty = computed(() => {
-  const d = currentQuestion.value?.difficulty
-  if (d == null) return testDifficulties[0]
-  return testDifficulties[Math.min(Math.max(Math.round(d) - 1, 0), testDifficulties.length - 1)]
-})
+const currentDifficulty = computed(() => getDifficulty(currentQuestion.value?.difficulty) ?? getDifficulty(1))
 
 // Respuesta actual del input
 const currentAnswer = ref('')
