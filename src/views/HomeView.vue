@@ -45,7 +45,7 @@ function handleFermiClick() {
   <div class="min-h-screen flex justify-center p-4 pt-12 sm:p-6 sm:pt-14 md:p-8 md:pt-16">
     <div class="max-w-4xl w-full">
       <!-- Logo / Título -->
-      <div class="text-center mb-12">
+      <div class="text-center mb-6">
         <h1 class="text-2xl sm:text-4xl font-bold text-neutral-800 mb-4">
           <span aria-hidden="true">🎯 </span>Gymkana de <span @click.prevent="handleFermiClick" class="cursor-default select-none">Fermi</span><span aria-hidden="true"> 🎯</span>
         </h1>
