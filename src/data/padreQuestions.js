@@ -15,7 +15,7 @@ export const themes = [
       '¿Cuántos espaguetis hay en un paquete?',
       '¿Cuántos pelos tienes en la cabeza?',
       '¿Cuántos segundos llevas vivo?',
-      '¿Cuántos latidos le quedan a tu corazón si vives hasta los 90?',
+      '¿Cuántas células hay en tu cuerpo?',
     ],
   },
   {
