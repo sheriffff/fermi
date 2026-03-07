@@ -5,6 +5,7 @@ import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
 import { createUserOnline, saveResponsesOnline, saveResultsEmail } from '@/lib/supabase'
 import { colors, testDifficulties } from '@/config/difficulties.js'
+import { APP_URL } from '@/config/app.js'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import QuestionCard from '@/components/common/QuestionCard.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
@@ -59,12 +60,25 @@ async function shareLink() {
     await navigator.share({
       title: '¡Juguemos a Estimar!',
       text: 'Acabo de hacer un test de estimación de cantidades muy entretenido. ¿Te animas?',
-      url: window.location.origin
+      url: APP_URL
     })
   } catch (e) {
     // user cancelled share
   }
 }
+
+async function shareGroup() {
+  try {
+    await navigator.share({
+      title: '¡Juguemos a Estimar!',
+      text: 'Abrid este enlace cada uno en vuestro dispositivo. Elegid el mismo modelo y hacemos el mismo test.',
+      url: APP_URL
+    })
+  } catch (e) {
+    // user cancelled share
+  }
+}
+
 
 // Aviso de 30 segundos
 const showTimeWarning = ref(false)
@@ -79,8 +93,15 @@ const metadata = ref({
   codigoPersonal: '',
   email: '',
   piVsE: '',
+  mismoTest: false,
   segundaVez: false,
   modelosYaHechos: []
+})
+
+const codigoGrupoInput = ref('')
+
+watch(() => metadata.value.mismoTest, (val) => {
+  if (!val) codigoGrupoInput.value = ''
 })
 
 // Generar opciones de edad desde 4 hasta 99
@@ -124,6 +145,9 @@ function toggleModeloYaHecho(modelo) {
 const isMetadataValid = computed(() => {
   const m = metadata.value
   const basicValid = m.edad && m.piVsE
+  if (m.mismoTest) {
+    return basicValid && modeloOptions.value.includes(codigoGrupoInput.value)
+  }
   if (m.segundaVez) {
     return basicValid && m.modelosYaHechos.length > 0
   }
@@ -272,7 +296,9 @@ async function startTest() {
     let modelo
     const availableTests = modeloOptions.value
 
-    if (metadata.value.segundaVez && metadata.value.modelosYaHechos.length > 0) {
+    if (metadata.value.mismoTest) {
+      modelo = codigoGrupoInput.value
+    } else if (metadata.value.segundaVez && metadata.value.modelosYaHechos.length > 0) {
       const modelosDisponibles = availableTests.filter(
         m => !metadata.value.modelosYaHechos.includes(m)
       )
@@ -365,7 +391,8 @@ async function finishTest() {
       piVsE: metadata.value.piVsE,
       whichTestsBefore: metadata.value.modelosYaHechos.join(''),
       userAlias: metadata.value.codigoPersonal,
-      testModel: modeloAsignado.value
+      testModel: modeloAsignado.value,
+      amigosTest: metadata.value.mismoTest ? codigoGrupoInput.value : null
     })
 
     const rows = Object.keys(respuestas.value).map(key => {
@@ -483,8 +510,53 @@ async function finishTest() {
               </div>
             </div>
 
-            <!-- Segunda vez -->
+            <!-- Mismo test que amigos -->
             <div class="card space-y-3">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  v-model="metadata.mismoTest"
+                  class="w-5 h-5 rounded text-primary-500"
+                />
+                <span class="text-neutral-700 font-medium">
+                  Estoy con amigos y queremos hacer el mismo test
+                </span>
+              </label>
+
+              <Transition name="fade">
+                <div v-if="metadata.mismoTest" class="ml-8 space-y-3 pt-1">
+                  <p class="text-sm text-neutral-500">
+                    Que cada uno abra esta página <span class="font-mono text-primary-600">{{ APP_URL }}</span> en su dispositivo.
+                  </p>
+                  <button
+                    v-if="canShare"
+                    type="button"
+                    @click="shareGroup"
+                    class="btn-outline w-full"
+                  >
+                    📤 Compartir enlace con el grupo
+                  </button>
+                  <p class="text-sm text-neutral-500">
+                    Elegid todos el mismo modelo.
+                  </p>
+                  <div class="flex gap-2">
+                    <label
+                      v-for="m in modeloOptions"
+                      :key="m"
+                      class="cursor-pointer"
+                    >
+                      <input type="radio" v-model="codigoGrupoInput" :value="m" class="sr-only peer" />
+                      <div class="w-12 text-center py-2 rounded-xl text-sm font-bold border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
+                        {{ m }}
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </Transition>
+            </div>
+
+            <!-- Segunda vez -->
+            <div class="card space-y-3" :class="{ 'opacity-40 pointer-events-none': metadata.mismoTest }">
               <label class="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -544,6 +616,7 @@ async function finishTest() {
               <span v-else>Vamos →</span>
             </button>
           </form>
+
         </div>
 
         <div v-else-if="currentStep === 'instructions'" key="instructions">

@@ -132,7 +132,9 @@ Requires Node.js `24.x` as specified in package.json engines.
 
 - `src/lib/supabase.js` - All database operations, central integration point
 - `src/lib/questions.js` - Excel-based question loading and caching
-- `src/data/padreQuestions.js` - Static config for /padre family activity questions (organized by theme, then difficulty)
+- `src/config/padreQuestions.js` - Static config for /padre family activity questions (organized by theme, then difficulty)
+- `src/config/difficulties.js` - Shared difficulty levels and color mappings (used by TestView and PadreView)
+- `src/config/app.js` - App-level constants (APP_URL)
 - `src/router/index.js` - Route definitions
 - `supabase/schema.sql` - Complete database schema with RLS policies and seed data
 - `public/questions.xlsx` - Question bank source (sheets: categories, questions, tests, other_questions)

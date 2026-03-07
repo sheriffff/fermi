@@ -1,4 +1,4 @@
-export { colors } from '../config/difficulties.js'
+export { colors } from './difficulties.js'
 
 export const difficulties = [
   { level: 'Fácil', color: 'emerald' },

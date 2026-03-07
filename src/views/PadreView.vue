@@ -1,7 +1,7 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 import FeedbackButton from '@/components/common/FeedbackButton.vue'
-import { themes, difficulties, colors } from '@/data/padreQuestions.js'
+import { themes, difficulties, colors } from '@/config/padreQuestions.js'
 </script>
 
 <template>
