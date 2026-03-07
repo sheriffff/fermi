@@ -22,6 +22,11 @@ const routes = [
     component: () => import('@/views/RandomView.vue')
   },
   {
+    path: '/padre',
+    name: 'padre',
+    component: () => import('@/views/PadreView.vue')
+  },
+  {
     path: '/admin',
     component: () => import('@/views/AdminView.vue'),
     children: [
