@@ -7,6 +7,7 @@ import { useMobile } from '@/composables/useMobile'
 const props = defineProps({
   questionText: { type: String, required: true },
   unitText: { type: String, default: '' },
+  noteText: { type: String, default: '' },
   modelValue: { type: String, default: '' },
   submitLabel: { type: String, default: 'Enviar' },
   submitDisabled: { type: Boolean, default: true },
@@ -39,6 +40,8 @@ defineExpose({ fermiInputRef, focusInput })
         Responde en: {{ unitText }}
       </p>
     </div>
+
+    <p v-if="noteText" class="text-sm text-neutral-400 italic -mt-4 mb-6">{{ noteText }}</p>
 
     <FermiInput
       ref="fermiInputRef"

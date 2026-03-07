@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useNumberFormat } from '@/composables/useNumberFormat'
 import { useTimer } from '@/composables/useTimer'
@@ -11,6 +11,9 @@ import { useMobile } from '@/composables/useMobile'
 
 const { isMobile } = useMobile()
 
+const QUESTION_TIME = 180
+const WARNING_TIME = 30
+
 const currentQuestion = ref(null)
 const currentAnswer = ref('')
 const showResult = ref(false)
@@ -18,9 +21,38 @@ const skipped = ref(false)
 const isLoading = ref(true)
 const questionCardRef = ref(null)
 const showLogErrorModal = ref(false)
+const timerShaking = ref(false)
+const warningPlayed = ref(false)
 
 const { formatNumber, formatRange, cleanInput } = useNumberFormat()
-const { start: startTimer, stop: stopTimer, reset: resetTimer, getElapsedTime } = useTimer(9999)
+const { formattedTime, seconds: timeRemaining, start: startTimer, stop: stopTimer, reset: resetTimer, getElapsedTime } = useTimer(QUESTION_TIME, () => {})
+
+watch(timeRemaining, (remaining) => {
+  if (remaining <= WARNING_TIME && remaining > 0 && !warningPlayed.value) {
+    warningPlayed.value = true
+    timerShaking.value = true
+    playWarningSound()
+    setTimeout(() => { timerShaking.value = false }, 1000)
+  }
+})
+
+function playWarningSound() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    const oscillator = audioContext.createOscillator()
+    const gainNode = audioContext.createGain()
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext.destination)
+    oscillator.frequency.value = 440
+    oscillator.type = 'sine'
+    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+    oscillator.start(audioContext.currentTime)
+    oscillator.stop(audioContext.currentTime + 0.5)
+  } catch (e) {
+    console.log('No se pudo reproducir sonido:', e)
+  }
+}
 
 const hasRange = computed(() => {
   const q = currentQuestion.value
@@ -91,7 +123,9 @@ async function getNewQuestion() {
   showResult.value = false
   skipped.value = false
   isLoading.value = false
-  resetTimer(9999)
+  warningPlayed.value = false
+  timerShaking.value = false
+  resetTimer(QUESTION_TIME)
   startTimer()
 }
 
@@ -144,9 +178,16 @@ async function handleSubmit() {
 
         <template v-else>
         <div v-if="!showResult" class="space-y-6">
+          <div class="flex items-center justify-end">
+            <span class="timer-toggle" :class="{ 'timer-shaking': timerShaking }">
+              <span class="timer-icon">⏱️</span>
+              <span class="timer-value">{{ formattedTime }}</span>
+            </span>
+          </div>
           <QuestionCard
             ref="questionCardRef"
             :question-text="currentQuestion?.texto ?? ''"
+            note-text="Tómate tu tiempo y haz tus cuentas."
             v-model="currentAnswer"
             submit-label="Ver resultado"
             mobile-submit-label="Enviar"
@@ -229,3 +270,30 @@ async function handleSubmit() {
   </div>
 </template>
 
+<style scoped>
+@reference "../assets/main.css";
+
+.timer-toggle {
+  @apply flex items-center gap-1 px-2 py-1 rounded-lg;
+  @apply bg-neutral-100 transition-all duration-200;
+}
+
+.timer-icon {
+  @apply text-lg transition-transform duration-200;
+}
+
+.timer-value {
+  @apply font-mono text-sm text-neutral-600;
+}
+
+.timer-shaking {
+  @apply scale-125;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0) scale(1.25); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px) scale(1.25); }
+  20%, 40%, 60%, 80% { transform: translateX(2px) scale(1.25); }
+}
+</style>
