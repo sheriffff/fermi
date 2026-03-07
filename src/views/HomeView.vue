@@ -52,11 +52,11 @@ function handleFermiClick() {
         <p class="text-xl text-neutral-600 leading-relaxed mb-3">
           Explorando el arte de estimar
         </p>
-        <div class="flex justify-center gap-4 text-">
-          <button @click="showInfoModal = true" class="text-neutral-500 hover:text-primary-600 underline underline-offset-2 decoration-neutral-300 hover:decoration-primary-600 transition-colors cursor-pointer">
+        <div class="flex justify-center gap-3">
+          <button @click="showInfoModal = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 bg-white text-neutral-600 text-sm font-medium shadow-sm hover:shadow-md hover:border-primary-300 hover:text-primary-600 transition-all cursor-pointer">
             🤔 ¿De qué va esto?
           </button>
-          <button @click="showImageModal = true" class="text-neutral-500 hover:text-primary-600 underline underline-offset-2 decoration-neutral-300 hover:decoration-primary-600 transition-colors cursor-pointer">
+          <button @click="showImageModal = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 bg-white text-neutral-600 text-sm font-medium shadow-sm hover:shadow-md hover:border-primary-300 hover:text-primary-600 transition-all cursor-pointer">
             💡 ¿Cómo empezó todo?
           </button>
         </div>
