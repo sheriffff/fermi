@@ -39,7 +39,7 @@ export async function logDownload() {
   if (error) throw error
 }
 
-export async function createUserOnline({ age, piVsE, whichTestsBefore, userAlias, testModel, amigosTest }) {
+export async function createUserOnline({ age, piVsE, whichTestsBefore, userAlias, testModel, amigosTest, email }) {
   if (!dbEnabled) return 'fake-user-id'
   const id = crypto.randomUUID()
   const { error } = await supabase
@@ -52,6 +52,7 @@ export async function createUserOnline({ age, piVsE, whichTestsBefore, userAlias
       user_alias: userAlias || null,
       test_model: testModel,
       amigos_test: amigosTest || null,
+      email: email || null,
       user_agent: navigator.userAgent,
       device_type: getDeviceType()
     })

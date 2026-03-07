@@ -388,7 +388,8 @@ async function finishTest() {
       whichTestsBefore: metadata.value.modelosYaHechos.join(''),
       userAlias: metadata.value.codigoPersonal,
       testModel: modeloAsignado.value,
-      amigosTest: metadata.value.mismoTest ? codigoGrupoInput.value : null
+      amigosTest: metadata.value.mismoTest ? codigoGrupoInput.value : null,
+      email: metadata.value.email || null
     })
 
     const rows = Object.keys(respuestas.value).map(key => {
@@ -401,10 +402,6 @@ async function finishTest() {
     })
 
     await saveResponsesOnline(userId, modeloAsignado.value, rows)
-
-    if (metadata.value.email) {
-      saveResultsEmail(metadata.value.email).catch(() => {})
-    }
 
     savedUserId.value = userId
   } catch (e) {
@@ -470,7 +467,7 @@ async function finishTest() {
                 <label class="label">Email <span class="font-normal text-neutral-400">(opcional)</span></label>
                 <input
                   v-model="metadata.email"
-                  type="email"
+                  type="text"
                   class="input"
                   placeholder="tu@email.com"
                   maxlength="100"
