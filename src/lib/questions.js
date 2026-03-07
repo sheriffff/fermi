@@ -22,7 +22,8 @@ async function loadExcel() {
         id: row[col('id_question')],
         texto: row[col('question')],
         p05: hasRange ? p05 : null,
-        p95: hasRange ? p95 : null
+        p95: hasRange ? p95 : null,
+        difficulty: row[col('difficulty')] != null ? Number(row[col('difficulty')]) : null
       }
     })
 

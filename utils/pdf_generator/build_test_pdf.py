@@ -24,10 +24,14 @@ def load_test_questions(test_id):
     tests_sheet = wb['tests']
     questions_sheet = wb['questions']
 
+    headers = [questions_sheet.cell(1, col).value for col in range(1, questions_sheet.max_column + 1)]
+    col_id = headers.index('id_question') + 1
+    col_text = headers.index('question') + 1
+
     questions = {}
     for i in range(2, questions_sheet.max_row + 1):
-        q_id = questions_sheet.cell(i, 1).value
-        text = questions_sheet.cell(i, 5).value
+        q_id = questions_sheet.cell(i, col_id).value
+        text = questions_sheet.cell(i, col_text).value
         if q_id is not None and text:
             questions[q_id] = text
 

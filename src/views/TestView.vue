@@ -180,10 +180,10 @@ const progressPercent = computed(() => {
   return (currentQuestionIndex.value / totalQuestions.value) * 100
 })
 
-// Dificultad de la pregunta actual (2 preguntas por nivel)
 const currentDifficulty = computed(() => {
-  const idx = Math.floor(currentQuestionIndex.value / 2)
-  return testDifficulties[Math.min(idx, testDifficulties.length - 1)]
+  const d = currentQuestion.value?.difficulty
+  if (d == null) return testDifficulties[0]
+  return testDifficulties[Math.min(Math.max(Math.round(d) - 1, 0), testDifficulties.length - 1)]
 })
 
 // Respuesta actual del input

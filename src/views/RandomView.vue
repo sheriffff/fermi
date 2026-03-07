@@ -8,6 +8,7 @@ import { savePlayResponse } from '@/lib/supabase'
 import QuestionCard from '@/components/common/QuestionCard.vue'
 import LogErrorModal from '@/components/common/LogErrorModal.vue'
 import { useMobile } from '@/composables/useMobile'
+import { colors, testDifficulties } from '@/config/difficulties.js'
 
 const { isMobile } = useMobile()
 
@@ -110,6 +111,12 @@ const isAnswerComplete = computed(() => {
   return cleanInput(currentAnswer.value) !== ''
 })
 
+const currentDifficulty = computed(() => {
+  const d = currentQuestion.value?.difficulty
+  if (d == null) return null
+  return testDifficulties[Math.min(Math.max(Math.round(d) - 1, 0), testDifficulties.length - 1)]
+})
+
 function formatFactor(f) {
   if (f >= 100) return Math.round(f).toLocaleString('es-ES')
   if (f >= 10) return Math.round(f).toString()
@@ -178,7 +185,11 @@ async function handleSubmit() {
 
         <template v-else>
         <div v-if="!showResult" class="space-y-6">
-          <div class="flex items-center justify-end">
+          <div class="flex items-center justify-between">
+            <span v-if="currentDifficulty" class="text-xs font-semibold px-2.5 py-1 rounded-full" :class="colors[currentDifficulty.color].badge">
+              {{ currentDifficulty.level }}
+            </span>
+            <span v-else></span>
             <span class="timer-toggle" :class="{ 'timer-shaking': timerShaking }">
               <span class="timer-icon">⏱️</span>
               <span class="timer-value">{{ formattedTime }}</span>
