@@ -1,100 +1,7 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 import FeedbackButton from '@/components/common/FeedbackButton.vue'
-
-const places = [
-  { emoji: '🏠', label: 'En casa' },
-  { emoji: '📺', label: 'Viendo la tele' },
-  { emoji: '🌳', label: 'Por la calle' },
-  { emoji: '🛒', label: 'Supermercado' },
-  { emoji: '🚗', label: 'En el coche' },
-]
-
-const rows = [
-  {
-    level: 'Fácil',
-    color: 'emerald',
-    questions: [
-      '¿Cuántos libros caben en tu habitación?',
-      '¿Cuántas palabras dice el presentador por minuto?',
-      '¿Cuántos pasos hay de aquí a esa esquina?',
-      '¿Cuántas latas de tomate hay en ese estante?',
-      '¿Cuántos árboles hemos pasado en los últimos 5 minutos?',
-    ],
-  },
-  {
-    level: 'Medio',
-    color: 'blue',
-    questions: [
-      '¿Cuántos espaguetis hay en un paquete?',
-      '¿Cuántos anuncios has visto en tu vida?',
-      '¿Cuántos coches pasan por aquí en un día?',
-      '¿Cuántos granos de arroz hay en ese paquete de 1 kg?',
-      '¿Cuántos kilómetros recorre este coche al año?',
-    ],
-  },
-  {
-    level: 'Difícil',
-    color: 'orange',
-    questions: [
-      '¿Cuántos pelos tienes en la cabeza?',
-      '¿Cuántos fotogramas tiene esta película?',
-      '¿Cuántas baldosas hay en esta acera?',
-      '¿Cuánto pesa toda la comida que hay ahora mismo en este supermercado?',
-      '¿Cuántos litros de gasolina has gastado en tu vida?',
-    ],
-  },
-  {
-    level: 'Muy difícil',
-    color: 'red',
-    questions: [
-      '¿Cuántos segundos llevas vivo?',
-      '¿Cuántos píxeles has visto en toda tu vida?',
-      '¿Cuántos ladrillos tiene ese edificio?',
-      '¿Cuántas calorías hay en todo el supermercado?',
-      '¿Cuántos pasos necesitarías para llegar al Sol caminando?',
-    ],
-  },
-  {
-    level: 'Megadesafío',
-    color: 'violet',
-    questions: [
-      '¿Cuántos latidos le quedan a tu corazón si vives hasta los 90?',
-      '¿Cuántos bits de información has consumido en tu vida?',
-      '¿Cuántos granos de arena hay en todas las playas del mundo?',
-      '¿Cuántos átomos hay en el pan de molde que acabas de comprar?',
-      '¿Cuántas vueltas a la Tierra has dado en coche a lo largo de tu vida?',
-    ],
-  },
-]
-
-const colors = {
-  emerald: {
-    badge: 'bg-emerald-100 text-emerald-700',
-    cell: 'bg-emerald-50/60 hover:bg-emerald-50',
-    border: 'border-emerald-100',
-  },
-  blue: {
-    badge: 'bg-blue-100 text-blue-700',
-    cell: 'bg-blue-50/60 hover:bg-blue-50',
-    border: 'border-blue-100',
-  },
-  orange: {
-    badge: 'bg-orange-100 text-orange-700',
-    cell: 'bg-orange-50/60 hover:bg-orange-50',
-    border: 'border-orange-100',
-  },
-  red: {
-    badge: 'bg-red-100 text-red-700',
-    cell: 'bg-red-50/60 hover:bg-red-50',
-    border: 'border-red-100',
-  },
-  violet: {
-    badge: 'bg-violet-100 text-violet-700',
-    cell: 'bg-violet-50/60 hover:bg-violet-50',
-    border: 'border-violet-100',
-  },
-}
+import { themes, difficulties, colors } from '@/data/padreQuestions.js'
 </script>
 
 <template>
@@ -126,35 +33,35 @@ const colors = {
             <tr class="bg-neutral-50 border-b border-neutral-200">
               <th class="p-3 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wide w-28"></th>
               <th
-                v-for="place in places"
-                :key="place.label"
+                v-for="theme in themes"
+                :key="theme.label"
                 class="p-3 text-center text-sm font-semibold text-neutral-700"
               >
                 <div class="flex flex-col items-center gap-1">
-                  <span class="text-xl">{{ place.emoji }}</span>
-                  <span>{{ place.label }}</span>
+                  <span class="text-xl">{{ theme.emoji }}</span>
+                  <span>{{ theme.label }}</span>
                 </div>
               </th>
             </tr>
           </thead>
           <tbody>
             <tr
-              v-for="(row, ri) in rows"
-              :key="row.level"
-              :class="ri < rows.length - 1 ? 'border-b border-neutral-200' : ''"
+              v-for="(d, di) in difficulties"
+              :key="d.level"
+              :class="di < difficulties.length - 1 ? 'border-b border-neutral-200' : ''"
             >
               <td class="p-3 align-middle">
-                <span :class="colors[row.color].badge" class="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">
-                  {{ row.level }}
+                <span :class="colors[d.color].badge" class="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">
+                  {{ d.level }}
                 </span>
               </td>
               <td
-                v-for="(q, qi) in row.questions"
-                :key="qi"
-                :class="[colors[row.color].cell, colors[row.color].border, qi < row.questions.length - 1 ? 'border-r' : '']"
+                v-for="(theme, ti) in themes"
+                :key="ti"
+                :class="[colors[d.color].cell, colors[d.color].border, ti < themes.length - 1 ? 'border-r' : '']"
                 class="p-3 text-sm text-neutral-700 align-top transition-colors"
               >
-                <span class="italic leading-snug">{{ q }}</span>
+                <span class="italic leading-snug">{{ theme.questions[di] }}</span>
               </td>
             </tr>
           </tbody>
