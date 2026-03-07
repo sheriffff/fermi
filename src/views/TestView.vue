@@ -3,11 +3,12 @@ import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useTimer } from '@/composables/useTimer'
 import { useNumberFormat } from '@/composables/useNumberFormat'
-import { createUserOnline, saveResponsesOnline } from '@/lib/supabase'
+import { createUserOnline, saveResponsesOnline, saveResultsEmail } from '@/lib/supabase'
+import { colors, testDifficulties } from '@/config/difficulties.js'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import QuestionCard from '@/components/common/QuestionCard.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
-import FeedbackModal from '@/components/common/FeedbackModal.vue'
+import FeedbackButton from '@/components/common/FeedbackButton.vue'
 import LogErrorModal from '@/components/common/LogErrorModal.vue'
 import ScribbleUpload from '@/components/adultos/ScribbleUpload.vue'
 import { useMobile } from '@/composables/useMobile'
@@ -28,7 +29,6 @@ const isLoading = ref(false)
 const error = ref(null)
 const savedUserId = ref(null)
 const canShare = !!navigator.share
-const showFeedbackModal = ref(false)
 const showLogErrorModal = ref(false)
 const showUpload = ref(false)
 const timerVisible = ref(false)
@@ -77,6 +77,7 @@ const timerShaking = ref(false)
 const metadata = ref({
   edad: '40',
   codigoPersonal: '',
+  email: '',
   piVsE: '',
   segundaVez: false,
   modelosYaHechos: []
@@ -153,6 +154,12 @@ const totalQuestions = computed(() => preguntas.value.length)
 const progressPercent = computed(() => {
   if (totalQuestions.value === 0) return 0
   return (currentQuestionIndex.value / totalQuestions.value) * 100
+})
+
+// Dificultad de la pregunta actual (2 preguntas por nivel)
+const currentDifficulty = computed(() => {
+  const idx = Math.floor(currentQuestionIndex.value / 2)
+  return testDifficulties[Math.min(idx, testDifficulties.length - 1)]
 })
 
 // Respuesta actual del input
@@ -340,7 +347,6 @@ async function goToNextQuestion() {
     showTimeWarning.value = false
     warningPlayed.value = false
     timerShaking.value = false
-    timerVisible.value = false
 
     await nextTick()
     resetTimer(QUESTION_TIME)
@@ -372,6 +378,10 @@ async function finishTest() {
     })
 
     await saveResponsesOnline(userId, modeloAsignado.value, rows)
+
+    if (metadata.value.email) {
+      saveResultsEmail(metadata.value.email).catch(() => {})
+    }
 
     savedUserId.value = userId
   } catch (e) {
@@ -431,6 +441,20 @@ async function finishTest() {
                     Por si quieres encontrarte más tarde en la tabla de resultados.
                   </p>
                 </div>
+              </div>
+
+              <div>
+                <label class="label">Email <span class="font-normal text-neutral-400">(opcional)</span></label>
+                <input
+                  v-model="metadata.email"
+                  type="email"
+                  class="input"
+                  placeholder="tu@email.com"
+                  maxlength="100"
+                />
+                <p class="text-sm text-neutral-400 mt-1.5 italic">
+                  Cuando publique los resultados del estudio, te aviso.
+                </p>
               </div>
 
               <div class="space-y-3">
@@ -556,6 +580,15 @@ async function finishTest() {
 
           <Transition name="slide" mode="out-in" @after-enter="focusInput">
             <div :key="currentQuestionIndex" class="card-elevated">
+              <div class="mb-4">
+                <span class="text-xs text-neutral-400 mr-1.5">Dificultad:</span>
+                <span
+                  class="inline text-xs font-semibold px-2.5 py-1 rounded-full"
+                  :class="colors[currentDifficulty.color].badge"
+                >
+                  {{ currentDifficulty.level }}
+                </span>
+              </div>
               <QuestionCard
                 ref="questionCardRef"
                 :question-text="currentQuestion?.texto ?? ''"
@@ -590,9 +623,10 @@ async function finishTest() {
               <button
                 v-if="savedUserId"
                 @click="showUpload = true"
-                class="btn-outline btn-large w-full max-w-xs"
+                class="btn-outline w-full max-w-xs flex flex-col items-center gap-0.5 py-3 px-5"
               >
-                📸 A ver tu hoja en sucio!
+                <span class="text-sm font-medium">📸 Sube una foto de tu hoja en sucio!</span>
+                <span class="text-xs text-neutral-400 font-normal">Me gusta ver cómo habéis calculado</span>
               </button>
               <button
                 v-if="canShare"
@@ -601,12 +635,7 @@ async function finishTest() {
               >
                 📤 Comparte con un amigo
               </button>
-              <button
-                @click="showFeedbackModal = true"
-                class="btn-outline btn-large w-full max-w-xs"
-              >
-                📣 Dame tu opinión
-              </button>
+              <FeedbackButton />
             </div>
           </div>
 
@@ -672,8 +701,6 @@ async function finishTest() {
           </Transition>
 
           <LogErrorModal :show="showLogErrorModal" @close="showLogErrorModal = false" />
-
-          <FeedbackModal :show="showFeedbackModal" @close="showFeedbackModal = false" />
 
         </div>
       </Transition>

@@ -93,9 +93,9 @@ const warningTimeText = computed(() => {
         <div class="flex gap-4 items-start">
           <span class="text-2xl">🔢</span>
           <div>
-            <p class="font-semibold text-neutral-800">Números grandes</p>
+            <p class="font-semibold text-neutral-800">Atajos</p>
             <p class="text-sm text-neutral-500">
-              Usa, si quieres, los botones <span class="font-mono bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded">×1000</span> y <span class="font-mono bg-secondary-100 text-secondary-600 px-1.5 py-0.5 rounded">/1000</span>.
+              Los botones <span class="font-mono bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded">×1000</span> y <span class="font-mono bg-secondary-100 text-secondary-600 px-1.5 py-0.5 rounded">/1000</span> multiplican o dividen tu número por 1.000. Por ejemplo: escribe «5», pulsa ×1000 dos veces → 5.000.000.
             </p>
           </div>
         </div>
