@@ -37,7 +37,7 @@ VITE_LOG_TO_DDBB=true          # set to 'false' to skip all DB writes in dev
 
 ### Frontend Stack
 - **Vue 3** (Composition API) with Vite
-- **Vue Router** for navigation (5 main routes)
+- **Vue Router** for navigation
 - **Tailwind CSS 4** for styling
 - **Supabase JS Client** for direct database access (no backend API layer)
 
@@ -65,16 +65,23 @@ The `src/lib/questions.js` module caches the parsed Excel data and provides func
 
 ### Key Routes & Views
 
-- `/` (HomeView) - Landing page with two buttons: teacher or adult participant
+- `/` (HomeView) - Landing page
 - `/profe` (ProfeView) - PDF download page for teachers (no registration)
+- `/padre` (PadreView) - Family activity ideas; questions loaded from `src/data/padreQuestions.js`
 - `/test` (TestView) - Main test interface with 150s timer per question, sequential question flow
 - `/random` (RandomView) - Single random question tester
-- `/admin` (AdminView) - Manual paper test entry with data grid, CSV export functionality
+- `/upload/:userId` (UploadView) - Mobile photo upload for handwritten scribbles; compresses and stores images via `uploadScribble()`
+- `/admin` (AdminView) - Nested layout with sub-routes:
+  - `/admin/datos` - Manual paper test data entry
+  - `/admin/metricas` - Metrics dashboard
+  - `/admin/metricas/:tableKey` - Metric detail view
+  - `/admin/exportar` - CSV export
 
 ### Composables (Shared Logic)
 
 - `useTimer.js` - Countdown timer logic for test questions (default 180s, but TestView uses 150s)
 - `useNumberFormat.js` - Formats large numbers with thousand separators for display
+- `useMobile.js` - Mobile device detection
 
 ### Supabase Integration
 
@@ -85,6 +92,7 @@ All database operations go through helper functions in `src/lib/supabase.js`:
 - `createUserPaper()` - Creates paper student record, returns id
 - `saveResponsesPaper()` - Inserts per-question paper responses for a student
 - `savePlayResponse()` - Saves a single play response from /random
+- `uploadScribble()` - Uploads compressed photo to Supabase Storage (used by /upload/:userId)
 - `exportTable()` - Exports table data for CSV generation
 
 Row Level Security (RLS) is enabled. All policies use the `anon` role (no Supabase Auth). Admin authentication is client-side only (SHA-256 hash). The `VITE_LOG_TO_DDBB` env var controls whether DB writes are executed (set to `'false'` to disable in dev).
@@ -124,6 +132,7 @@ Requires Node.js `24.x` as specified in package.json engines.
 
 - `src/lib/supabase.js` - All database operations, central integration point
 - `src/lib/questions.js` - Excel-based question loading and caching
+- `src/data/padreQuestions.js` - Static config for /padre family activity questions (organized by theme, then difficulty)
 - `src/router/index.js` - Route definitions
 - `supabase/schema.sql` - Complete database schema with RLS policies and seed data
 - `public/questions.xlsx` - Question bank source (sheets: categories, questions, tests, other_questions)
