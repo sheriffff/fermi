@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import ImageModal from '@/components/common/ImageModal.vue'
 import FeedbackModal from '@/components/common/FeedbackModal.vue'
 import ResultsModal from '@/components/common/ResultsModal.vue'
+import PadreModal from '@/components/common/PadreModal.vue'
 
 import { useRouter } from 'vue-router'
 import { setDbEnabled } from '@/lib/supabase'
@@ -13,6 +14,7 @@ const showImageModal = ref(false)
 const showInfoModal = ref(false)
 const showFeedbackModal = ref(false)
 const showResultsModal = ref(false)
+const showPadreModal = ref(false)
 
 const porClicks = ref(0)
 let porTimer = null
@@ -66,6 +68,7 @@ function handleFermiClick() {
       <ImageModal :show="showImageModal" @close="showImageModal = false" />
       <FeedbackModal :show="showFeedbackModal" @close="showFeedbackModal = false" />
       <ResultsModal :show="showResultsModal" @close="showResultsModal = false" />
+      <PadreModal :show="showPadreModal" @close="showPadreModal = false" />
 
       <Teleport to="body">
         <Transition name="modal">
@@ -117,7 +120,7 @@ function handleFermiClick() {
       </RouterLink>
 
       <!-- Acciones secundarias -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <RouterLink
           to="/profe"
           class="flex flex-col items-center justify-center bg-white rounded-3xl shadow-lg border border-neutral-100 p-4 md:p-5 group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
@@ -149,6 +152,17 @@ function handleFermiClick() {
           </div>
           <h3 class="text-lg font-semibold text-neutral-800 mb-1">Resultados</h3>
           <p class="text-neutral-500 text-sm">¿Qué tal estimamos?</p>
+        </button>
+
+        <button
+          @click="showPadreModal = true"
+          class="flex flex-col items-center justify-center bg-white rounded-3xl shadow-lg border border-neutral-100 p-4 md:p-5 group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
+        >
+          <div class="mb-2">
+            <span class="text-3xl group-hover:scale-110 transition-transform duration-300 inline-block">👨‍👩‍👧</span>
+          </div>
+          <h3 class="text-lg font-semibold text-neutral-800 mb-1">Soy Padre</h3>
+          <p class="text-neutral-500 text-sm">Ideas para jugar en familia</p>
         </button>
       </div>
 
