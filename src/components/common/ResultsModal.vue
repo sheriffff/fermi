@@ -58,11 +58,11 @@ async function submit() {
               Aún estoy recopilando datos!
             </p>
             <p class="text-neutral-600 mb-5">
-              Espero tener los resultados hacia <span class="font-semibold text-neutral-700">Mayo 2026</span>
+              Espero tener los resultados en <span class="font-semibold text-neutral-700">Junio 2026</span>
             </p>
 
             <label class="block mb-5">
-              <span class="text-neutral-600">Si quieres, te envío un correo cuando los tenga</span>
+              <span class="text-neutral-600">Deja tu correo y te aviso cuando estén listos</span>
               <input
                 v-model="email"
                 type="email"
@@ -81,7 +81,7 @@ async function submit() {
                 ? 'bg-neutral-300 cursor-not-allowed'
                 : 'bg-primary-600 hover:bg-primary-700 cursor-pointer'"
             >
-              {{ sending ? 'Guardando...' : 'Avisadme' }}
+              {{ sending ? 'Guardando...' : 'Avisame!' }}
             </button>
           </template>
 

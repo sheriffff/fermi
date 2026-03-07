@@ -1,5 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
+import FeedbackButton from '@/components/common/FeedbackButton.vue'
 
 const places = [
   { emoji: '🏠', label: 'En casa' },
@@ -158,6 +159,10 @@ const colors = {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="mt-6">
+        <FeedbackButton />
       </div>
 
       <p class="mb-6 text-center text-neutral-400 text-md mt-4 italic">

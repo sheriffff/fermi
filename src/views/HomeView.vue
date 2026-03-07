@@ -2,7 +2,7 @@
 import { RouterLink } from 'vue-router'
 import { ref } from 'vue'
 import ImageModal from '@/components/common/ImageModal.vue'
-import FeedbackModal from '@/components/common/FeedbackModal.vue'
+import FeedbackButton from '@/components/common/FeedbackButton.vue'
 import ResultsModal from '@/components/common/ResultsModal.vue'
 
 import { useRouter } from 'vue-router'
@@ -11,7 +11,6 @@ import { setDbEnabled } from '@/lib/supabase'
 const router = useRouter()
 const showImageModal = ref(false)
 const showInfoModal = ref(false)
-const showFeedbackModal = ref(false)
 const showResultsModal = ref(false)
 
 const porClicks = ref(0)
@@ -164,10 +163,8 @@ function handleFermiClick() {
 
       </div>
 
-      <div class="text-center mt-8">
-        <button @click="showFeedbackModal = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 bg-white text-neutral-600 text-sm font-medium shadow-sm hover:shadow-md hover:border-primary-300 hover:text-primary-600 transition-all cursor-pointer">
-          📣 Dame tu opinión
-        </button>
+      <div class="mt-8">
+        <FeedbackButton />
       </div>
 
       <div class="text-center mt-4 text-sm text-neutral-500">
