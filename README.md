@@ -41,6 +41,6 @@ Este estudio es parte de mi Trabajo de Fin de Máster en el Máster de Educació
 [//]: # (</figure>)
 
 <figure style="text-align:center;">
-  <img width="600" src="assets/fermi_and_sheriff.png" alt="Fermi y Sheriff discutiendo órdenes de magnitud">
+  <img width="600" src="public/fermi_and_sheriff.png" alt="Fermi y Sheriff discutiendo órdenes de magnitud">
   <figcaption style="font-style:italic; margin-top:0.5rem;">Fermi: "¿Cuántos pelos tienes en la cabeza?" — Sheriff: "Déjame pensar... Cien mil?"</figcaption>
 </figure>
