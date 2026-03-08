@@ -29,7 +29,7 @@ function handleDownload() {
 
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-neutral-800">
-          Hola Profesor <span class="text-4xl">👩‍🏫</span>
+          Hola Profe <span class="text-4xl">👩‍🏫</span>
         </h1>
       </div>
 
@@ -39,7 +39,7 @@ function handleDownload() {
             En el siguiente PDF encontrarás:
           </p>
           <ul class="text-sm text-neutral-600 list-disc list-inside mb-3">
-            <li>Instrucciones para el profesor.</li>
+            <li>Instrucciones para profesor/a.</li>
             <li>Documentos legales necesarios.</li>
             <li>4 tests diferentes A, B, C y D.</li>
           </ul>

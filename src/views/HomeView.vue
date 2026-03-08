@@ -142,7 +142,7 @@ function handleFermiClick() {
           <div class="mb-2">
             <span class="text-3xl group-hover:scale-110 transition-transform duration-300 inline-block">👩‍🏫</span>
           </div>
-          <h3 class="text-lg font-semibold text-neutral-800 mb-1">Soy Profesor</h3>
+          <h3 class="text-lg font-semibold text-neutral-800 mb-1">Soy Profe</h3>
           <p class="text-neutral-500 text-sm">Descarga los tests para tu aula</p>
         </RouterLink>
 
