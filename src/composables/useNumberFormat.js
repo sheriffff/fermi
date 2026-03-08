@@ -42,6 +42,9 @@ export function useNumberFormat() {
     for (const scale of scales) {
       if (absNum >= scale.value) {
         const scaled = absNum / scale.value
+        if (scaled === 1 && scale.value === 1e9) {
+          return `${sign}1000 millones`
+        }
         const formatted = scaled.toLocaleString('es-ES', {
           minimumFractionDigits: 0,
           maximumFractionDigits: 2

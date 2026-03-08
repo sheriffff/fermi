@@ -40,20 +40,8 @@ const binRange = computed(() => {
 
   const rMin = Math.log10(props.correctRange.min)
   const rMax = Math.log10(props.correctRange.max)
-
-  let extraLeft = BIN_SIZE
-  let extraRight = BIN_SIZE
-
-  if (allLogs.length) {
-    const dataMin = Math.min(...allLogs)
-    const dataMax = Math.max(...allLogs)
-    extraLeft = Math.max(rMin - dataMin, BIN_SIZE)
-    extraRight = Math.max(dataMax - rMax, BIN_SIZE)
-  }
-
-  const extra = Math.max(extraLeft, extraRight)
-  const finalMin = Math.floor((rMin - extra) / BIN_SIZE) * BIN_SIZE
-  const finalMax = Math.ceil((rMax + extra) / BIN_SIZE) * BIN_SIZE
+  const finalMin = Math.floor((rMin - 3) / BIN_SIZE) * BIN_SIZE
+  const finalMax = Math.ceil((rMax + 3) / BIN_SIZE) * BIN_SIZE
   return { min: finalMin, max: finalMax }
 })
 
@@ -74,7 +62,7 @@ const maxCount = computed(() => Math.max(...bins.value.map(b => b.count), 1))
 
 const W = 560
 const H = 170
-const PAD = { top: 20, right: 12, bottom: 36, left: 12 }
+const PAD = { top: 20, right: 12, bottom: 48, left: 12 }
 const chartW = W - PAD.left - PAD.right
 const chartH = H - PAD.top - PAD.bottom
 
@@ -106,7 +94,7 @@ const xTicks = computed(() => {
   const { min, max } = binRange.value
   const ticks = []
   for (let p = Math.ceil(min); p <= Math.floor(max); p++) {
-    ticks.push({ x: logToX(p), label: formatTick(Math.pow(10, p)) })
+    ticks.push({ x: logToX(p), label: formatTick(Math.pow(10, p)), exp: p })
   }
   return ticks
 })
@@ -114,6 +102,18 @@ const xTicks = computed(() => {
 const userLogError = computed(() => {
   if (!props.userAnswer || !props.correctRange) return null
   return computeLogError(props.userAnswer)
+})
+
+const userIsCorrect = computed(() => {
+  if (!props.userAnswer || !props.correctRange) return null
+  return props.userAnswer >= props.correctRange.min && props.userAnswer <= props.correctRange.max
+})
+
+const percentCorrect = computed(() => {
+  if (!props.correctRange || !validResponses.value.length) return null
+  const { min, max } = props.correctRange
+  const correct = validResponses.value.filter(r => r >= min && r <= max).length
+  return Math.round((correct / validResponses.value.length) * 100)
 })
 
 const percentileWorse = computed(() => {
@@ -136,17 +136,23 @@ const percentileWorse = computed(() => {
 
     <div class="bg-neutral-50 rounded-2xl p-3">
       <svg :viewBox="`0 0 ${W} ${H}`" class="w-full" style="overflow: visible">
-        <!-- Correct range band -->
-        <rect
-          v-if="correctRangeRect"
-          :x="correctRangeRect.x"
-          :y="PAD.top"
-          :width="correctRangeRect.width"
-          :height="chartH"
-          fill="#bbf7d0"
-          rx="3"
-        />
-
+        <defs>
+          <linearGradient id="rangeHalo" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="#22c55e" stop-opacity="0"/>
+            <stop offset="25%"  stop-color="#22c55e" stop-opacity="0.28"/>
+            <stop offset="50%"  stop-color="#22c55e" stop-opacity="0.38"/>
+            <stop offset="75%"  stop-color="#22c55e" stop-opacity="0.28"/>
+            <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="fadeLeft" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="#f5f5f5" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#f5f5f5" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="fadeRight" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="#f5f5f5" stop-opacity="0"/>
+            <stop offset="100%" stop-color="#f5f5f5" stop-opacity="1"/>
+          </linearGradient>
+        </defs>
         <!-- Bars -->
         <rect
           v-for="(bar, i) in barsData"
@@ -155,11 +161,25 @@ const percentileWorse = computed(() => {
           :width="bar.width"
           :y="bar.count === 0 ? PAD.top + chartH : bar.y"
           :height="bar.count === 0 ? 0 : bar.height"
-          :fill="bar.isUserBin ? '#0ea5e9' : '#c4c4c4'"
+          fill="#c4c4c4"
           rx="2"
           class="histogram-bar"
           :style="{ animationDelay: `${i * 30}ms` }"
         />
+
+        <!-- Correct range band (halo, sin borde) -->
+        <rect
+          v-if="correctRangeRect"
+          :x="correctRangeRect.x"
+          :y="0"
+          :width="correctRangeRect.width"
+          :height="PAD.top + chartH"
+          fill="url(#rangeHalo)"
+        />
+
+        <!-- Edge fades -->
+        <rect :x="PAD.left" :y="PAD.top" :width="chartW * 0.12" :height="chartH" fill="url(#fadeLeft)" />
+        <rect :x="PAD.left + chartW * 0.88" :y="PAD.top" :width="chartW * 0.12" :height="chartH" fill="url(#fadeRight)" />
 
         <!-- User answer vertical line -->
         <line
@@ -214,6 +234,14 @@ const percentileWorse = computed(() => {
             fill="#737373"
             font-family="system-ui, sans-serif"
           >{{ tick.label }}</text>
+          <text
+            :x="tick.x"
+            :y="PAD.top + chartH + 29"
+            text-anchor="middle"
+            font-size="10"
+            fill="#888888"
+            font-family="system-ui, sans-serif"
+          >10<tspan dy="-4" font-size="7">{{ tick.exp }}</tspan></text>
         </g>
       </svg>
     </div>
@@ -235,8 +263,23 @@ const percentileWorse = computed(() => {
     </div>
 
     <!-- Percentile message -->
-    <div v-if="percentileWorse !== null" class="text-center text-sm text-neutral-500 pt-1">
-      El <span class="font-bold text-neutral-700">{{ percentileWorse }}%</span> de jugadores lo hizo peor que tú
+    <div class="text-center text-sm text-neutral-500 pt-1 space-y-0.5">
+      <div v-if="percentCorrect !== null">
+        <template v-if="userIsCorrect">
+          Esta pregunta la acertáis tan solo el <span class="font-bold text-neutral-700">{{ percentCorrect }}%</span> de jugadores!
+        </template>
+        <template v-else>
+          Esta pregunta la acierta sólo el <span class="font-bold text-neutral-700">{{ percentCorrect }}%</span> de los jugadores.
+        </template>
+      </div>
+      <div v-if="!userIsCorrect && percentileWorse !== null">
+        <template v-if="percentileWorse >= 30">
+          Tú no acertaste. Aun así, lo hiciste mejor que el <span class="font-bold text-neutral-700">{{ percentileWorse }}%</span> de jugadores.
+        </template>
+        <template v-else>
+          Tú no acertaste. De hecho, lo hiciste peor que el <span class="font-bold text-neutral-700">{{ 100 - percentileWorse }}%</span> de jugadores.
+        </template>
+      </div>
     </div>
   </div>
 </template>

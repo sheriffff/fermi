@@ -54,6 +54,11 @@ const routes = [
         path: 'dificultad',
         name: 'admin-dificultad',
         component: () => import('@/views/AdminDificultadView.vue')
+      },
+      {
+        path: 'histograma',
+        name: 'admin-histograma',
+        component: () => import('@/views/AdminHistogramTestView.vue')
       }
     ]
   },
