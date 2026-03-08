@@ -69,8 +69,8 @@ const metadata = ref({
   codigoPersonal: '',
   email: '',
   piVsE: '',
-  mismoTest: false,
-  segundaVez: false,
+  mismoTest: null,
+  segundaVez: null,
   modelosYaHechos: []
 })
 
@@ -124,7 +124,7 @@ const isMetadataValid = computed(() => {
   if (m.mismoTest) {
     return basicValid && modeloOptions.value.includes(codigoGrupoInput.value)
   }
-  if (m.segundaVez) {
+  if (m.segundaVez === true) {
     return basicValid && m.modelosYaHechos.length > 0
   }
   return basicValid
@@ -270,7 +270,7 @@ async function startTest() {
 
     if (metadata.value.mismoTest) {
       modelo = codigoGrupoInput.value
-    } else if (metadata.value.segundaVez && metadata.value.modelosYaHechos.length > 0) {
+    } else if (metadata.value.segundaVez === true && metadata.value.modelosYaHechos.length > 0) {
       const modelosDisponibles = availableTests.filter(
         m => !metadata.value.modelosYaHechos.includes(m)
       )
@@ -410,8 +410,8 @@ async function finishTest() {
           <form @submit.prevent="startTest" class="space-y-4">
 
             <div class="card space-y-5">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
+              <div class="grid grid-cols-3 gap-4">
+                <div class="col-span-1">
                   <label class="label">Edad</label>
                   <select v-model="metadata.edad" class="select" required>
                     <option value="" disabled>—</option>
@@ -424,7 +424,7 @@ async function finishTest() {
                     </option>
                   </select>
                 </div>
-                <div>
+                <div class="col-span-2">
                   <label class="label">Alias <span class="font-normal text-neutral-400">(opcional)</span></label>
                   <input
                     v-model="metadata.codigoPersonal"
@@ -434,7 +434,7 @@ async function finishTest() {
                     maxlength="20"
                   />
                   <p class="text-sm text-neutral-400 mt-1.5 italic">
-                    Por si quieres encontrarte más tarde en la tabla de resultados.
+                    Para encontrarte más tarde entre los resultados.
                   </p>
                 </div>
               </div>
@@ -479,86 +479,66 @@ async function finishTest() {
               </div>
             </div>
 
-            <!-- Mismo test que amigos -->
-            <div class="card space-y-3">
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  v-model="metadata.mismoTest"
-                  class="w-5 h-5 rounded text-primary-500"
-                />
-                <span class="text-neutral-700 font-medium">
-                  Estoy con amigos y queremos hacer el mismo test
-                </span>
-              </label>
+            <!-- Solo / Amigos + Segunda vez -->
+            <div class="card space-y-4">
+              <div class="flex gap-2">
+                <label v-for="opt in [{ value: false, label: 'Estoy sol@' }, { value: true, label: 'Estoy acompañad@' }]" :key="String(opt.value)" class="flex-1 cursor-pointer">
+                  <input type="radio" v-model="metadata.mismoTest" :value="opt.value" class="sr-only peer" />
+                  <div class="text-center py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
+                    {{ opt.label }}
+                  </div>
+                </label>
+              </div>
 
               <Transition name="fade">
-                <div v-if="metadata.mismoTest" class="ml-8 space-y-3 pt-1">
+                <div v-if="metadata.mismoTest === false" class="space-y-3">
+                  <p class="text-sm font-medium text-neutral-700">¿Ya hiciste el test antes?</p>
+
+                  <div class="flex gap-2">
+                    <label v-for="opt in [{ value: true, label: 'Sí' }, { value: false, label: 'No' }]" :key="String(opt.value)" class="flex-1 cursor-pointer">
+                      <input type="radio" v-model="metadata.segundaVez" :value="opt.value" class="sr-only peer" />
+                      <div class="text-center py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
+                        {{ opt.label }}
+                      </div>
+                    </label>
+                  </div>
+                  <p class="text-sm text-neutral-500 italic">Hay 4 modelos. Puedes jugar más veces.</p>
+                  <Transition name="fade">
+                    <div v-if="metadata.segundaVez === true" class="space-y-2">
+                      <label class="label">Marca cuáles hiciste ya:</label>
+                      <div class="space-y-2">
+                        <label
+                          v-for="modelo in modeloOptions"
+                          :key="modelo"
+                          class="flex items-start gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer hover:bg-neutral-50"
+                          :class="[metadata.modelosYaHechos.includes(modelo) ? 'border-primary-500 bg-primary-50' : 'border-neutral-200']"
+                        >
+                          <input type="checkbox" :checked="metadata.modelosYaHechos.includes(modelo)" @change="toggleModeloYaHecho(modelo)" class="w-5 h-5 rounded text-primary-500 mt-0.5" />
+                          <span class="flex-1">
+                            <span class="font-mono font-bold text-neutral-800 block">Modelo {{ modelo }}</span>
+                            <span class="text-xs text-neutral-500 mt-1 italic block">La P1 decía: "{{ primerasPreguntasPorModelo[modelo] }}"</span>
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  </Transition>
+                </div>
+              </Transition>
+
+              <Transition name="fade">
+                <div v-if="metadata.mismoTest === true" class="space-y-3">
+                  <p class="text-sm text-neutral-500">Cada uno hará el test por su cuenta.</p>
                   <p class="text-sm text-neutral-500">
                     Que cada uno abra esta página <span class="font-mono text-primary-600">{{ APP_URL }}</span> en su dispositivo.
                   </p>
                   <ShareButton class="w-full !justify-center btn-outline" />
-                  <p class="text-sm text-neutral-500">
-                    Elegid todos el mismo modelo.
-                  </p>
+                  <p class="text-sm text-neutral-500">Elegid todos la misma letra.</p>
                   <div class="flex gap-2">
-                    <label
-                      v-for="m in modeloOptions"
-                      :key="m"
-                      class="cursor-pointer"
-                    >
+                    <label v-for="m in modeloOptions" :key="m" class="cursor-pointer">
                       <input type="radio" v-model="codigoGrupoInput" :value="m" class="sr-only peer" />
                       <div class="w-12 text-center py-2 rounded-xl text-sm font-bold border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
                         {{ m }}
                       </div>
-                    </label>
-                  </div>
-                </div>
-              </Transition>
-            </div>
-
-            <!-- Segunda vez -->
-            <div class="card space-y-3" :class="{ 'opacity-40 pointer-events-none': metadata.mismoTest }">
-              <label class="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  v-model="metadata.segundaVez"
-                  class="w-5 h-5 rounded text-primary-500"
-                />
-                <span class="text-neutral-700 font-medium">
-                  Ya hice el test antes
-                </span>
-              </label>
-              <p class="text-sm text-neutral-400 ml-8 italic">
-                Hay 4 modelos. Puedes jugar más veces.
-              </p>
-
-              <Transition name="fade">
-                <div v-if="metadata.segundaVez" class="ml-8 space-y-3 pt-1">
-                  <label class="label">Marca cuáles hiciste ya:</label>
-                  <div class="space-y-2">
-                    <label
-                      v-for="modelo in modeloOptions"
-                      :key="modelo"
-                      class="flex items-start gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer hover:bg-neutral-50"
-                      :class="[
-                        metadata.modelosYaHechos.includes(modelo)
-                          ? 'border-primary-500 bg-primary-50'
-                          : 'border-neutral-200'
-                      ]"
-                    >
-                      <input
-                        type="checkbox"
-                        :checked="metadata.modelosYaHechos.includes(modelo)"
-                        @change="toggleModeloYaHecho(modelo)"
-                        class="w-5 h-5 rounded text-primary-500 mt-0.5"
-                      />
-                      <span class="flex-1">
-                        <span class="font-mono font-bold text-neutral-800 block">Modelo {{ modelo }}</span>
-                        <span class="text-xs text-neutral-500 mt-1 italic block">
-                          La P1 decía: "{{ primerasPreguntasPorModelo[modelo] }}"
-                        </span>
-                      </span>
                     </label>
                   </div>
                 </div>
