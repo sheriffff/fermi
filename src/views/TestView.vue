@@ -10,6 +10,7 @@ import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import QuestionCard from '@/components/common/QuestionCard.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
 import FeedbackButton from '@/components/common/FeedbackButton.vue'
+import ShareButton from '@/components/common/ShareButton.vue'
 import LogErrorModal from '@/components/common/LogErrorModal.vue'
 import ScribbleUpload from '@/components/adultos/ScribbleUpload.vue'
 import { useMobile } from '@/composables/useMobile'
@@ -29,7 +30,6 @@ const currentStep = ref('metadata') // 'metadata' | 'instructions' | 'test' | 'f
 const isLoading = ref(false)
 const error = ref(null)
 const savedUserId = ref(null)
-const canShare = !!navigator.share
 const showLogErrorModal = ref(false)
 const showUpload = ref(false)
 const timerVisible = ref(false)
@@ -53,30 +53,6 @@ function logErrValueClass(r) {
   if (r.logErr === null) return 'text-neutral-800'
   if (r.logErr < 1) return 'text-amber-800'
   return 'text-red-800'
-}
-
-async function shareLink() {
-  try {
-    await navigator.share({
-      title: '¡Juguemos a Estimar!',
-      text: 'Acabo de hacer un test de estimación de cantidades muy entretenido. ¿Te animas?',
-      url: APP_URL
-    })
-  } catch (e) {
-    // user cancelled share
-  }
-}
-
-async function shareGroup() {
-  try {
-    await navigator.share({
-      title: '¡Juguemos a Estimar!',
-      text: 'Abrid este enlace cada uno en vuestro dispositivo. Elegid el mismo modelo y hacemos el mismo test.',
-      url: APP_URL
-    })
-  } catch (e) {
-    // user cancelled share
-  }
 }
 
 
@@ -521,14 +497,7 @@ async function finishTest() {
                   <p class="text-sm text-neutral-500">
                     Que cada uno abra esta página <span class="font-mono text-primary-600">{{ APP_URL }}</span> en su dispositivo.
                   </p>
-                  <button
-                    v-if="canShare"
-                    type="button"
-                    @click="shareGroup"
-                    class="btn-outline w-full"
-                  >
-                    📤 Compartir enlace con el grupo
-                  </button>
+                  <ShareButton class="w-full !justify-center btn-outline" />
                   <p class="text-sm text-neutral-500">
                     Elegid todos el mismo modelo.
                   </p>
@@ -694,13 +663,7 @@ async function finishTest() {
                 <span class="text-sm font-medium">📸 Sube una foto de tu hoja en sucio!</span>
                 <span class="text-xs text-neutral-400 font-normal">Me gusta ver cómo habéis calculado</span>
               </button>
-              <button
-                v-if="canShare"
-                @click="shareLink"
-                class="btn-primary btn-large w-full max-w-xs"
-              >
-                📤 Comparte con un amigo
-              </button>
+              <ShareButton />
               <FeedbackButton />
             </div>
           </div>

@@ -3,6 +3,7 @@ import { RouterLink } from 'vue-router'
 import { ref } from 'vue'
 import ImageModal from '@/components/common/ImageModal.vue'
 import FeedbackButton from '@/components/common/FeedbackButton.vue'
+import ShareButton from '@/components/common/ShareButton.vue'
 import ResultsModal from '@/components/common/ResultsModal.vue'
 
 import { useRouter } from 'vue-router'
@@ -169,7 +170,8 @@ function handleFermiClick() {
 
       </div>
 
-      <div class="mt-8">
+      <div class="mt-8 flex flex-col items-center gap-3">
+        <ShareButton />
         <FeedbackButton />
       </div>
 
