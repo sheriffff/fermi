@@ -28,7 +28,7 @@ const emit = defineEmits(['close'])
 
           <figure class="text-center">
             <img
-              src="/fermi_and_sheriff.png"
+              src="/fermi_and_sheriff.jpg"
               alt="Fermi y Sheriff discutiendo órdenes de magnitud"
               class="w-full rounded-lg shadow-md"
             />
