@@ -39,6 +39,8 @@ def main():
 
         rows.append((table, count, latest))
 
+    rows.sort(key=lambda r: r[2] if r[2] != "—" else "", reverse=True)
+
     col_w = [max(len(r[i]) for r in rows) for i in range(3)]
     col_w[0] = max(col_w[0], len("Table"))
     col_w[1] = max(col_w[1], len("Rows"))
