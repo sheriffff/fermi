@@ -280,7 +280,7 @@ async function handleSubmit() {
             </div>
           </template>
 
-          <template v-if="hasRange && (isLoadingResponses || playResponses.length >= 5)">
+          <template v-if="hasRange && !skipped && (isLoadingResponses || playResponses.length >= 5)">
             <div class="border-t border-neutral-100 pt-5">
               <div v-if="isLoadingResponses" class="text-center py-4 text-sm text-neutral-400">
                 Cargando distribución...
