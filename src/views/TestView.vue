@@ -629,19 +629,18 @@ async function finishTest() {
 
             <div class="flex flex-col items-center gap-3">
               <button
+                v-if="savedUserId"
+                @click="showUpload = true"
+                class="btn-outline btn-large w-full max-w-xs"
+              >
+                📸 Sube una foto de tu hoja en sucio!
+              </button>
+              <button
                 v-if="!showResults"
                 @click="showResults = true"
                 class="btn-outline btn-large w-full max-w-xs"
               >
                 📝 Ver respuestas correctas
-              </button>
-              <button
-                v-if="savedUserId"
-                @click="showUpload = true"
-                class="btn-outline w-full max-w-xs flex flex-col items-center gap-0.5 py-3 px-5"
-              >
-                <span class="text-sm font-medium">📸 Sube una foto de tu hoja en sucio!</span>
-                <span class="text-xs text-neutral-400 font-normal">Me gusta ver cómo habéis calculado</span>
               </button>
               <ShareButton />
               <FeedbackButton />
