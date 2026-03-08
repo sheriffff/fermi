@@ -336,6 +336,17 @@ export async function getAllScribbleUrls() {
   return signed.map((s, i) => ({ url: s.signedUrl, created_at: data[i].created_at }))
 }
 
+export async function getPlayResponses(idPlayQuestion) {
+  const { data, error } = await supabase
+    .from('responses_play_random')
+    .select('response')
+    .eq('id_play_question', idPlayQuestion)
+    .not('response', 'is', null)
+
+  if (error) throw error
+  return data.map(r => r.response).filter(r => r > 0)
+}
+
 export async function getActivityByDay(days = 14) {
   const since = new Date()
   since.setDate(since.getDate() - days)

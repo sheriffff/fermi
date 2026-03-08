@@ -4,9 +4,10 @@ import { RouterLink } from 'vue-router'
 import { useNumberFormat } from '@/composables/useNumberFormat'
 import { useTimer } from '@/composables/useTimer'
 import { getRandomPlayQuestion } from '@/lib/questions'
-import { savePlayResponse } from '@/lib/supabase'
+import { savePlayResponse, getPlayResponses } from '@/lib/supabase'
 import QuestionCard from '@/components/common/QuestionCard.vue'
 import LogErrorModal from '@/components/common/LogErrorModal.vue'
+import ResponseHistogram from '@/components/common/ResponseHistogram.vue'
 import { useMobile } from '@/composables/useMobile'
 import { colors, getDifficulty } from '@/config/difficulties.js'
 
@@ -24,6 +25,8 @@ const questionCardRef = ref(null)
 const showLogErrorModal = ref(false)
 const timerShaking = ref(false)
 const warningPlayed = ref(false)
+const playResponses = ref([])
+const isLoadingResponses = ref(false)
 
 const { formatNumber, formatRange, cleanInput } = useNumberFormat()
 const { formattedTime, seconds: timeRemaining, start: startTimer, stop: stopTimer, reset: resetTimer, getElapsedTime } = useTimer(QUESTION_TIME, () => {})
@@ -127,15 +130,28 @@ async function getNewQuestion() {
   skipped.value = false
   isLoading.value = false
   warningPlayed.value = false
+  playResponses.value = []
   timerShaking.value = false
   resetTimer(QUESTION_TIME)
   startTimer()
 }
 
-function handleSkip() {
+async function fetchResponses(id) {
+  isLoadingResponses.value = true
+  try {
+    playResponses.value = await getPlayResponses(id)
+  } catch (e) {
+    console.error('Error cargando respuestas:', e)
+  } finally {
+    isLoadingResponses.value = false
+  }
+}
+
+async function handleSkip() {
   stopTimer()
   skipped.value = true
   showResult.value = true
+  fetchResponses(currentQuestion.value.id)
 }
 
 onMounted(() => {
@@ -157,6 +173,7 @@ async function handleSubmit() {
   } catch (e) {
     console.error('Error guardando respuesta play:', e)
   }
+  fetchResponses(currentQuestion.value.id)
 }
 </script>
 
@@ -182,8 +199,9 @@ async function handleSubmit() {
         <template v-else>
         <div v-if="!showResult" class="space-y-6">
           <div class="flex items-center justify-between">
-            <span v-if="currentDifficulty" class="text-xs font-semibold px-2.5 py-1 rounded-full" :class="colors[currentDifficulty.color].badge">
-              {{ currentDifficulty.level }}
+            <span v-if="currentDifficulty">
+              <span class="text-xs text-neutral-400 mr-1.5">Dificultad:</span>
+              <span class="text-xs font-semibold px-2.5 py-1 rounded-full" :class="colors[currentDifficulty.color].badge">{{ currentDifficulty.level }}</span>
             </span>
             <span v-else></span>
             <span class="timer-toggle" :class="{ 'timer-shaking': timerShaking }">
@@ -261,7 +279,21 @@ async function handleSubmit() {
               </div>
             </div>
           </template>
-          
+
+          <template v-if="hasRange && (isLoadingResponses || playResponses.length >= 5)">
+            <div class="border-t border-neutral-100 pt-5">
+              <div v-if="isLoadingResponses" class="text-center py-4 text-sm text-neutral-400">
+                Cargando distribución...
+              </div>
+              <ResponseHistogram
+                v-else
+                :responses="playResponses"
+                :user-answer="skipped ? null : answerNum"
+                :correct-range="correctRange"
+              />
+            </div>
+          </template>
+
           <button
             @click="getNewQuestion"
             class="btn-primary btn-large w-full"
