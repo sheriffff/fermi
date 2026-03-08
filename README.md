@@ -12,8 +12,8 @@ por [Manuel López Sheriff](https://www.linkedin.com/in/sheriff-data)
  - **¿Cuántos litros de agua se consumen en España al día?**
  - **¿Cuántos españoles se llaman Alberto, son valencianos, y miden más de 1.90?**
 
-Este tipo de problemas son históricamente conocidos como [Problemas de Fermi](https://es.wikipedia.org/wiki/Problema_de_Fermi); 
-por Enrico Fermi, de los pocos grandes físicos teóricos y a su vez experimentales de la historia.
+Este tipo de problemas son históricamente conocidos como [Problemas de Fermi](https://es.wikipedia.org/wiki/Problema_de_Fermi). 
+Enrico Fermi fue uno de los pocos grandes físicos teóricos y a su vez experimentales de la historia.
 
 ---
 

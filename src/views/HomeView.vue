@@ -94,7 +94,8 @@ function handleFermiClick() {
                 — ¿Cuánta leche produce una vaca en su vida?
               </p>
               <p class="text-neutral-600 leading-relaxed mb-7">
-                Este tipo de problemas de estimación son conocidos como <a href="https://es.wikipedia.org/wiki/Problema_de_Fermi" target="_blank" class="text-primary-600 hover:underline">Problemas de Fermi</a>, uno de los pocos grandes físicos teóricos y a la vez experimentales de la historia.
+                Este tipo de problemas de estimación son históricamente conocidos como <a href="https://es.wikipedia.org/wiki/Problema_de_Fermi" target="_blank" class="text-primary-600 hover:underline">Problemas de Fermi</a>.
+                Enrico Fermi fue uno de los pocos grandes físicos teóricos y a la vez experimentales de la historia.
               </p>
               <p class="text-neutral-600 leading-relaxed">
                 Esta aplicación web la hice para que tú juegues a estimar cantidades. Y la desarrollo en paralelo a otro
