@@ -49,6 +49,11 @@ const routes = [
         path: 'exportar',
         name: 'admin-exportar',
         component: () => import('@/views/AdminExportView.vue')
+      },
+      {
+        path: 'dificultad',
+        name: 'admin-dificultad',
+        component: () => import('@/views/AdminDificultadView.vue')
       }
     ]
   },

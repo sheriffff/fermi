@@ -23,7 +23,8 @@ async function loadExcel() {
         texto: row[col('question')],
         p05: hasRange ? p05 : null,
         p95: hasRange ? p95 : null,
-        difficulty: row[col('difficulty')] != null ? Number(row[col('difficulty')]) : null
+        difficulty: row[col('difficulty')] != null ? Number(row[col('difficulty')]) : null,
+        elo: row[col('elo')] != null ? Number(row[col('elo')]) : null
       }
     })
 
@@ -82,6 +83,12 @@ export async function getRandomQuestion() {
 export async function getAvailableTests() {
   const { tests } = await loadExcel()
   return Object.keys(tests).sort()
+}
+
+export async function getQuestionsInTests() {
+  const { questions, tests } = await loadExcel()
+  const testIds = new Set(Object.values(tests).flat())
+  return questions.filter(q => testIds.has(q.id))
 }
 
 export async function getRandomPlayQuestion() {

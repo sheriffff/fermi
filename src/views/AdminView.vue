@@ -30,7 +30,8 @@ async function handleLogin() {
 const hubLinks = [
   { to: '/admin/datos', label: 'Insertar Datos', desc: 'Entrada de exámenes en papel', icon: '📝' },
   { to: '/admin/metricas', label: 'Métricas', desc: 'Resumen de datos en Supabase', icon: '📊' },
-  { to: '/admin/exportar', label: 'Exportar CSV', desc: 'Descarga tablas y vistas', icon: '📥' }
+  { to: '/admin/exportar', label: 'Exportar CSV', desc: 'Descarga tablas y vistas', icon: '📥' },
+  { to: '/admin/dificultad', label: 'Votar Dificultad', desc: 'Ranking por comparación por pares', icon: '⚖️' }
 ]
 </script>
 
