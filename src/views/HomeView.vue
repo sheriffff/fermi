@@ -49,8 +49,11 @@ function handleFermiClick() {
         <h1 class="text-2xl sm:text-4xl font-bold text-neutral-800 mb-4">
           <span aria-hidden="true">🎯 </span>Gymkana de <span @click.prevent="handleFermiClick" class="cursor-default select-none">Fermi</span><span aria-hidden="true"> 🎯</span>
         </h1>
-        <p class="text-xl text-neutral-600 leading-relaxed mb-3">
+        <p class="text-xl text-neutral-600 leading-relaxed mb-1">
           Explorando el arte de estimar
+        </p>
+        <p class="text-sm text-neutral-400 mb-3">
+          <span @click.prevent="handlePorClick" class="cursor-default select-none">por</span> <a href="https://www.linkedin.com/in/sheriff-data" target="_blank" class="text-primary-500 hover:underline">Manuel López Sheriff</a>
         </p>
         <div class="flex justify-center gap-3">
           <button @click="showInfoModal = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 bg-white text-neutral-600 text-sm font-medium shadow-sm hover:shadow-md hover:border-primary-300 hover:text-primary-600 transition-all cursor-pointer">
@@ -170,9 +173,6 @@ function handleFermiClick() {
         <FeedbackButton />
       </div>
 
-      <div class="text-center mt-4 text-sm text-neutral-500">
-        <span @click.prevent="handlePorClick" class="cursor-default select-none">por</span> <a href="https://www.linkedin.com/in/sheriff-data" target="_blank" class="text-primary-600 hover:underline">Manuel López Sheriff</a>
-      </div>
     </div>
   </div>
 </template>
