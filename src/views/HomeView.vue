@@ -52,7 +52,7 @@ function handleFermiClick() {
         <p class="text-xl text-neutral-600 leading-relaxed mb-1">
           Explorando el arte de estimar
         </p>
-        <p class="text-sm text-neutral-400 mb-3">
+        <p class="text-sm text-neutral-400 mt-2 mb-5">
           <span @click.prevent="handlePorClick" class="cursor-default select-none">por</span> <a href="https://www.linkedin.com/in/sheriff-data" target="_blank" class="text-primary-500 hover:underline">Manuel López Sheriff</a>
         </p>
         <div class="flex justify-center gap-3">
