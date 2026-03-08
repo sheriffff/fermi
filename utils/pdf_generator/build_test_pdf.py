@@ -38,14 +38,16 @@ def load_test_questions(test_id):
     t_headers = [tests_sheet.cell(1, col).value for col in range(1, tests_sheet.max_column + 1)]
     col_test = t_headers.index('test') + 1
     col_q_id = t_headers.index('id_question') + 1
+    col_q_num = t_headers.index('question_number') + 1
 
-    test_questions = []
+    test_entries = []
     for i in range(2, tests_sheet.max_row + 1):
         t_id = tests_sheet.cell(i, col_test).value
         q_id = tests_sheet.cell(i, col_q_id).value
+        q_num = tests_sheet.cell(i, col_q_num).value
         if t_id == test_id and q_id is not None:
-            question_text = questions.get(q_id, 'NOT FOUND')
-            test_questions.append(question_text)
+            test_entries.append((q_num, questions.get(q_id, 'NOT FOUND')))
+    test_questions = [text for _, text in sorted(test_entries, key=lambda x: x[0])]
 
     return test_questions
 

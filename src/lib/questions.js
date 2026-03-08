@@ -33,12 +33,15 @@ async function loadExcel() {
   const tCol = name => tHeaders.indexOf(name)
   const tests = {}
 
+  const testEntries = {}
   for (const row of testsRaw.slice(1)) {
     const testId = row[tCol('test')]
-    if (!tests[testId]) {
-      tests[testId] = []
-    }
-    tests[testId].push(row[tCol('id_question')])
+    if (!testEntries[testId]) testEntries[testId] = []
+    testEntries[testId].push({ questionId: row[tCol('id_question')], number: row[tCol('question_number')] })
+  }
+  for (const testId of Object.keys(testEntries)) {
+    testEntries[testId].sort((a, b) => a.number - b.number)
+    tests[testId] = testEntries[testId].map(e => e.questionId)
   }
 
   questionsCache = { questions, tests }
