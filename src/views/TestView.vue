@@ -529,10 +529,10 @@ async function finishTest() {
                 <div v-if="metadata.mismoTest === true" class="space-y-3">
                   <p class="text-sm text-neutral-500">Cada uno hará el test por su cuenta.</p>
                   <p class="text-sm text-neutral-500">
-                    Que cada uno abra esta página <span class="font-mono text-primary-600">{{ APP_URL }}</span> en su dispositivo.
+                    Que cada uno acceda al test en su dispositivo.
                   </p>
                   <ShareButton class="w-full !justify-center btn-outline" />
-                  <p class="text-sm text-neutral-500">Elegid todos la misma letra.</p>
+                  <p class="text-sm text-neutral-500">Simplemente, elegid todos la misma letra para aseguraros de hacer el mismo test.</p>
                   <div class="flex gap-2">
                     <label v-for="m in modeloOptions" :key="m" class="cursor-pointer">
                       <input type="radio" v-model="codigoGrupoInput" :value="m" class="sr-only peer" />
