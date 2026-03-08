@@ -24,9 +24,9 @@ def load_test_questions(test_id):
     tests_sheet = wb['tests']
     questions_sheet = wb['questions']
 
-    headers = [questions_sheet.cell(1, col).value for col in range(1, questions_sheet.max_column + 1)]
-    col_id = headers.index('id_question') + 1
-    col_text = headers.index('question') + 1
+    q_headers = [questions_sheet.cell(1, col).value for col in range(1, questions_sheet.max_column + 1)]
+    col_id = q_headers.index('id_question') + 1
+    col_text = q_headers.index('question') + 1
 
     questions = {}
     for i in range(2, questions_sheet.max_row + 1):
@@ -35,10 +35,14 @@ def load_test_questions(test_id):
         if q_id is not None and text:
             questions[q_id] = text
 
+    t_headers = [tests_sheet.cell(1, col).value for col in range(1, tests_sheet.max_column + 1)]
+    col_test = t_headers.index('test') + 1
+    col_q_id = t_headers.index('id_question') + 1
+
     test_questions = []
     for i in range(2, tests_sheet.max_row + 1):
-        t_id = tests_sheet.cell(i, 1).value
-        q_id = tests_sheet.cell(i, 2).value
+        t_id = tests_sheet.cell(i, col_test).value
+        q_id = tests_sheet.cell(i, col_q_id).value
         if t_id == test_id and q_id is not None:
             question_text = questions.get(q_id, 'NOT FOUND')
             test_questions.append(question_text)

@@ -35,5 +35,5 @@ export const testDifficulties = [
 
 export function getDifficulty(d) {
   if (d == null) return null
-  return testDifficulties[Math.min(Math.max(Math.ceil(d) - 1, 0), testDifficulties.length - 1)]
+  return testDifficulties[d - 1] ?? null
 }
