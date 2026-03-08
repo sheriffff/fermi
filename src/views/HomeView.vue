@@ -125,6 +125,17 @@ function handleFermiClick() {
       <!-- Acciones secundarias -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <RouterLink
+          to="/random"
+          class="flex flex-col items-center justify-center bg-white rounded-3xl shadow-lg border border-neutral-100 p-4 md:p-5 group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
+        >
+          <div class="mb-2">
+            <span class="text-3xl group-hover:scale-110 transition-transform duration-300 inline-block">🎲</span>
+          </div>
+          <h3 class="text-lg font-semibold text-neutral-800 mb-1">Pregunta Rápida</h3>
+          <p class="text-neutral-500 text-sm">Prueba!</p>
+        </RouterLink>
+
+        <RouterLink
           to="/profe"
           class="flex flex-col items-center justify-center bg-white rounded-3xl shadow-lg border border-neutral-100 p-4 md:p-5 group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
         >
@@ -144,17 +155,6 @@ function handleFermiClick() {
           </div>
           <h3 class="text-lg font-semibold text-neutral-800 mb-1">Soy Padre / Madre</h3>
           <p class="text-neutral-500 text-sm">Ideas para jugar en familia</p>
-        </RouterLink>
-
-        <RouterLink
-          to="/random"
-          class="flex flex-col items-center justify-center bg-white rounded-3xl shadow-lg border border-neutral-100 p-4 md:p-5 group hover:shadow-xl transition-all duration-300 cursor-pointer text-center"
-        >
-          <div class="mb-2">
-            <span class="text-3xl group-hover:scale-110 transition-transform duration-300 inline-block">🎲</span>
-          </div>
-          <h3 class="text-lg font-semibold text-neutral-800 mb-1">Pregunta Rápida</h3>
-          <p class="text-neutral-500 text-sm">Prueba!</p>
         </RouterLink>
 
         <button
