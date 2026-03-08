@@ -120,14 +120,15 @@ function toggleModeloYaHecho(modelo) {
 
 const isMetadataValid = computed(() => {
   const m = metadata.value
-  const basicValid = m.edad && m.piVsE
-  if (m.mismoTest) {
-    return basicValid && modeloOptions.value.includes(codigoGrupoInput.value)
+  if (!m.edad || !m.piVsE) return false
+  if (m.mismoTest === null) return false
+  if (m.mismoTest === true) {
+    return modeloOptions.value.includes(codigoGrupoInput.value)
   }
-  if (m.segundaVez === true) {
-    return basicValid && m.modelosYaHechos.length > 0
-  }
-  return basicValid
+  // solo
+  if (m.segundaVez === null) return false
+  if (m.segundaVez === true) return m.modelosYaHechos.length > 0
+  return true
 })
 
 // ============================================
@@ -409,7 +410,7 @@ async function finishTest() {
           <!-- Formulario -->
           <form @submit.prevent="startTest" class="space-y-4">
 
-            <div class="card space-y-5">
+            <div class="card">
               <div class="grid grid-cols-3 gap-4">
                 <div class="col-span-1">
                   <label class="label">Edad</label>
@@ -437,46 +438,45 @@ async function finishTest() {
                     Para encontrarte más tarde entre los resultados.
                   </p>
                 </div>
-              </div>
-
-              <div>
-                <label class="label">Email <span class="font-normal text-neutral-400">(opcional)</span></label>
-                <input
-                  v-model="metadata.email"
-                  type="text"
-                  class="input"
-                  placeholder="tu@email.com"
-                  maxlength="100"
-                />
-                <p class="text-sm text-neutral-400 mt-1.5 italic">
-                  Cuando publique los resultados del estudio, te aviso.
-                </p>
-              </div>
-
-              <div class="space-y-3">
-                <label class="label !mb-0">¿Qué número es más grande?</label>
-                <div class="flex flex-wrap gap-2">
-                  <label
-                    v-for="option in piVsEOptions"
-                    :key="option.value"
-                    class="flex-1 min-w-[100px] cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      v-model="metadata.piVsE"
-                      :value="option.value"
-                      class="sr-only peer"
-                      required
-                    />
-                    <div class="text-center py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
-                      {{ option.label }}
-                    </div>
-                  </label>
+                <div class="col-start-2 col-span-2">
+                  <label class="label">Email <span class="font-normal text-neutral-400">(opcional)</span></label>
+                  <input
+                    v-model="metadata.email"
+                    type="text"
+                    class="input"
+                    placeholder="tu@email.com"
+                    maxlength="100"
+                  />
+                  <p class="text-sm text-neutral-400 mt-1.5 italic">
+                    Cuando publique los resultados del estudio, te aviso.
+                  </p>
                 </div>
-                <p class="text-sm text-neutral-400 italic">
-                  Esta pregunta me ayuda a calibrar tu familiaridad con las matemáticas. No es perfecta, pero da igual.
-                </p>
               </div>
+            </div>
+
+            <div class="card space-y-3">
+              <label class="label !mb-0">¿Qué número es más grande?</label>
+              <div class="flex flex-wrap gap-2">
+                <label
+                  v-for="option in piVsEOptions"
+                  :key="option.value"
+                  class="flex-1 min-w-[100px] cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    v-model="metadata.piVsE"
+                    :value="option.value"
+                    class="sr-only peer"
+                    required
+                  />
+                  <div class="text-center py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
+                    {{ option.label }}
+                  </div>
+                </label>
+              </div>
+              <p class="text-sm text-neutral-400 italic">
+                Esta pregunta me ayuda a calibrar tu familiaridad con las matemáticas.
+              </p>
             </div>
 
             <!-- Solo / Amigos + Segunda vez -->

@@ -15,7 +15,7 @@ jobs:
           SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
         run: |
           mkdir -p backups
-          TABLES="logs_download users_online responses_online users_paper responses_paper responses_play_random feedback"
+          TABLES="logs_download users_online responses_online users_paper responses_paper responses_play_random feedback email_subscriptions"
           for TABLE in $TABLES; do
             HTTP_CODE=$(curl -s -w "%{http_code}" \
               -H "Accept: text/csv" \

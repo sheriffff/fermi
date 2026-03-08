@@ -62,7 +62,7 @@ const warningTimeText = computed(() => {
         <div class="flex gap-4 items-start">
           <span class="text-2xl">⚡</span>
           <div>
-            <p class="font-semibold text-neutral-800">¿Tienes 10 minutos?</p>
+            <p class="font-semibold text-neutral-800">¿Tienes 15 minutos?</p>
             <p class="text-sm text-neutral-500">
               Si ahora no los tienes, mejor vuelve en otro momento. Pero vuelve!
             </p>
@@ -91,16 +91,6 @@ const warningTimeText = computed(() => {
         </div>
 
         <div class="flex gap-4 items-start">
-          <span class="text-2xl">🔢</span>
-          <div>
-            <p class="font-semibold text-neutral-800">Atajos</p>
-            <p class="text-sm text-neutral-500">
-              Los botones <span class="font-mono bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded">×1000</span> y <span class="font-mono bg-secondary-100 text-secondary-600 px-1.5 py-0.5 rounded">/1000</span> multiplican o dividen tu número por 1.000. Por ejemplo: escribe «5», pulsa ×1000 dos veces → 5.000.000.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex gap-4 items-start">
           <span class="text-2xl">📝</span>
           <div>
             <p class="font-semibold text-neutral-800">Usa papel y boli</p>
@@ -123,9 +113,19 @@ const warningTimeText = computed(() => {
         <div class="flex gap-4 items-start">
           <span class="text-2xl">🎯</span>
           <div>
-            <p class="font-semibold text-neutral-800">Esto no es un examen.</p>
+            <p class="font-semibold text-neutral-800">Esto no es un examen</p>
             <p class="text-sm text-neutral-500">
               Y es anónimo. No busques información. Disfruta!
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-4 items-start">
+          <span class="text-2xl">💡</span>
+          <div>
+            <p class="font-semibold text-neutral-800">No hay una única respuesta correcta</p>
+            <p class="text-sm text-neutral-500">
+              Se trata de estimar. Un valor aproximado es suficiente.
             </p>
           </div>
         </div>
