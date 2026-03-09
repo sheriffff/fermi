@@ -13,6 +13,7 @@ import InstructionsCard from '@/components/common/InstructionsCard.vue'
 import FeedbackButton from '@/components/common/FeedbackButton.vue'
 import ShareButton from '@/components/common/ShareButton.vue'
 import LogErrorModal from '@/components/common/LogErrorModal.vue'
+import ScoreExplanationModal from '@/components/common/ScoreExplanationModal.vue'
 import ScribbleUpload from '@/components/adultos/ScribbleUpload.vue'
 import { useMobile } from '@/composables/useMobile'
 
@@ -32,6 +33,7 @@ const isLoading = ref(false)
 const error = ref(null)
 const savedUserId = ref(null)
 const showLogErrorModal = ref(false)
+const showScoreModal = ref(false)
 const showUpload = ref(false)
 const timerVisible = ref(false)
 
@@ -662,6 +664,26 @@ async function fetchAllResponses() {
 
         <div v-else-if="currentStep === 'finished'" key="finished" class="text-center">
 
+          <!-- Score card: shown as soon as population data loads, before everything else -->
+          <Transition name="fade">
+            <div v-if="finalScore || isLoadingResponses" class="card text-center mb-4">
+              <template v-if="finalScore">
+                <p class="text-sm text-neutral-500 mb-1">Tu nota</p>
+                <p class="text-5xl font-bold text-primary-600">{{ finalScore }}</p>
+                <p class="text-xs text-neutral-400 mt-1">/ 10 · basada en tu percentil vs la población</p>
+                <button
+                  @click="showScoreModal = true"
+                  class="mt-3 text-xs text-primary-500 hover:text-primary-700 underline underline-offset-2 transition-colors"
+                >
+                  ¿Cómo se calcula la nota?
+                </button>
+              </template>
+              <template v-else>
+                <p class="text-sm text-neutral-400">Calculando tu nota...</p>
+              </template>
+            </div>
+          </Transition>
+
           <div class="card-elevated py-12">
             <div class="text-6xl mb-6">🎉</div>
 
@@ -717,11 +739,6 @@ async function fetchAllResponses() {
 
           <Transition name="fade">
             <div v-if="showResults" class="mt-6 text-left">
-              <div v-if="finalScore" class="card text-center mb-4">
-                <p class="text-sm text-neutral-500 mb-1">Tu nota</p>
-                <p class="text-5xl font-bold text-primary-600">{{ finalScore }}</p>
-                <p class="text-xs text-neutral-400 mt-1">/ 10 · basada en tu percentil vs la población</p>
-              </div>
               <div class="space-y-3">
                 <div
                   v-for="r in resultsData"
@@ -771,6 +788,7 @@ async function fetchAllResponses() {
           </Transition>
 
           <LogErrorModal :show="showLogErrorModal" @close="showLogErrorModal = false" />
+          <ScoreExplanationModal :show="showScoreModal" @close="showScoreModal = false" />
 
         </div>
       </Transition>
