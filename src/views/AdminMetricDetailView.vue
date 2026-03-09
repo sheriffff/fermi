@@ -16,9 +16,9 @@ const scribbleUrls = ref([])
 const TABLE_CONFIG = {
   users_online: {
     label: 'Test Online',
-    select: 'user_alias, device_type, created_at',
-    columns: ['created_at', 'device_type', 'user_alias'],
-    columnLabels: ['Fecha', 'Dispositivo', 'Alias'],
+    select: 'user_alias, device_type, email, created_at',
+    columns: ['created_at', 'device_type', 'user_alias', 'email'],
+    columnLabels: ['Fecha', 'Dispositivo', 'Alias', 'Email'],
     hasCharts: true,
     hasDeviceChart: true
   },
@@ -149,49 +149,57 @@ onMounted(async () => {
     <div v-else-if="error" class="text-center py-12 text-red-500">{{ error }}</div>
 
     <div v-else class="space-y-8">
-      <!-- Recent rows table -->
-      <div v-if="config.columns && recentRows.length" class="card overflow-x-auto">
-        <h3 class="text-sm font-semibold text-neutral-500 mb-3">Últimos 10</h3>
-        <table class="text-sm">
-          <thead>
-            <tr>
-              <th v-for="(label, i) in config.columnLabels" :key="i" class="text-left text-xs font-medium text-neutral-400 uppercase pb-2 pr-8 max-w-52">{{ label }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, i) in recentRows" :key="i" class="border-t border-neutral-100">
-              <td v-for="col in config.columns" :key="col" class="py-2 pr-8 text-neutral-700 max-w-52">{{ formatCell(row[col], col) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Charts side by side -->
-      <div v-if="config.hasCharts" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div v-if="dailyCounts.length" class="card">
-          <h3 class="text-sm font-semibold text-neutral-500 mb-4">Últimos 7 días</h3>
-          <div class="flex items-end gap-2 h-40">
-            <div v-for="d in dailyCounts" :key="d.date" class="flex-1 flex flex-col items-center justify-end h-full">
-              <span class="text-xs font-medium text-neutral-600 mb-1">{{ d.count }}</span>
-              <div
-                class="w-full bg-primary-400 rounded-t transition-all"
-                :style="{ height: (d.count / maxDaily * 100) + '%', minHeight: d.count > 0 ? '4px' : '0' }"
-              ></div>
-              <span class="text-xs text-neutral-400 mt-1 whitespace-nowrap">{{ formatShortDate(d.date) }}</span>
-            </div>
-          </div>
+      <!-- Table + charts side by side -->
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
+        <!-- Recent rows table -->
+        <div v-if="config.columns && recentRows.length" class="card overflow-x-auto w-fit">
+          <h3 class="text-sm font-semibold text-neutral-500 mb-3">Últimos 10</h3>
+          <table class="text-sm">
+            <thead>
+              <tr>
+                <th v-for="(label, i) in config.columnLabels" :key="i" class="text-left text-xs font-medium text-neutral-400 uppercase pb-2 pr-8 max-w-52">{{ label }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, i) in recentRows" :key="i" class="border-t border-neutral-100">
+                <td v-for="col in config.columns" :key="col" class="py-2 pr-8 text-neutral-700 max-w-52">
+                  <template v-if="col === 'email'">
+                    <span v-if="row[col]" class="text-green-600 font-bold">✓</span>
+                  </template>
+                  <template v-else>{{ formatCell(row[col], col) }}</template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div v-if="weeklyCounts.length" class="card">
-          <h3 class="text-sm font-semibold text-neutral-500 mb-4">Últimas 4 semanas</h3>
-          <div class="flex items-end gap-2 h-40">
-            <div v-for="w in weeklyCounts" :key="w.week" class="flex-1 flex flex-col items-center justify-end h-full">
-              <span class="text-xs font-medium text-neutral-600 mb-1">{{ w.count }}</span>
-              <div
-                class="w-full bg-emerald-400 rounded-t transition-all"
-                :style="{ height: (w.count / maxWeekly * 100) + '%', minHeight: w.count > 0 ? '4px' : '0' }"
-              ></div>
-              <span class="text-xs text-neutral-400 mt-1 whitespace-nowrap">{{ w.week }}</span>
+        <!-- Charts stacked on the right -->
+        <div v-if="config.hasCharts" class="flex flex-col gap-4 shrink-0 lg:w-64">
+          <div v-if="dailyCounts.length" class="card">
+            <h3 class="text-sm font-semibold text-neutral-500 mb-4">Últimos 7 días</h3>
+            <div class="flex items-end gap-2 h-32">
+              <div v-for="d in dailyCounts" :key="d.date" class="flex-1 flex flex-col items-center justify-end h-full">
+                <span class="text-xs font-medium text-neutral-600 mb-1">{{ d.count }}</span>
+                <div
+                  class="w-full bg-primary-400 rounded-t transition-all"
+                  :style="{ height: (d.count / maxDaily * 100) + '%', minHeight: d.count > 0 ? '4px' : '0' }"
+                ></div>
+                <span class="text-xs text-neutral-400 mt-1 whitespace-nowrap">{{ formatShortDate(d.date) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="weeklyCounts.length" class="card">
+            <h3 class="text-sm font-semibold text-neutral-500 mb-4">Últimas 4 semanas</h3>
+            <div class="flex items-end gap-4 h-32">
+              <div v-for="w in weeklyCounts" :key="w.week" class="flex-1 flex flex-col items-center justify-end h-full">
+                <span class="text-xs font-medium text-neutral-600 mb-1">{{ w.count }}</span>
+                <div
+                  class="w-full bg-emerald-400 rounded-t transition-all"
+                  :style="{ height: (w.count / maxWeekly * 100) + '%', minHeight: w.count > 0 ? '4px' : '0' }"
+                ></div>
+                <span class="text-xs text-neutral-400 mt-1 whitespace-nowrap">{{ w.week }}</span>
+              </div>
             </div>
           </div>
         </div>

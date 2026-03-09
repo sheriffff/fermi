@@ -24,7 +24,8 @@ const groups = [
   {
     title: 'Feedback',
     tables: [
-      { key: 'feedback', label: 'Mensajes' }
+      { key: 'feedback', label: 'Mensajes' },
+      { key: 'email_subscriptions', label: 'Avísame' }
     ]
   },
   {
