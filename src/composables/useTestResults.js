@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue'
-import { getPlayResponses } from '@/lib/supabase'
+import { getOnlineResponsesForQuestion } from '@/lib/supabase'
 
 export function useTestResults(preguntas, respuestas) {
-  const allPlayResponses = ref({})
+  const allPopulation = ref({}) // keyed by question index (1-based)
   const isLoadingResponses = ref(false)
 
   function logErrBg(r) {
@@ -28,7 +28,8 @@ export function useTestResults(preguntas, respuestas) {
 
   const resultsData = computed(() => {
     return preguntas.value.map((q, i) => {
-      const key = `p${i + 1}`
+      const questionN = i + 1
+      const key = `p${questionN}`
       const answer = respuestas.value[key]
       const hasP = q.p05 != null && q.p95 != null
       let logErr = null
@@ -44,7 +45,7 @@ export function useTestResults(preguntas, respuestas) {
         }
       }
 
-      const population = allPlayResponses.value[q.id] || []
+      const population = allPopulation.value[questionN] || []
       let percentile = null
       if (logErr !== null && population.length > 0 && hasP) {
         const popLogErrs = population.map(r => {
@@ -58,7 +59,7 @@ export function useTestResults(preguntas, respuestas) {
         }
       }
 
-      return { num: i + 1, texto: q.texto, answer, p05: q.p05, p95: q.p95, hasP, logErr, inRange, population, percentile }
+      return { num: questionN, texto: q.texto, answer, p05: q.p05, p95: q.p95, hasP, logErr, inRange, population, percentile }
     })
   })
 
@@ -74,15 +75,16 @@ export function useTestResults(preguntas, respuestas) {
     return (valid.reduce((s, r) => s + r.logErr, 0) / valid.length).toFixed(2)
   })
 
-  async function fetchAllResponses() {
+  async function fetchAllResponses(testModel) {
     isLoadingResponses.value = true
     await Promise.all(
       preguntas.value
         .filter(q => q.p05 != null && q.p95 != null)
-        .map(async q => {
+        .map(async (q, i) => {
+          const questionN = i + 1
           try {
-            const r = await getPlayResponses(q.id)
-            allPlayResponses.value[q.id] = r
+            const r = await getOnlineResponsesForQuestion(testModel, questionN)
+            allPopulation.value[questionN] = r
           } catch (e) { /* silencioso */ }
         })
     )

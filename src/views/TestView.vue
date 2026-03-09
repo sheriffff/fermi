@@ -226,7 +226,7 @@ async function finishTest() {
     isLoading.value = false
     currentStep.value = 'finished'
   }
-  fetchAllResponses()
+  fetchAllResponses(modeloAsignado.value)
 }
 
 function focusInput() {

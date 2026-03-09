@@ -347,6 +347,18 @@ export async function getPlayResponses(idPlayQuestion) {
   return data.map(r => r.response).filter(r => r > 0)
 }
 
+export async function getOnlineResponsesForQuestion(testModel, questionN) {
+  const { data, error } = await supabase
+    .from('responses_online')
+    .select('response')
+    .eq('test_model', testModel)
+    .eq('question_n', questionN)
+    .not('response', 'is', null)
+
+  if (error) throw error
+  return data.map(r => Number(r.response)).filter(r => r > 0)
+}
+
 export async function getActivityByDay(days = 14) {
   const since = new Date()
   since.setDate(since.getDate() - days)
