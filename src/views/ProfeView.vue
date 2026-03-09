@@ -32,16 +32,21 @@ function handleDownload(href) {
       <p class="text-md text-neutral-1000 text-center mb-4">Descarga estos 3 documentos:</p>
 
       <div class="grid grid-cols-3 gap-3">
-        <button
+        <div
           v-for="file in files"
           :key="file.href"
-          @click="handleDownload(file.href)"
-          class="flex flex-col items-center gap-2 px-3 py-5 rounded-xl bg-primary-50 hover:bg-primary-100 border border-primary-200 text-primary-800 font-medium transition-all duration-200 hover:shadow-md text-center group"
+          class="flex flex-col items-center gap-2 px-3 py-5 rounded-xl bg-primary-50 border border-primary-200 text-primary-800 font-medium text-center"
         >
           <span class="text-3xl">{{ file.icon }}</span>
-          <span class="text-xs leading-snug">{{ file.label }}</span>
-          <span v-if="file.note" class="text-xs text-red-500 font-semibold leading-snug">{{ file.note }}</span>
-        </button>
+          <span class="text-sm leading-snug flex-1">{{ file.label }}</span>
+          <span v-if="file.note" class="text-sm text-red-500 font-semibold leading-snug">{{ file.note }}</span>
+          <button
+            @click="handleDownload(file.href)"
+            class="mt-1 flex items-center gap-1 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold transition-colors cursor-pointer w-full justify-center"
+          >
+            ⬇️ Descargar
+          </button>
+        </div>
       </div>
     </div>
   </div>
