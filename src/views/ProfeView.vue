@@ -1,31 +1,19 @@
 <script setup>
-import { ref } from 'vue'
 import { logDownload } from '@/lib/supabase'
 import BackButton from '@/components/common/BackButton.vue'
 
-const downloadState = ref('idle') // 'idle' | 'downloading' | 'done'
-
 const files = [
-  { href: '/pdfs/Hoja Instrucciones Profes.pdf', name: 'Hoja Instrucciones Profes.pdf' },
-  { href: '/pdfs/Tests_ABCD.pdf', name: 'Tests_ABCD.pdf' },
-  { href: '/pdfs/Docs_Alumnado.pdf', name: 'Docs_Alumnado.pdf' },
+  { href: '/pdfs/Hoja Instrucciones Profes.pdf', label: 'Instrucciones para ti', icon: '📋' },
+  { href: '/pdfs/Tests_ABCD.pdf', label: 'Tests: A, B, C, D', icon: '📝', note: '⚠️ Imprime a doble cara' },
+  { href: '/pdfs/Docs_Alumnado.pdf', label: 'Hoja informativa y consentimiento', icon: '📄' },
 ]
 
-function handleDownload() {
-  downloadState.value = 'downloading'
-  files.forEach(({ href, name }, i) => {
-    setTimeout(() => {
-      const link = document.createElement('a')
-      link.href = href
-      link.download = name
-      link.click()
-    }, i * 600)
-  })
+function handleDownload(href) {
+  const link = document.createElement('a')
+  link.href = href
+  link.download = href.split('/').pop()
+  link.click()
   logDownload().catch(() => {})
-  setTimeout(() => {
-    downloadState.value = 'done'
-    setTimeout(() => { downloadState.value = 'idle' }, 3000)
-  }, files.length * 600 + 200)
 }
 </script>
 
@@ -41,30 +29,18 @@ function handleDownload() {
         </h1>
       </div>
 
-      <div class="card text-center space-y-6">
-        <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-xl text-left">
-          <p class="text-sm text-neutral-700 mb-2">
-            Se descargarán 3 PDFs:
-          </p>
-          <ul class="text-sm text-neutral-600 list-disc list-inside mb-3">
-            <li>Hoja de instrucciones para ti.</li>
-            <li>Los 4 modelos de test (A, B, C y D).</li>
-            <li>Hoja informativa y Consentimiento informado.</li>
-          </ul>
-        </div>
+      <p class="text-md text-neutral-1000 text-center mb-4">Descarga estos 3 documentos:</p>
 
+      <div class="grid grid-cols-3 gap-3">
         <button
-          @click="handleDownload"
-          class="btn-large w-full transition-all duration-300"
-          :class="{
-            'btn-primary': downloadState !== 'done',
-            'bg-emerald-500 text-white rounded-2xl font-medium': downloadState === 'done'
-          }"
-          :disabled="downloadState === 'downloading'"
+          v-for="file in files"
+          :key="file.href"
+          @click="handleDownload(file.href)"
+          class="flex flex-col items-center gap-2 px-3 py-5 rounded-xl bg-primary-50 hover:bg-primary-100 border border-primary-200 text-primary-800 font-medium transition-all duration-200 hover:shadow-md text-center group"
         >
-          <span v-if="downloadState === 'idle'">Descargar PDFs</span>
-          <span v-else-if="downloadState === 'downloading'">Descargando...</span>
-          <span v-else>Descargados ✓</span>
+          <span class="text-3xl">{{ file.icon }}</span>
+          <span class="text-xs leading-snug">{{ file.label }}</span>
+          <span v-if="file.note" class="text-xs text-red-500 font-semibold leading-snug">{{ file.note }}</span>
         </button>
       </div>
     </div>
