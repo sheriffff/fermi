@@ -130,7 +130,7 @@ const percentileWorse = computed(() => {
 <template>
   <div class="space-y-3">
     <div class="flex items-center justify-between">
-      <p class="text-sm font-semibold text-neutral-700">¿Cómo te comparas?</p>
+      <p class="text-sm font-semibold text-neutral-700">¿Lo hiciste mejor que el resto?</p>
       <p class="text-xs text-neutral-400">{{ validResponses.length }} jugador{{ validResponses.length !== 1 ? 'es' : '' }}</p>
     </div>
 
