@@ -3,11 +3,12 @@ import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { useTimer } from '@/composables/useTimer'
 import BackButton from '@/components/common/BackButton.vue'
 import { useNumberFormat } from '@/composables/useNumberFormat'
-import { createUserOnline, saveResponsesOnline, saveResultsEmail } from '@/lib/supabase'
+import { createUserOnline, saveResponsesOnline, saveResultsEmail, getPlayResponses } from '@/lib/supabase'
 import { colors, getDifficulty } from '@/config/difficulties.js'
 import { APP_URL } from '@/config/app.js'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
 import QuestionCard from '@/components/common/QuestionCard.vue'
+import ResponseHistogram from '@/components/common/ResponseHistogram.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
 import FeedbackButton from '@/components/common/FeedbackButton.vue'
 import ShareButton from '@/components/common/ShareButton.vue'
@@ -228,6 +229,8 @@ function playWarningSound() {
 const { formatNumber, formatRange, cleanInput } = useNumberFormat()
 
 const showResults = ref(false)
+const allPlayResponses = ref({})
+const isLoadingResponses = ref(false)
 
 const resultsData = computed(() => {
   return preguntas.value.map((q, i) => {
@@ -245,8 +248,33 @@ const resultsData = computed(() => {
         logErr = Math.abs(Math.log10(answer / bound))
       }
     }
-    return { num: i + 1, texto: q.texto, answer, p05: q.p05, p95: q.p95, hasP, logErr, inRange }
+    const population = allPlayResponses.value[q.id] || []
+    let percentile = null
+    if (logErr !== null && population.length > 0 && hasP) {
+      const popLogErrs = population.map(r => {
+        if (r <= 0) return null
+        if (r >= q.p05 && r <= q.p95) return 0
+        const bound = r < q.p05 ? q.p05 : q.p95
+        return Math.abs(Math.log10(r / bound))
+      }).filter(e => e !== null)
+      if (popLogErrs.length > 0) {
+        percentile = popLogErrs.filter(e => e > logErr).length / popLogErrs.length
+      }
+    }
+    return { num: i + 1, texto: q.texto, answer, p05: q.p05, p95: q.p95, hasP, logErr, inRange, population, percentile }
   })
+})
+
+const finalScore = computed(() => {
+  const valid = resultsData.value.filter(r => r.percentile !== null)
+  if (!valid.length) return null
+  return ((valid.reduce((s, r) => s + r.percentile, 0) / valid.length) * 10).toFixed(1)
+})
+
+const avgLogErr = computed(() => {
+  const valid = resultsData.value.filter(r => r.logErr !== null)
+  if (!valid.length) return null
+  return (valid.reduce((s, r) => s + r.logErr, 0) / valid.length).toFixed(2)
 })
 
 const formattedAnswer = computed(() => {
@@ -387,6 +415,22 @@ async function finishTest() {
     isLoading.value = false
     currentStep.value = 'finished'
   }
+  fetchAllResponses()
+}
+
+async function fetchAllResponses() {
+  isLoadingResponses.value = true
+  await Promise.all(
+    preguntas.value
+      .filter(q => q.p05 != null && q.p95 != null)
+      .map(async q => {
+        try {
+          const r = await getPlayResponses(q.id)
+          allPlayResponses.value[q.id] = r
+        } catch (e) { /* silencioso */ }
+      })
+  )
+  isLoadingResponses.value = false
 }
 </script>
 
@@ -673,6 +717,11 @@ async function finishTest() {
 
           <Transition name="fade">
             <div v-if="showResults" class="mt-6 text-left">
+              <div v-if="finalScore" class="card text-center mb-4">
+                <p class="text-sm text-neutral-500 mb-1">Tu nota</p>
+                <p class="text-5xl font-bold text-primary-600">{{ finalScore }}</p>
+                <p class="text-xs text-neutral-400 mt-1">/ 10 · basada en tu percentil vs la población</p>
+              </div>
               <div class="space-y-3">
                 <div
                   v-for="r in resultsData"
@@ -701,7 +750,22 @@ async function finishTest() {
                       </p>
                     </div>
                   </div>
+                  <p v-if="r.logErr !== null" class="text-xs text-center mt-2" :class="logErrLabel(r)">
+                    Error log: <span class="font-bold">{{ r.logErr.toFixed(2) }}</span>
+                  </p>
+                  <div v-if="r.population.length >= 2 && !isLoadingResponses" class="mt-3 border-t border-neutral-100 pt-3">
+                    <ResponseHistogram
+                      :responses="r.population"
+                      :user-answer="r.answer"
+                      :correct-range="r.hasP ? { min: r.p05, max: r.p95 } : null"
+                    />
+                  </div>
+                  <p v-else-if="isLoadingResponses" class="text-xs text-neutral-400 text-center mt-2">Cargando datos de población...</p>
                 </div>
+              </div>
+              <div v-if="avgLogErr" class="card text-center mt-3">
+                <p class="text-sm text-neutral-500">Error logarítmico medio</p>
+                <p class="text-3xl font-bold text-neutral-800">{{ avgLogErr }}</p>
               </div>
             </div>
           </Transition>
