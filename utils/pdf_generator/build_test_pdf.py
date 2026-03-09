@@ -74,7 +74,7 @@ def generate_pdf(test_id):
     tests_dir = Path(__file__).parent / "tests"
     tests_dir.mkdir(exist_ok=True)
 
-    filename = tests_dir / f"examen_modelo_{test_id}.pdf"
+    filename = tests_dir / f"test_{test_id}.pdf"
     c = canvas.Canvas(str(filename), pagesize=A4)
     width, height = A4
 
@@ -114,6 +114,7 @@ def generate_pdf(test_id):
         modelo_text = f"Modelo {test_id}"
         modelo_width = c.stringWidth(modelo_text, "Helvetica", 10)
         c.drawString((width - modelo_width) / 2, y_pos, modelo_text)
+        c.drawRightString(margin_right, y_pos, "20 minutos")
 
         y_pos -= 1.6 * cm
         c.setFont("Helvetica", 10)
@@ -269,7 +270,7 @@ def generate_pdf(test_id):
     intro_style.leading = 14
     intro_style.alignment = TA_LEFT
     for text in [
-        "Hay muchas respuestas correctas: la clave es usar la lógica para dar una cifra con sentido.",
+        "Hay muchas respuestas correctas, la clave es usar la lógica para dar una cifra con sentido.",
         "Puedes hacer cuentas en sucio en esta hoja. Puedes usar calculadora.",
     ]:
         p = Paragraph(text, intro_style)

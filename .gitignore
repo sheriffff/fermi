@@ -1,5 +1,6 @@
 .env*
 fermi_TODO_human.md
+old_data
 
 utils/pdf_generator/tests
 utils/pdf_generator/docs

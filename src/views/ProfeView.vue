@@ -5,17 +5,28 @@ import BackButton from '@/components/common/BackButton.vue'
 
 const downloadState = ref('idle') // 'idle' | 'downloading' | 'done'
 
+const files = [
+  { href: '/pdfs/Hoja Instrucciones Profes.pdf', name: 'Hoja Instrucciones Profes.pdf' },
+  { href: '/pdfs/Hoja Informativa.pdf', name: 'Hoja Informativa.pdf' },
+  { href: '/pdfs/Consentimiento informado.pdf', name: 'Consentimiento informado.pdf' },
+  { href: '/pdfs/Tests_ABCD.pdf', name: 'Tests_ABCD.pdf' },
+]
+
 function handleDownload() {
   downloadState.value = 'downloading'
-  const link = document.createElement('a')
-  link.href = '/profe_instrucciones_y_tests.pdf'
-  link.download = 'profe_instrucciones_y_tests.pdf'
-  link.click()
+  files.forEach(({ href, name }, i) => {
+    setTimeout(() => {
+      const link = document.createElement('a')
+      link.href = href
+      link.download = name
+      link.click()
+    }, i * 600)
+  })
   logDownload().catch(() => {})
   setTimeout(() => {
     downloadState.value = 'done'
     setTimeout(() => { downloadState.value = 'idle' }, 3000)
-  }, 800)
+  }, files.length * 600 + 200)
 }
 </script>
 
@@ -34,16 +45,14 @@ function handleDownload() {
       <div class="card text-center space-y-6">
         <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-xl text-left">
           <p class="text-sm text-neutral-700 mb-2">
-            En el siguiente PDF encontrarás:
+            Se descargarán 4 PDFs:
           </p>
           <ul class="text-sm text-neutral-600 list-disc list-inside mb-3">
-            <li>Instrucciones para profesor/a.</li>
-            <li>Documentos legales necesarios.</li>
-            <li>4 tests diferentes A, B, C y D.</li>
+            <li>Hoja de instrucciones para ti.</li>
+            <li>Los 4 modelos de test (A, B, C y D). <span class="text-sm text-amber-700 font-medium">Imprime a doble cara.</span></li>
+            <li>Hoja informativa para el alumnado.</li>
+            <li>Consentimiento informado.</li>
           </ul>
-          <p class="text-sm text-amber-700 font-medium">
-            Descárgalo e imprímelo a doble cara.
-          </p>
         </div>
 
         <button
@@ -55,9 +64,9 @@ function handleDownload() {
           }"
           :disabled="downloadState === 'downloading'"
         >
-          <span v-if="downloadState === 'idle'">Descargar PDF</span>
+          <span v-if="downloadState === 'idle'">Descargar PDFs</span>
           <span v-else-if="downloadState === 'downloading'">Descargando...</span>
-          <span v-else>Descargado ✓</span>
+          <span v-else>Descargados ✓</span>
         </button>
       </div>
     </div>
