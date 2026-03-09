@@ -1,27 +1,26 @@
 <script setup>
-import { ref, computed, nextTick, onMounted, watch } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 import { useTimer } from '@/composables/useTimer'
-import BackButton from '@/components/common/BackButton.vue'
 import { useNumberFormat } from '@/composables/useNumberFormat'
-import { createUserOnline, saveResponsesOnline, saveResultsEmail, getPlayResponses } from '@/lib/supabase'
+import { useTestResults } from '@/composables/useTestResults'
+import { useMobile } from '@/composables/useMobile'
+import { createUserOnline, saveResponsesOnline } from '@/lib/supabase'
 import { colors, getDifficulty } from '@/config/difficulties.js'
-import { APP_URL } from '@/config/app.js'
 import { getTestQuestions, getAvailableTests } from '@/lib/questions'
+import BackButton from '@/components/common/BackButton.vue'
 import QuestionCard from '@/components/common/QuestionCard.vue'
-import ResponseHistogram from '@/components/common/ResponseHistogram.vue'
 import InstructionsCard from '@/components/common/InstructionsCard.vue'
 import FeedbackButton from '@/components/common/FeedbackButton.vue'
 import ShareButton from '@/components/common/ShareButton.vue'
+import ResponseHistogram from '@/components/common/ResponseHistogram.vue'
 import LogErrorModal from '@/components/common/LogErrorModal.vue'
 import ScoreExplanationModal from '@/components/common/ScoreExplanationModal.vue'
 import ScribbleUpload from '@/components/adultos/ScribbleUpload.vue'
-import { useMobile } from '@/composables/useMobile'
+import TestMetadataForm from '@/components/adultos/TestMetadataForm.vue'
 
 const { isMobile } = useMobile()
+const { formatNumber, formatRange, cleanInput } = useNumberFormat()
 
-// ============================================
-// CONFIGURACIÓN DE TIEMPOS
-// ============================================
 const QUESTION_TIME = 180
 const WARNING_TIME = 30
 
@@ -32,107 +31,12 @@ const currentStep = ref('metadata') // 'metadata' | 'instructions' | 'test' | 'f
 const isLoading = ref(false)
 const error = ref(null)
 const savedUserId = ref(null)
+const savedMetadata = ref(null)
+const savedCodigoGrupo = ref('')
 const showLogErrorModal = ref(false)
 const showScoreModal = ref(false)
 const showUpload = ref(false)
-const timerVisible = ref(false)
-
-function logErrBg(r) {
-  if (r.inRange) return 'bg-emerald-50'
-  if (r.logErr === null) return 'bg-neutral-50'
-  if (r.logErr < 1) return 'bg-amber-50'
-  return 'bg-red-50'
-}
-
-function logErrLabel(r) {
-  if (r.inRange) return 'text-emerald-500'
-  if (r.logErr === null) return 'text-neutral-400'
-  if (r.logErr < 1) return 'text-amber-500'
-  return 'text-red-500'
-}
-
-function logErrValueClass(r) {
-  if (r.inRange) return 'text-emerald-800'
-  if (r.logErr === null) return 'text-neutral-800'
-  if (r.logErr < 1) return 'text-amber-800'
-  return 'text-red-800'
-}
-
-
-// Aviso de 30 segundos
-const showTimeWarning = ref(false)
-const warningPlayed = ref(false)
-const timerShaking = ref(false)
-
-// ============================================
-// METADATA DEL PARTICIPANTE
-// ============================================
-const metadata = ref({
-  edad: '40',
-  codigoPersonal: '',
-  email: '',
-  piVsE: '',
-  mismoTest: null,
-  segundaVez: null,
-  modelosYaHechos: []
-})
-
-const codigoGrupoInput = ref('')
-
-watch(() => metadata.value.mismoTest, (val) => {
-  if (!val) codigoGrupoInput.value = ''
-})
-
-// Generar opciones de edad desde 4 hasta 99
-const edadOptions = Array.from({ length: 96 }, (_, i) => i + 4)
-
-const piVsEOptions = [
-  { value: 'pi', label: 'π (pi)' },
-  { value: 'e', label: 'e (Euler)' },
-  { value: 'no_se', label: 'No lo sé / No lo recuerdo' }
-]
-
-const modeloOptions = ref(['A', 'B', 'C', 'D'])
-const primerasPreguntasPorModelo = ref({})
-
-// Cargar las primeras preguntas de cada modelo al montar
-onMounted(async () => {
-  const tests = await getAvailableTests()
-  modeloOptions.value = tests
-
-  for (const testNum of tests) {
-    const questions = await getTestQuestions(testNum)
-    if (questions.length > 0) {
-      primerasPreguntasPorModelo.value[testNum] = questions[0].texto
-    }
-  }
-})
-
-// Toggle para marcar/desmarcar modelos ya hechos
-function toggleModeloYaHecho(modelo) {
-  const index = metadata.value.modelosYaHechos.indexOf(modelo)
-  if (index > -1) {
-    // Ya está marcado, quitarlo
-    metadata.value.modelosYaHechos.splice(index, 1)
-  } else {
-    // No está marcado, añadirlo
-    metadata.value.modelosYaHechos.push(modelo)
-  }
-}
-
-
-const isMetadataValid = computed(() => {
-  const m = metadata.value
-  if (!m.edad || !m.piVsE) return false
-  if (m.mismoTest === null) return false
-  if (m.mismoTest === true) {
-    return modeloOptions.value.includes(codigoGrupoInput.value)
-  }
-  // solo
-  if (m.segundaVez === null) return false
-  if (m.segundaVez === true) return m.modelosYaHechos.length > 0
-  return true
-})
+const showResults = ref(false)
 
 // ============================================
 // ESTADO DEL TEST
@@ -142,46 +46,34 @@ const currentQuestionIndex = ref(0)
 const respuestas = ref({})
 const tiempos = ref({})
 const modeloAsignado = ref('')
+const currentAnswer = ref('')
+const questionCardRef = ref(null)
 
-// Pregunta actual
-const currentQuestion = computed(() => {
-  return preguntas.value[currentQuestionIndex.value] || null
-})
-
-// Número de pregunta actual (1-based para mostrar)
+const currentQuestion = computed(() => preguntas.value[currentQuestionIndex.value] || null)
 const questionNumber = computed(() => currentQuestionIndex.value + 1)
-
-// Total de preguntas
 const totalQuestions = computed(() => preguntas.value.length)
-
-// Progreso en porcentaje
 const progressPercent = computed(() => {
   if (totalQuestions.value === 0) return 0
   return (currentQuestionIndex.value / totalQuestions.value) * 100
 })
-
 const currentDifficulty = computed(() => getDifficulty(currentQuestion.value?.difficulty) ?? getDifficulty(1))
+const isAnswerComplete = computed(() => cleanInput(currentAnswer.value) !== '')
 
-// Respuesta actual del input
-const currentAnswer = ref('')
-const questionCardRef = ref(null)
-
-function focusInput() {
-  questionCardRef.value?.focusInput()
-}
-
-const isAnswerComplete = computed(() => {
-  return cleanInput(currentAnswer.value) !== ''
-})
+// ============================================
+// RESULTADOS
+// ============================================
+const { resultsData, finalScore, avgLogErr, isLoadingResponses, fetchAllResponses, logErrBg, logErrLabel, logErrValueClass } = useTestResults(preguntas, respuestas)
 
 // ============================================
 // TIMER
 // ============================================
+const showTimeWarning = ref(false)
+const warningPlayed = ref(false)
+const timerShaking = ref(false)
+const timerVisible = ref(false)
+
 const {
   formattedTime,
-  timerClass,
-  timerState,
-  percentageRemaining,
   seconds: timeRemaining,
   start: startTimer,
   stop: stopTimer,
@@ -196,9 +88,7 @@ watch(timeRemaining, (remaining) => {
     timerShaking.value = true
     timerVisible.value = true
     playWarningSound()
-    setTimeout(() => {
-      timerShaking.value = false
-    }, 1000)
+    setTimeout(() => { timerShaking.value = false }, 1000)
   }
 })
 
@@ -207,16 +97,12 @@ function playWarningSound() {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)()
     const oscillator = audioContext.createOscillator()
     const gainNode = audioContext.createGain()
-
     oscillator.connect(gainNode)
     gainNode.connect(audioContext.destination)
-
     oscillator.frequency.value = 440
     oscillator.type = 'sine'
-
     gainNode.gain.setValueAtTime(0.15, audioContext.currentTime)
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
-
     oscillator.start(audioContext.currentTime)
     oscillator.stop(audioContext.currentTime + 0.5)
   } catch (e) {
@@ -224,98 +110,31 @@ function playWarningSound() {
   }
 }
 
-
-// ============================================
-// FORMATEADOR DE NÚMEROS
-// ============================================
-const { formatNumber, formatRange, cleanInput } = useNumberFormat()
-
-const showResults = ref(false)
-const allPlayResponses = ref({})
-const isLoadingResponses = ref(false)
-
-const resultsData = computed(() => {
-  return preguntas.value.map((q, i) => {
-    const key = `p${i + 1}`
-    const answer = respuestas.value[key]
-    const hasP = q.p05 != null && q.p95 != null
-    let logErr = null
-    let inRange = false
-    if (answer != null && answer > 0 && hasP) {
-      if (answer >= q.p05 && answer <= q.p95) {
-        inRange = true
-        logErr = 0
-      } else {
-        const bound = answer < q.p05 ? q.p05 : q.p95
-        logErr = Math.abs(Math.log10(answer / bound))
-      }
-    }
-    const population = allPlayResponses.value[q.id] || []
-    let percentile = null
-    if (logErr !== null && population.length > 0 && hasP) {
-      const popLogErrs = population.map(r => {
-        if (r <= 0) return null
-        if (r >= q.p05 && r <= q.p95) return 0
-        const bound = r < q.p05 ? q.p05 : q.p95
-        return Math.abs(Math.log10(r / bound))
-      }).filter(e => e !== null)
-      if (popLogErrs.length > 0) {
-        percentile = popLogErrs.filter(e => e > logErr).length / popLogErrs.length
-      }
-    }
-    return { num: i + 1, texto: q.texto, answer, p05: q.p05, p95: q.p95, hasP, logErr, inRange, population, percentile }
-  })
-})
-
-const finalScore = computed(() => {
-  const valid = resultsData.value.filter(r => r.percentile !== null)
-  if (!valid.length) return null
-  return ((valid.reduce((s, r) => s + r.percentile, 0) / valid.length) * 10).toFixed(1)
-})
-
-const avgLogErr = computed(() => {
-  const valid = resultsData.value.filter(r => r.logErr !== null)
-  if (!valid.length) return null
-  return (valid.reduce((s, r) => s + r.logErr, 0) / valid.length).toFixed(2)
-})
-
-const formattedAnswer = computed(() => {
-  const cleaned = cleanInput(currentAnswer.value)
-  if (!cleaned) return '—'
-  return formatNumber(parseInt(cleaned, 10))
-})
-
 // ============================================
 // HANDLERS
 // ============================================
-
-async function startTest() {
-  if (!isMetadataValid.value) return
-
+async function handleMetadataSubmit({ metadata, codigoGrupo }) {
   isLoading.value = true
   error.value = null
+  savedMetadata.value = metadata
+  savedCodigoGrupo.value = codigoGrupo
 
   try {
+    const availableTests = await getAvailableTests()
     let modelo
-    const availableTests = modeloOptions.value
 
-    if (metadata.value.mismoTest) {
-      modelo = codigoGrupoInput.value
-    } else if (metadata.value.segundaVez === true && metadata.value.modelosYaHechos.length > 0) {
-      const modelosDisponibles = availableTests.filter(
-        m => !metadata.value.modelosYaHechos.includes(m)
-      )
-      if (modelosDisponibles.length > 0) {
-        modelo = modelosDisponibles[Math.floor(Math.random() * modelosDisponibles.length)]
-      } else {
-        modelo = availableTests[Math.floor(Math.random() * availableTests.length)]
-      }
+    if (metadata.mismoTest) {
+      modelo = codigoGrupo
+    } else if (metadata.segundaVez === true && metadata.modelosYaHechos.length > 0) {
+      const disponibles = availableTests.filter(m => !metadata.modelosYaHechos.includes(m))
+      modelo = disponibles.length > 0
+        ? disponibles[Math.floor(Math.random() * disponibles.length)]
+        : availableTests[Math.floor(Math.random() * availableTests.length)]
     } else {
       modelo = availableTests[Math.floor(Math.random() * availableTests.length)]
     }
 
     modeloAsignado.value = modelo
-
     preguntas.value = await getTestQuestions(modelo)
 
     if (!preguntas.value || preguntas.value.length === 0) {
@@ -326,8 +145,6 @@ async function startTest() {
     respuestas.value = {}
     tiempos.value = {}
     currentAnswer.value = ''
-
-    // Ir a instrucciones primero
     currentStep.value = 'instructions'
 
   } catch (e) {
@@ -348,7 +165,6 @@ function startQuestions() {
 }
 
 function handleTimeUp() {
-  // Guardar respuesta actual (aunque esté vacía) y pasar a siguiente
   saveCurrentAnswer()
   goToNextQuestion()
 }
@@ -359,12 +175,10 @@ function handleSubmitAnswer() {
 }
 
 function saveCurrentAnswer() {
-  const questionKey = `p${currentQuestionIndex.value + 1}`
+  const key = `p${currentQuestionIndex.value + 1}`
   const cleaned = cleanInput(currentAnswer.value)
-
-  respuestas.value[questionKey] = cleaned ? parseInt(cleaned, 10) : null
-
-  tiempos.value[questionKey] = getElapsedTime()
+  respuestas.value[key] = cleaned ? parseInt(cleaned, 10) : null
+  tiempos.value[key] = getElapsedTime()
 }
 
 async function goToNextQuestion() {
@@ -376,7 +190,6 @@ async function goToNextQuestion() {
     showTimeWarning.value = false
     warningPlayed.value = false
     timerShaking.value = false
-
     await nextTick()
     resetTimer(QUESTION_TIME)
     startTimer()
@@ -387,29 +200,25 @@ async function goToNextQuestion() {
 
 async function finishTest() {
   isLoading.value = true
-
   try {
+    const m = savedMetadata.value
     const userId = await createUserOnline({
-      age: parseInt(metadata.value.edad),
-      piVsE: metadata.value.piVsE,
-      whichTestsBefore: metadata.value.modelosYaHechos.join(''),
-      userAlias: metadata.value.codigoPersonal,
+      age: parseInt(m.edad),
+      piVsE: m.piVsE,
+      whichTestsBefore: m.modelosYaHechos.join(''),
+      userAlias: m.codigoPersonal,
       testModel: modeloAsignado.value,
-      amigosTest: metadata.value.mismoTest ? codigoGrupoInput.value : null,
-      email: metadata.value.email || null
+      amigosTest: m.mismoTest ? savedCodigoGrupo.value : null,
+      email: m.email || null
     })
 
-    const rows = Object.keys(respuestas.value).map(key => {
-      const n = parseInt(key.replace('p', ''), 10)
-      return {
-        questionN: n,
-        response: respuestas.value[key],
-        time: tiempos.value[key]
-      }
-    })
+    const rows = Object.keys(respuestas.value).map(key => ({
+      questionN: parseInt(key.replace('p', ''), 10),
+      response: respuestas.value[key],
+      time: tiempos.value[key]
+    }))
 
     await saveResponsesOnline(userId, modeloAsignado.value, rows)
-
     savedUserId.value = userId
   } catch (e) {
     console.error('Error guardando respuestas:', e)
@@ -420,19 +229,8 @@ async function finishTest() {
   fetchAllResponses()
 }
 
-async function fetchAllResponses() {
-  isLoadingResponses.value = true
-  await Promise.all(
-    preguntas.value
-      .filter(q => q.p05 != null && q.p95 != null)
-      .map(async q => {
-        try {
-          const r = await getPlayResponses(q.id)
-          allPlayResponses.value[q.id] = r
-        } catch (e) { /* silencioso */ }
-      })
-  )
-  isLoadingResponses.value = false
+function focusInput() {
+  questionCardRef.value?.focusInput()
 }
 </script>
 
@@ -443,182 +241,19 @@ async function fetchAllResponses() {
     <div class="max-w-2xl mx-auto">
 
       <Transition name="fade" mode="out-in">
+
         <div v-if="currentStep === 'metadata'" key="metadata">
-
-          <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-neutral-800">
-              ¡Juguemos a Estimar! 🎯
-            </h1>
-          </div>
-
-          <!-- Formulario -->
-          <form @submit.prevent="startTest" class="space-y-4">
-
-            <div class="card">
-              <div class="grid grid-cols-3 gap-4">
-                <div class="col-span-1">
-                  <label class="label">Edad</label>
-                  <select v-model="metadata.edad" class="select" required>
-                    <option value="" disabled>—</option>
-                    <option
-                      v-for="edad in edadOptions"
-                      :key="edad"
-                      :value="edad"
-                    >
-                      {{ edad }}
-                    </option>
-                  </select>
-                </div>
-                <div class="col-span-2">
-                  <label class="label">Alias <span class="font-normal text-neutral-400">(opcional)</span></label>
-                  <input
-                    v-model="metadata.codigoPersonal"
-                    type="text"
-                    class="input"
-                    placeholder="Einstein42"
-                    maxlength="20"
-                  />
-                  <p class="text-sm text-neutral-400 mt-1.5 italic">
-                    Para encontrarte más tarde entre los resultados.
-                  </p>
-                </div>
-                <div class="col-start-2 col-span-2">
-                  <label class="label">Email <span class="font-normal text-neutral-400">(opcional)</span></label>
-                  <input
-                    v-model="metadata.email"
-                    type="text"
-                    class="input"
-                    placeholder="tu@email.com"
-                    maxlength="100"
-                  />
-                  <p class="text-sm text-neutral-400 mt-1.5 italic">
-                    Cuando publique los resultados del estudio, te aviso.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="card space-y-3">
-              <label class="label !mb-0">¿Qué número es más grande?</label>
-              <div class="flex flex-wrap gap-2">
-                <label
-                  v-for="option in piVsEOptions"
-                  :key="option.value"
-                  class="flex-1 min-w-[100px] cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    v-model="metadata.piVsE"
-                    :value="option.value"
-                    class="sr-only peer"
-                    required
-                  />
-                  <div class="text-center py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
-                    {{ option.label }}
-                  </div>
-                </label>
-              </div>
-              <p class="text-sm text-neutral-400 italic">
-                Esta pregunta me ayuda a calibrar tu familiaridad con las matemáticas.
-              </p>
-            </div>
-
-            <!-- Solo / Amigos + Segunda vez -->
-            <div class="card space-y-4">
-              <div class="flex gap-2">
-                <label v-for="opt in [{ value: false, label: 'Estoy sol@' }, { value: true, label: 'Estoy acompañad@' }]" :key="String(opt.value)" class="flex-1 cursor-pointer">
-                  <input type="radio" v-model="metadata.mismoTest" :value="opt.value" class="sr-only peer" />
-                  <div class="text-center py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
-                    {{ opt.label }}
-                  </div>
-                </label>
-              </div>
-
-              <Transition name="fade">
-                <div v-if="metadata.mismoTest === false" class="space-y-3">
-                  <p class="text-sm font-medium text-neutral-700">¿Ya hiciste el test antes?</p>
-
-                  <div class="flex gap-2">
-                    <label v-for="opt in [{ value: true, label: 'Sí' }, { value: false, label: 'No' }]" :key="String(opt.value)" class="flex-1 cursor-pointer">
-                      <input type="radio" v-model="metadata.segundaVez" :value="opt.value" class="sr-only peer" />
-                      <div class="text-center py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
-                        {{ opt.label }}
-                      </div>
-                    </label>
-                  </div>
-                  <p class="text-sm text-neutral-500 italic">Hay 4 modelos. Puedes jugar más veces.</p>
-                  <Transition name="fade">
-                    <div v-if="metadata.segundaVez === true" class="space-y-2">
-                      <label class="label">Marca cuáles hiciste ya:</label>
-                      <div class="space-y-2">
-                        <label
-                          v-for="modelo in modeloOptions"
-                          :key="modelo"
-                          class="flex items-start gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer hover:bg-neutral-50"
-                          :class="[metadata.modelosYaHechos.includes(modelo) ? 'border-primary-500 bg-primary-50' : 'border-neutral-200']"
-                        >
-                          <input type="checkbox" :checked="metadata.modelosYaHechos.includes(modelo)" @change="toggleModeloYaHecho(modelo)" class="w-5 h-5 rounded text-primary-500 mt-0.5" />
-                          <span class="flex-1">
-                            <span class="font-mono font-bold text-neutral-800 block">Modelo {{ modelo }}</span>
-                            <span class="text-xs text-neutral-500 mt-1 italic block">La P1 decía: "{{ primerasPreguntasPorModelo[modelo] }}"</span>
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                  </Transition>
-                </div>
-              </Transition>
-
-              <Transition name="fade">
-                <div v-if="metadata.mismoTest === true" class="space-y-3">
-                  <p class="text-sm text-neutral-500">Cada uno hará el test por su cuenta.</p>
-                  <p class="text-sm text-neutral-500">
-                    Que cada uno acceda al test en su dispositivo.
-                  </p>
-                  <ShareButton class="w-full !justify-center btn-outline" />
-                  <p class="text-sm text-neutral-500">Simplemente, elegid todos la misma letra para aseguraros de hacer el mismo test.</p>
-                  <div class="flex gap-2">
-                    <label v-for="m in modeloOptions" :key="m" class="cursor-pointer">
-                      <input type="radio" v-model="codigoGrupoInput" :value="m" class="sr-only peer" />
-                      <div class="w-12 text-center py-2 rounded-xl text-sm font-bold border-2 transition-all duration-150 border-neutral-200 text-neutral-600 hover:border-neutral-300 peer-checked:border-primary-500 peer-checked:bg-primary-50 peer-checked:text-primary-700">
-                        {{ m }}
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </Transition>
-            </div>
-
-            <div v-if="error" class="p-4 bg-red-50 text-red-700 rounded-xl text-sm">
-              {{ error }}
-            </div>
-
-            <button
-              type="submit"
-              class="btn-primary btn-large w-full"
-              :disabled="!isMetadataValid || isLoading"
-            >
-              <span v-if="isLoading">Cargando...</span>
-              <span v-else>Vamos →</span>
-            </button>
-          </form>
-
+          <TestMetadataForm :is-loading="isLoading" :error="error" @submit="handleMetadataSubmit" />
         </div>
 
         <div v-else-if="currentStep === 'instructions'" key="instructions">
-          <InstructionsCard
-            :question-time="QUESTION_TIME"
-            :warning-time="WARNING_TIME"
-            @start="startQuestions"
-          />
+          <InstructionsCard :question-time="QUESTION_TIME" :warning-time="WARNING_TIME" @start="startQuestions" />
         </div>
 
         <div v-else-if="currentStep === 'test'" key="test" class="space-y-6" :class="{ 'pb-[280px]': isMobile }">
 
           <div class="flex items-center justify-between mb-4">
-            <span class="text-sm text-neutral-500 font-medium">
-              Pregunta {{ questionNumber }} de {{ totalQuestions }}
-            </span>
+            <span class="text-sm text-neutral-500 font-medium">Pregunta {{ questionNumber }} de {{ totalQuestions }}</span>
             <span
               class="timer-toggle cursor-pointer select-none"
               :class="{ 'timer-shaking': timerShaking }"
@@ -630,21 +265,14 @@ async function fetchAllResponses() {
           </div>
 
           <div class="progress-bar">
-            <div
-              class="progress-bar-fill"
-              :style="{ width: `${progressPercent}%` }"
-            ></div>
+            <div class="progress-bar-fill" :style="{ width: `${progressPercent}%` }"></div>
           </div>
-
 
           <Transition name="slide" mode="out-in" @after-enter="focusInput">
             <div :key="currentQuestionIndex" class="card-elevated">
               <div class="mb-4">
                 <span class="text-xs text-neutral-400 mr-1.5">Dificultad:</span>
-                <span
-                  class="inline text-xs font-semibold px-2.5 py-1 rounded-full"
-                  :class="colors[currentDifficulty.color].badge"
-                >
+                <span class="inline text-xs font-semibold px-2.5 py-1 rounded-full" :class="colors[currentDifficulty.color].badge">
                   {{ currentDifficulty.level }}
                 </span>
               </div>
@@ -664,17 +292,13 @@ async function fetchAllResponses() {
 
         <div v-else-if="currentStep === 'finished'" key="finished" class="text-center">
 
-          <!-- Score card: shown as soon as population data loads, before everything else -->
           <Transition name="fade">
             <div v-if="finalScore || isLoadingResponses" class="card text-center mb-4">
               <template v-if="finalScore">
                 <p class="text-sm text-neutral-500 mb-1">Tu nota</p>
                 <p class="text-5xl font-bold text-primary-600">{{ finalScore }}</p>
                 <p class="text-xs text-neutral-400 mt-1">/ 10 · basada en tu percentil vs la población</p>
-                <button
-                  @click="showScoreModal = true"
-                  class="mt-3 text-xs text-primary-500 hover:text-primary-700 underline underline-offset-2 transition-colors"
-                >
+                <button @click="showScoreModal = true" class="mt-3 text-xs text-primary-500 hover:text-primary-700 underline underline-offset-2 transition-colors">
                   ¿Cómo se calcula la nota?
                 </button>
               </template>
@@ -686,24 +310,12 @@ async function fetchAllResponses() {
 
           <div class="card-elevated py-12">
             <div class="text-6xl mb-6">🎉</div>
-
-            <h1 class="text-3xl font-bold text-neutral-800 mb-4">
-              ¡Gracias por participar!
-            </h1>
-
+            <h1 class="text-3xl font-bold text-neutral-800 mb-4">¡Gracias por participar!</h1>
             <div class="flex flex-col items-center gap-3">
-              <button
-                v-if="savedUserId"
-                @click="showUpload = true"
-                class="btn-outline btn-large w-full max-w-xs"
-              >
+              <button v-if="savedUserId" @click="showUpload = true" class="btn-outline btn-large w-full max-w-xs">
                 📸 Sube una foto de tu hoja en sucio!
               </button>
-              <button
-                v-if="!showResults"
-                @click="showResults = true"
-                class="btn-outline btn-large w-full max-w-xs"
-              >
+              <button v-if="!showResults" @click="showResults = true" class="btn-outline btn-large w-full max-w-xs">
                 📝 Ver respuestas correctas
               </button>
               <ShareButton />
@@ -713,25 +325,15 @@ async function fetchAllResponses() {
 
           <Teleport to="body">
             <Transition name="modal">
-              <div
-                v-if="showUpload"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4"
-                @click.self="showUpload = false"
-              >
+              <div v-if="showUpload" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="showUpload = false">
                 <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
                 <div class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8">
-                  <button
-                    @click="showUpload = false"
-                    class="absolute top-3 right-3 bg-neutral-100 rounded-full p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-200 transition-colors z-10"
-                  >
+                  <button @click="showUpload = false" class="absolute top-3 right-3 bg-neutral-100 rounded-full p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-200 transition-colors z-10">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
-                  <ScribbleUpload
-                    :user-id="savedUserId"
-                    @back="showUpload = false"
-                  />
+                  <ScribbleUpload :user-id="savedUserId" @back="showUpload = false" />
                 </div>
               </div>
             </Transition>
@@ -740,20 +342,13 @@ async function fetchAllResponses() {
           <Transition name="fade">
             <div v-if="showResults" class="mt-6 text-left">
               <div class="space-y-3">
-                <div
-                  v-for="r in resultsData"
-                  :key="r.num"
-                  class="card"
-                >
+                <div v-for="r in resultsData" :key="r.num" class="card">
                   <p class="text-neutral-700 mb-3">
                     <span class="text-neutral-400 font-mono mr-1">{{ r.num }}.</span>
                     {{ r.texto }}
                   </p>
                   <div class="grid grid-cols-2 gap-3">
-                    <div
-                      class="rounded-xl px-3 py-2 text-center"
-                      :class="logErrBg(r)"
-                    >
+                    <div class="rounded-xl px-3 py-2 text-center" :class="logErrBg(r)">
                       <p class="text-xs mb-0.5" :class="logErrLabel(r)">Tu respuesta</p>
                       <p class="font-mono font-medium" :class="logErrValueClass(r)">
                         {{ r.answer != null ? formatNumber(r.answer) : '—' }}<span v-if="r.inRange"> ⭐</span>
@@ -771,11 +366,7 @@ async function fetchAllResponses() {
                     Error log: <span class="font-bold">{{ r.logErr.toFixed(2) }}</span>
                   </p>
                   <div v-if="r.population.length >= 2 && !isLoadingResponses" class="mt-3 border-t border-neutral-100 pt-3">
-                    <ResponseHistogram
-                      :responses="r.population"
-                      :user-answer="r.answer"
-                      :correct-range="r.hasP ? { min: r.p05, max: r.p95 } : null"
-                    />
+                    <ResponseHistogram :responses="r.population" :user-answer="r.answer" :correct-range="r.hasP ? { min: r.p05, max: r.p95 } : null" />
                   </div>
                   <p v-else-if="isLoadingResponses" class="text-xs text-neutral-400 text-center mt-2">Cargando datos de población...</p>
                 </div>
@@ -847,6 +438,4 @@ async function fetchAllResponses() {
   transform: scale(0.9) translateY(20px);
   opacity: 0;
 }
-
 </style>
-
