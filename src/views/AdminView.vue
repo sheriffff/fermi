@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
+import BackButton from '@/components/common/BackButton.vue'
 
 const route = useRoute()
 const isAuthenticated = ref(false)
@@ -38,9 +39,10 @@ const hubLinks = [
 
 <template>
   <div class="min-h-screen p-4 sm:p-6 md:p-8">
-    <RouterLink :to="route.path === '/admin' ? '/' : '/admin'" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
-      ← {{ route.path === '/admin' ? 'Volver al inicio' : 'Volver al panel' }}
-    </RouterLink>
+    <BackButton
+      :to="route.path === '/admin' ? '/' : '/admin'"
+      :label="route.path === '/admin' ? 'Volver al inicio' : 'Volver al panel'"
+    />
 
     <div v-if="!isAuthenticated" class="max-w-md mx-auto mt-12">
       <div class="card text-center">

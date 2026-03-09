@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { RouterLink } from 'vue-router'
 import { useNumberFormat } from '@/composables/useNumberFormat'
+import BackButton from '@/components/common/BackButton.vue'
 import { useTimer } from '@/composables/useTimer'
 import { getRandomPlayQuestion } from '@/lib/questions'
 import { savePlayResponse, getPlayResponses } from '@/lib/supabase'
@@ -179,9 +179,7 @@ async function handleSubmit() {
 
 <template>
   <div class="min-h-screen p-4 sm:p-6 md:p-8" :class="{ 'pb-[280px]': isMobile }">
-    <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
-      ← Volver al inicio
-    </RouterLink>
+    <BackButton />
 
     <div class="max-w-2xl mx-auto">
       <div class="text-center mb-8">

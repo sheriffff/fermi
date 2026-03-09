@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, watch } from 'vue'
-import { RouterLink } from 'vue-router'
 import { useTimer } from '@/composables/useTimer'
+import BackButton from '@/components/common/BackButton.vue'
 import { useNumberFormat } from '@/composables/useNumberFormat'
 import { createUserOnline, saveResponsesOnline, saveResultsEmail } from '@/lib/supabase'
 import { colors, getDifficulty } from '@/config/difficulties.js'
@@ -392,9 +392,7 @@ async function finishTest() {
 
 <template>
   <div class="min-h-screen p-4 sm:p-6 md:p-8">
-    <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
-      ← Volver al inicio
-    </RouterLink>
+    <BackButton />
 
     <div class="max-w-2xl mx-auto">
 

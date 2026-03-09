@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
 import { logDownload } from '@/lib/supabase'
+import BackButton from '@/components/common/BackButton.vue'
 
 const downloadState = ref('idle') // 'idle' | 'downloading' | 'done'
 
@@ -21,9 +21,7 @@ function handleDownload() {
 
 <template>
   <div class="min-h-screen p-4 sm:p-6 md:p-8">
-    <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
-      ← Volver al inicio
-    </RouterLink>
+    <BackButton />
 
     <div class="max-w-xl mx-auto">
 

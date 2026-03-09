@@ -1,14 +1,12 @@
 <script setup>
-import { RouterLink } from 'vue-router'
 import FeedbackButton from '@/components/common/FeedbackButton.vue'
+import BackButton from '@/components/common/BackButton.vue'
 import { themes, difficulties, colors } from '@/config/padreQuestions.js'
 </script>
 
 <template>
   <div class="min-h-screen p-4 sm:p-6 md:p-8">
-    <RouterLink to="/" class="inline-block mb-6 text-primary-500 hover:text-primary-600 transition-colors">
-      ← Volver al inicio
-    </RouterLink>
+    <BackButton />
 
     <div class="max-w-5xl mx-auto">
       <div class="text-center mb-8">
