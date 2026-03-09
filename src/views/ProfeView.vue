@@ -7,9 +7,8 @@ const downloadState = ref('idle') // 'idle' | 'downloading' | 'done'
 
 const files = [
   { href: '/pdfs/Hoja Instrucciones Profes.pdf', name: 'Hoja Instrucciones Profes.pdf' },
-  { href: '/pdfs/Hoja Informativa.pdf', name: 'Hoja Informativa.pdf' },
-  { href: '/pdfs/Consentimiento informado.pdf', name: 'Consentimiento informado.pdf' },
   { href: '/pdfs/Tests_ABCD.pdf', name: 'Tests_ABCD.pdf' },
+  { href: '/pdfs/Docs_Alumnado.pdf', name: 'Docs_Alumnado.pdf' },
 ]
 
 function handleDownload() {
@@ -45,13 +44,12 @@ function handleDownload() {
       <div class="card text-center space-y-6">
         <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-xl text-left">
           <p class="text-sm text-neutral-700 mb-2">
-            Se descargarán 4 PDFs:
+            Se descargarán 3 PDFs:
           </p>
           <ul class="text-sm text-neutral-600 list-disc list-inside mb-3">
             <li>Hoja de instrucciones para ti.</li>
-            <li>Los 4 modelos de test (A, B, C y D). <span class="text-sm text-amber-700 font-medium">Imprime a doble cara.</span></li>
-            <li>Hoja informativa para el alumnado.</li>
-            <li>Consentimiento informado.</li>
+            <li>Los 4 modelos de test (A, B, C y D).</li>
+            <li>Hoja informativa y Consentimiento informado.</li>
           </ul>
         </div>
 
