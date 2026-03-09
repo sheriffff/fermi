@@ -15,8 +15,8 @@ export const themes = [
     questions: [
       '¿Cuántos libros caben en tu habitación?',
       '¿Cuántos espaguetis hay en un paquete?',
-      '¿Cuántos pelos tienes en la cabeza?',
       '¿Cuántos segundos llevas vivo?',
+      '¿Cuántos pelos tienes en la cabeza?',
       '¿Cuántas células hay en tu cuerpo?',
     ],
   },
@@ -39,7 +39,7 @@ export const themes = [
       '¿Cuántos coches pasan por aquí en un día?',
       '¿Cuántas baldosas hay en esta acera?',
       '¿Cuántos ladrillos tiene ese edificio?',
-      '¿Cuántos granos de arena hay en todas las playas del mundo?',
+      '¿Cuántos habitaciones hay en todas las casas de esta ciudad?',
     ],
   },
   {
@@ -60,8 +60,8 @@ export const themes = [
       '¿Cuántos árboles hemos pasado en los últimos 5 minutos?',
       '¿Cuántos kilómetros recorre este coche al año?',
       '¿Cuántos litros de gasolina has gastado en tu vida?',
-      '¿Cuántos pasos necesitarías para llegar al Sol caminando?',
       '¿Cuántas vueltas a la Tierra has dado en coche a lo largo de tu vida?',
+      '¿Cuántos pasos necesitarías para llegar al Sol caminando?',
     ],
   },
 ]
