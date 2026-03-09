@@ -18,11 +18,10 @@ const props = defineProps({
 
 const { formatNumber, formatRange } = useNumberFormat()
 
-// Wrap props as refs so the composable can react to them
 const preguntasRef = computed(() => props.preguntas)
 const respuestasRef = computed(() => props.respuestas)
 
-const { resultsData, finalScore, avgLogErr, isLoadingResponses, fetchAllResponses, logErrBg, logErrLabel, logErrValueClass } = useTestResults(preguntasRef, respuestasRef)
+const { resultsData, finalScore, isLoadingResponses, fetchAllResponses, logErrBg, logErrLabel, logErrValueClass } = useTestResults(preguntasRef, respuestasRef)
 
 onMounted(() => fetchAllResponses(props.modeloAsignado))
 
@@ -30,36 +29,36 @@ const showResults = ref(false)
 const showUpload = ref(false)
 const showLogErrorModal = ref(false)
 const showScoreModal = ref(false)
+
+const expandedDetails = ref({})
+function toggleDetail(num) {
+  expandedDetails.value[num] = !expandedDetails.value[num]
+}
 </script>
 
 <template>
   <div class="text-center">
 
-    <Transition name="fade">
-      <div v-if="finalScore || isLoadingResponses" class="card text-center mb-4">
-        <template v-if="finalScore">
-          <p class="text-sm text-neutral-500 mb-1">Tu nota</p>
-          <p class="text-5xl font-bold text-primary-600">{{ finalScore }}</p>
-          <p class="text-xs text-neutral-400 mt-1">/ 10 · basada en tu percentil vs la población</p>
-          <button @click="showScoreModal = true" class="mt-3 text-xs text-primary-500 hover:text-primary-700 underline underline-offset-2 transition-colors">
-            ¿Cómo se calcula la nota?
-          </button>
-        </template>
-        <template v-else>
-          <p class="text-sm text-neutral-400">Calculando tu nota...</p>
-        </template>
-      </div>
-    </Transition>
-
     <div class="card-elevated py-12">
       <div class="text-6xl mb-6">🎉</div>
       <h1 class="text-3xl font-bold text-neutral-800 mb-4">¡Gracias por participar!</h1>
+
+      <div v-if="finalScore || isLoadingResponses" class="mt-4 mb-6">
+        <p v-if="finalScore" class="text-6xl font-bold text-primary-600">
+          <span class="text-2xl font-semibold text-primary-600 mr-1">Tu puntuación:</span>{{ finalScore }}<span class="text-3xl font-semibold text-primary-600 ml-1">/10</span>
+        </p>
+        <p v-else class="text-sm text-neutral-400">Calculando tu nota...</p>
+        <button @click="showScoreModal = true" class="mt-1 text-sm text-primary-500 hover:text-primary-700 underline underline-offset-2 transition-colors">
+          ¿Cómo se calcula tu puntuación?
+        </button>
+      </div>
+
       <div class="flex flex-col items-center gap-3">
         <button v-if="savedUserId" @click="showUpload = true" class="btn-outline btn-large w-full max-w-xs">
           📸 Sube una foto de tu hoja en sucio!
         </button>
         <button v-if="!showResults" @click="showResults = true" class="btn-outline btn-large w-full max-w-xs">
-          📝 Ver respuestas correctas
+          📝 Ver tu puntuación por pregunta
         </button>
         <ShareButton />
         <FeedbackButton />
@@ -90,33 +89,46 @@ const showScoreModal = ref(false)
               <span class="text-neutral-400 font-mono mr-1">{{ r.num }}.</span>
               {{ r.texto }}
             </p>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-3 gap-2">
               <div class="rounded-xl px-3 py-2 text-center" :class="logErrBg(r)">
                 <p class="text-xs mb-0.5" :class="logErrLabel(r)">Tu respuesta</p>
-                <p class="font-mono font-medium" :class="logErrValueClass(r)">
+                <p class="font-mono font-medium text-sm" :class="logErrValueClass(r)">
                   {{ r.answer != null ? formatNumber(r.answer) : '—' }}<span v-if="r.inRange"> ⭐</span>
                 </p>
               </div>
               <div class="bg-neutral-50 rounded-xl px-3 py-2 text-center">
                 <p class="text-xs text-neutral-400 mb-0.5">Respuesta correcta</p>
-                <p class="font-medium text-neutral-800">
+                <p class="font-medium text-neutral-800 text-sm">
                   <template v-if="r.hasP">{{ formatRange(r.p05, r.p95) }}</template>
                   <template v-else>—</template>
                 </p>
               </div>
+              <div class="rounded-xl px-3 py-2 text-center" :class="logErrBg(r)">
+                <p class="text-xs mb-0.5" :class="logErrLabel(r)">Nota</p>
+                <p class="font-bold text-sm" :class="logErrValueClass(r)">
+                  {{ r.percentile !== null ? (r.percentile === 1 ? '10' : (r.percentile * 10).toFixed(1)) : '—' }}
+                </p>
+              </div>
             </div>
-            <p v-if="r.logErr !== null" class="text-xs text-center mt-2" :class="logErrLabel(r)">
-              Error log: <span class="font-bold">{{ r.logErr.toFixed(2) }}</span>
-            </p>
-            <div v-if="r.population.length >= 2 && !isLoadingResponses" class="mt-3 border-t border-neutral-100 pt-3">
-              <ResponseHistogram :responses="r.population" :user-answer="r.answer" :correct-range="r.hasP ? { min: r.p05, max: r.p95 } : null" />
+            <button
+              v-if="r.population.length >= 2 || r.logErr !== null"
+              @click="toggleDetail(r.num)"
+              class="mt-2 text-xs text-primary-500 hover:text-primary-700 transition-colors w-full text-right"
+            >
+              {{ expandedDetails[r.num] ? 'Ocultar detalle ↑' : 'Ver detalle ↓' }}
+            </button>
+            <div v-if="expandedDetails[r.num]" class="mt-3 border-t border-neutral-100 pt-3">
+              <div v-if="r.population.length >= 2 && !isLoadingResponses">
+                <ResponseHistogram :responses="r.population" :user-answer="r.answer" :correct-range="r.hasP ? { min: r.p05, max: r.p95 } : null" />
+              </div>
+              <p v-else-if="isLoadingResponses" class="text-xs text-neutral-400 text-center">Cargando datos de población...</p>
             </div>
-            <p v-else-if="isLoadingResponses" class="text-xs text-neutral-400 text-center mt-2">Cargando datos de población...</p>
           </div>
         </div>
-        <div v-if="avgLogErr" class="card text-center mt-3">
-          <p class="text-sm text-neutral-500">Error logarítmico medio</p>
-          <p class="text-3xl font-bold text-neutral-800">{{ avgLogErr }}</p>
+        <div v-if="savedUserId" class="flex justify-center mt-4">
+        <button @click="showUpload = true" class="btn-outline w-full max-w-xs">
+          📸 Sube una foto de tu hoja en sucio!
+        </button>
         </div>
       </div>
     </Transition>

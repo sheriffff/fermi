@@ -47,7 +47,9 @@ export function useTestResults(preguntas, respuestas) {
 
       const population = allPopulation.value[questionN] || []
       let percentile = null
-      if (logErr !== null && population.length > 0 && hasP) {
+      if (logErr === 0) {
+        percentile = 1
+      } else if (logErr !== null && population.length > 0 && hasP) {
         const popLogErrs = population.map(r => {
           if (r <= 0) return null
           if (r >= q.p05 && r <= q.p95) return 0
@@ -66,7 +68,8 @@ export function useTestResults(preguntas, respuestas) {
   const finalScore = computed(() => {
     const valid = resultsData.value.filter(r => r.percentile !== null)
     if (!valid.length) return null
-    return ((valid.reduce((s, r) => s + r.percentile, 0) / valid.length) * 10).toFixed(1)
+    const score = (valid.reduce((s, r) => s + r.percentile, 0) / valid.length) * 10
+    return score === 10 ? '10' : score.toFixed(1)
   })
 
   const avgLogErr = computed(() => {

@@ -25,38 +25,40 @@ const emit = defineEmits(['close'])
             </svg>
           </button>
 
-          <h2 class="text-2xl font-bold text-neutral-800 mb-4">¿Cómo se calcula la nota? 🧮</h2>
+          <h2 class="text-2xl font-bold text-neutral-800 mb-6">¿Cómo se calcula tu puntuación? 🧮</h2>
 
-          <div class="space-y-4 text-neutral-600 leading-relaxed">
-            <p>
-              La nota no es fija. <strong>Depende de cuánto lo hacen los demás.</strong>
-            </p>
+          <div class="space-y-5 text-neutral-600 leading-relaxed">
 
-            <div class="bg-neutral-50 rounded-xl p-4 space-y-2">
-              <p class="font-semibold text-neutral-700">¿Qué es un percentil?</p>
-              <!-- Los que sois padres lo sabéis muy bien: es lo mismo que en las gráficas del pediatra -->
-              <p>
-                Si estás en el <strong>percentil 80</strong>, significa que lo hiciste mejor que el 80% de la gente que ha jugado. Cuanto más alto, mejor.
-              </p>
-              <p class="text-sm text-neutral-400 italic">
-                (Los que sois madres o padres lo sabéis de sobra: es exactamente lo mismo que usan en las revisiones del pediatra para el peso y la talla.)
-              </p>
+            <div>
+              <p class="text-base font-semibold text-neutral-800 mb-1">1. ¿Qué es un percentil?</p>
+              <p class="text-sm text-neutral-500 italic mb-2">Esto no lo saben más que los estadísticos y los que son padres y han ido al pediatra.</p>
+              <p>Mejor con un ejemplo: si estás en el percentil 80 del peso de una población,
+                significa que pesas más que el 80% de la población.</p>
             </div>
 
-            <p>
-              Para cada pregunta, comparo tu error logarítmico con el de todos los que ya han jugado. Calculo en qué percentil quedas. La nota final es la <strong>media de tus percentiles en todas las preguntas, sobre 10</strong>.
-            </p>
+            <div>
+              <p class="text-base font-semibold text-neutral-800 mb-1">2. Tu puntuación por pregunta</p>
+              <p>Si la clavas, un <strong>10</strong>. Si no, pero lo haces mejor que el 70% de los jugadores
+                (estás en el percentil 70), tienes un <strong>7</strong> en esa pregunta. </p>
+            </div>
+
+            <div>
+              <p class="text-base font-semibold text-neutral-800 mb-1">3. Tu puntuación final</p>
+              <p>La media de tus puntuaciones en las 8 preguntas.</p>
+            </div>
 
             <div class="bg-primary-50 rounded-xl p-4 border border-primary-100">
-              <p class="font-semibold text-primary-700 mb-1">Esta nota puede cambiar</p>
+              <p class="font-semibold text-primary-700 mb-1">Esta puntuación es orientativa</p>
+              <p class="text-sm text-primary-600 mb-4">
+                Depende de quién ha jugado hasta ahora, así que puede variar con el tiempo. Si juegas dentro de unos
+                meses, cuando haya más datos, la puntuación podría ser algo diferente.
+              </p>
               <p class="text-sm text-primary-600">
-                Como depende de quién ha jugado hasta ahora, tu nota de hoy puede ser diferente a la de mañana, cuando haya más gente en la base de datos. Es una nota viva, no estática.
+                Algo parecido a la campana de Gauss, para los que estudiásteis en los 70-80.
+                Por que yo solo se lo oí a mi madre.
               </p>
             </div>
 
-            <p class="text-sm text-neutral-400">
-              Si no hay suficientes datos de población para una pregunta, esa pregunta no cuenta para la nota.
-            </p>
           </div>
         </div>
       </div>
