@@ -26,6 +26,7 @@ const showLogErrorModal = ref(false)
 const timerShaking = ref(false)
 const warningPlayed = ref(false)
 const playResponses = ref([])
+const isFirstQuestion = ref(true)
 const isLoadingResponses = ref(false)
 
 const { formatNumber, formatRange, cleanInput } = useNumberFormat()
@@ -124,7 +125,9 @@ function formatFactor(f) {
 
 async function getNewQuestion() {
   isLoading.value = true
-  currentQuestion.value = await getRandomPlayQuestion()
+  const opts = isFirstQuestion.value ? { maxDifficulty: 2 } : undefined
+  isFirstQuestion.value = false
+  currentQuestion.value = await getRandomPlayQuestion(opts)
   currentAnswer.value = ''
   showResult.value = false
   skipped.value = false

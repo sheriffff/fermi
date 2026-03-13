@@ -94,10 +94,14 @@ export async function getQuestionsInTests() {
   return questions.filter(q => testIds.has(q.id))
 }
 
-export async function getRandomPlayQuestion() {
+export async function getRandomPlayQuestion({ maxDifficulty } = {}) {
   const { questions, tests } = await loadExcel()
   const testIds = new Set(Object.values(tests).flat())
-  const playQuestions = questions.filter(q => !testIds.has(q.id))
+  let playQuestions = questions.filter(q => !testIds.has(q.id))
+  if (maxDifficulty != null) {
+    const filtered = playQuestions.filter(q => q.difficulty != null && q.difficulty <= maxDifficulty)
+    if (filtered.length > 0) playQuestions = filtered
+  }
   const randomIndex = Math.floor(Math.random() * playQuestions.length)
   return playQuestions[randomIndex]
 }
